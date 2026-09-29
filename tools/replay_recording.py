@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import cv2
 import numpy as np
 from auto_fishing import analyze, annotate
+from bot_control import Navigation, BiteGuard
 
 
 def client_crop(frame, previous=None):
@@ -34,6 +35,8 @@ def main():
     parser.add_argument('--hz', type=float, default=10)
     parser.add_argument('--compare-baseline', action='store_true')
     parser.add_argument('--baseline-ref', default='0.1.0', help='Trusted local Git revision used for comparison')
+    parser.add_argument('--client-rect', type=int, nargs=4, metavar=('X','Y','W','H'),
+                        help='Explicit client rectangle for occluded or unusually sized desktop recordings')
     args = parser.parse_args()
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
@@ -43,11 +46,17 @@ def main():
     stride = max(1, round(fps / args.hz))
     last_rect = None
     counts = {}
+    navigation,bite_guard = Navigation(),BiteGuard()
     old_analyze = None
-    metrics = dict(track_frames=0,complete_markers=0,baseline_track_frames=0,baseline_complete_markers=0)
+    metrics = dict(track_frames=0,complete_markers=0,tap_frames=0,
+                   baseline_track_frames=0,baseline_complete_markers=0,baseline_tap_frames=0,
+                   hypothetical_navigation_clicks=0,hypothetical_hook_clicks=0)
     if args.compare_baseline:
-        source = subprocess.run(['git','show',f'{args.baseline_ref}:auto_fishing.py'],capture_output=True,
-                                text=True,encoding='utf-8',check=True).stdout
+        vision_source = subprocess.run(['git','show',f'{args.baseline_ref}:bot_vision.py'],
+                                       capture_output=True,text=True,encoding='utf-8')
+        source = vision_source.stdout if vision_source.returncode==0 else subprocess.run(
+            ['git','show',f'{args.baseline_ref}:auto_fishing.py'],capture_output=True,
+            text=True,encoding='utf-8',check=True).stdout
         module = types.ModuleType('offline_baseline')
         sys.modules[module.__name__] = module
         namespace = module.__dict__
@@ -55,7 +64,8 @@ def main():
         old_analyze = namespace['analyze']
     with (output / 'replay.csv').open('w', newline='', encoding='utf-8') as stream:
         writer = csv.writer(stream)
-        writer.writerow(['seconds', 'track', 'player_y', 'bar_h', 'fish_y', 'scene', 'action_x', 'action_y'])
+        writer.writerow(['seconds', 'track', 'player_y', 'bar_h', 'fish_y', 'scene', 'action_x', 'action_y',
+                         'hypothetical_navigation_click','hypothetical_hook_click'])
         for index in range(count):
             if not cap.grab():
                 break
@@ -64,23 +74,36 @@ def main():
             ok, desktop = cap.retrieve()
             if not ok:
                 continue
-            frame, last_rect = client_crop(desktop, last_rect)
+            if args.client_rect:
+                x,y,w,h = args.client_rect
+                frame = desktop[y:y+h,x:x+w]
+            else:
+                frame, last_rect = client_crop(desktop, last_rect)
             if frame is None or frame.size == 0:
                 continue
             d = analyze(frame)
+            # Simulation only: these controllers return decisions; this tool
+            # never constructs a Windows input runtime or sends clicks.
+            action = navigation.update(d,index/fps)
+            nav_click = isinstance(action,tuple) and not d.track_present
+            hook_click = bite_guard.update(d,index/fps) and not d.track_present and not nav_click
+            metrics['hypothetical_navigation_clicks'] += int(nav_click)
+            metrics['hypothetical_hook_clicks'] += int(hook_click)
             metrics['track_frames'] += int(d.track_present)
             metrics['complete_markers'] += int(d.minigame)
+            metrics['tap_frames'] += int(d.tap)
             if old_analyze:
                 old = old_analyze(frame)
                 metrics['baseline_track_frames'] += int(old.track_present)
                 metrics['baseline_complete_markers'] += int(old.minigame)
+                metrics['baseline_tap_frames'] += int(old.tap)
             scene = getattr(d, 'scene', '') or ('reel' if d.minigame else 'tap' if d.tap else 'button' if d.action_button else 'unknown')
             counts[scene] = counts.get(scene, 0) + 1
             writer.writerow([round(index / fps, 3), int(d.track_present),
                              d.player_center[1] if d.player_center else '',
                              d.player_box[3] if d.player_box else '',
                              d.fish_center[1] if d.fish_center else '', scene,
-                             *(d.action_button or ('', ''))])
+                             *(d.action_button or ('', '')),int(nav_click),int(hook_click)])
             if index % round(fps) < stride or (d.track_present and not d.minigame):
                 cv2.imwrite(str(output / f'{index / fps:07.2f}_{scene}.jpg'), annotate(frame, d, scene))
     cap.release()

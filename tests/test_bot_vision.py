@@ -26,6 +26,65 @@ def close_x(frame,point):
     cv2.line(frame,(point[0]+9,point[1]-9),(point[0]-9,point[1]+9),cyan,4)
 
 
+def action_button(frame,start,end,text=True):
+    x,y = start
+    x1,y1 = end
+    r = (y1-y)//2
+    for inset,c in ((0,(255,255,255)),(3,color(99,210,245))):
+        cv2.rectangle(frame,(x+r,y+inset),(x1-r,y1-inset),c,-1)
+        cv2.circle(frame,(x+r,y+r),r-inset,c,-1)
+        cv2.circle(frame,(x1-r,y+r),r-inset,c,-1)
+    if text:
+        cv2.putText(frame,'NEXT',(x+round((x1-x)*.30),y+round((y1-y)*.70)),
+                    cv2.FONT_HERSHEY_SIMPLEX,(y1-y)/65,(255,255,255),2)
+
+
+def bite_frame(text=True, bang=True, outline=True):
+    f = np.zeros((600,1000,3),np.uint8)
+    cv2.circle(f,(500,410),37,(255,255,255),-1)
+    cv2.circle(f,(500,410),32,color(155,150,250),-1)
+    if bang:
+        cv2.rectangle(f,(495,389),(505,410),(255,255,255),-1)
+        cv2.circle(f,(500,424),6,(255,255,255),-1)
+    if text:
+        if outline:
+            cv2.putText(f,'TAP!',(430,310),cv2.FONT_HERSHEY_SIMPLEX,2,color(117,220,255),10)
+        cv2.putText(f,'TAP!',(430,310),cv2.FONT_HERSHEY_SIMPLEX,2,color(30,200,255),4)
+    return f
+
+
+class BiteVisionTests(unittest.TestCase):
+    def test_bite_requires_all_three_independent_ui_features(self):
+        for scale in (1,.75,.5):
+            with self.subTest(scale=scale):
+                self.assertTrue(analyze(cv2.resize(bite_frame(),None,fx=scale,fy=scale)).tap)
+        self.assertFalse(analyze(bite_frame(text=False)).tap)
+        self.assertFalse(analyze(bite_frame(bang=False)).tap)
+        self.assertFalse(analyze(bite_frame(outline=False)).tap)
+
+    def test_pink_ice_reflections_cannot_trigger_hook(self):
+        f = np.zeros((600,1000,3),np.uint8)
+        for x,y in ((420,350),(495,390),(570,435)):
+            cv2.ellipse(f,(x,y),(23,21),0,0,360,color(155,160,245),-1)
+            cv2.line(f,(x-15,y),(x+12,y+8),(255,255,255),3)
+        self.assertFalse(analyze(f).tap)
+
+    def test_prompt_entrance_scale_uses_badge_relative_text_geometry(self):
+        f = bite_frame()
+        for scale in (.7,.85,1):
+            transform = np.float32([[scale,0,500*(1-scale)],[0,scale,410*(1-scale)]])
+            with self.subTest(scale=scale):
+                self.assertTrue(analyze(cv2.warpAffine(f,transform,(1000,600))).tap)
+
+    def test_near_white_letter_highlight_does_not_hide_real_tap(self):
+        f = bite_frame()
+        hsv = cv2.cvtColor(f,cv2.COLOR_BGR2HSV)
+        yellow = cv2.inRange(hsv,np.array((20,35,195)),np.array((38,255,255)))>0
+        yellow[290:] = False
+        f[yellow] = color(30,15,255)
+        self.assertTrue(analyze(f).tap)
+
+
 class TrackVisionTests(unittest.TestCase):
     def test_overlap_does_not_move_bar_center_to_visible_color_centroid(self):
         d = analyze(track_frame(90,250,315))
@@ -129,7 +188,7 @@ class PopupVisionTests(unittest.TestCase):
         cv2.rectangle(f,(0,190),(999,410),color(95,140,245),-1)
         for text,x in zip('GET',(430,473,516)):
             cv2.putText(f,text,(x,92),cv2.FONT_HERSHEY_SIMPLEX,1.5,(255,255,255),4)
-        cv2.rectangle(f,(785,525),(945,575),color(99,210,245),-1)
+        action_button(f,(785,525),(945,575))
         d = analyze(f)
         self.assertEqual(d.scene,'reward_continue')
         self.assertGreater(d.action_button[0],785)
@@ -144,7 +203,7 @@ class PopupVisionTests(unittest.TestCase):
     def test_reward_animation_does_not_click_background_continue(self):
         f = np.zeros((600,1000,3),np.uint8)
         cv2.rectangle(f,(0,190),(999,410),color(95,140,245),-1)
-        cv2.rectangle(f,(785,525),(945,575),color(99,210,245),-1)
+        action_button(f,(785,525),(945,575))
         d = analyze(f)
         self.assertEqual(d.scene,'overlay_animation')
         self.assertIsNone(d.action_button)
@@ -152,11 +211,35 @@ class PopupVisionTests(unittest.TestCase):
     def test_button_aspect_rejects_rightmost_scenery(self):
         f = np.zeros((600,1000,3),np.uint8)
         cyan = color(99,210,245)
-        cv2.rectangle(f,(750,535),(920,575),cyan,-1)
+        action_button(f,(750,535),(920,575))
         cv2.rectangle(f,(925,500),(990,590),cyan,-1)
         d = analyze(f)
         self.assertEqual(d.scene,'action')
         self.assertLess(d.action_button[0],920)
+
+    def test_cyan_ocean_rectangle_is_not_continue(self):
+        f = np.zeros((600,1000,3),np.uint8)
+        cv2.rectangle(f,(750,535),(920,575),color(99,210,245),-1)
+        self.assertIsNone(analyze(f).action_button)
+        action_button(f,(750,535),(920,575),text=False)
+        self.assertIsNone(analyze(f).action_button)
+
+    def test_outlined_continue_with_text_survives_scaling(self):
+        f = np.zeros((600,1000,3),np.uint8)
+        action_button(f,(750,535),(920,575))
+        for scale in (1,.75,.5):
+            with self.subTest(scale=scale):
+                d=analyze(cv2.resize(f,None,fx=scale,fy=scale))
+                self.assertEqual(d.scene,'action')
+                self.assertAlmostEqual(d.action_button[0],835*scale,delta=3)
+
+    def test_white_waves_and_glyph_like_spots_without_side_borders_are_rejected(self):
+        f = np.zeros((600,1000,3),np.uint8)
+        cv2.rectangle(f,(750,535),(920,575),color(99,210,245),-1)
+        cv2.line(f,(750,532),(920,532),(255,255,255),3)
+        cv2.line(f,(750,578),(920,578),(255,255,255),3)
+        cv2.putText(f,'NEXT',(790,562),cv2.FONT_HERSHEY_SIMPLEX,.6,(255,255,255),2)
+        self.assertIsNone(analyze(f).action_button)
 
 
 if __name__ == '__main__':

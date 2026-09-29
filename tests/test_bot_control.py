@@ -1,5 +1,5 @@
 import unittest
-from bot_control import ReelTracker, ReelControl, Navigation, Tracking
+from bot_control import ReelTracker, ReelControl, Navigation, Tracking, BiteGuard
 from bot_vision import Detection
 
 
@@ -53,6 +53,38 @@ class TemporalControlTests(unittest.TestCase):
         values = [controller.decide(Tracking(350,350,35,0,0),700)[0] for _ in range(12)]
         self.assertEqual(sum(values),6)
         self.assertLessEqual(max(sum(values[i:i+3]) for i in range(10)),2)
+
+
+class BiteGuardTests(unittest.TestCase):
+    def test_two_fresh_frames_click_once_until_prompt_leaves(self):
+        guard = BiteGuard()
+        d = Detection(tap=True,scene='tap')
+        self.assertFalse(guard.update(d,0))
+        self.assertFalse(guard.update(d,.02))
+        self.assertTrue(guard.update(d,.04))
+        self.assertFalse(guard.update(d,.08))
+        self.assertFalse(guard.update(d,.12))
+        guard.update(Detection(track_present=True),.14)
+        self.assertFalse(guard.update(d,.16))
+        self.assertTrue(guard.update(d,.20))
+
+    def test_interrupted_or_stale_evidence_cannot_confirm(self):
+        guard = BiteGuard()
+        d = Detection(tap=True)
+        self.assertFalse(guard.update(d,0))
+        self.assertFalse(guard.update(Detection(),.03))
+        self.assertFalse(guard.update(d,.04))
+        self.assertFalse(guard.update(d,.5))
+        self.assertTrue(guard.update(d,.54))
+
+    def test_one_frame_dropout_does_not_reclick_same_prompt(self):
+        guard = BiteGuard()
+        d = Detection(tap=True)
+        guard.update(d,0)
+        self.assertTrue(guard.update(d,.04))
+        guard.update(Detection(),.06)
+        self.assertFalse(guard.update(d,.08))
+        self.assertFalse(guard.update(d,.12))
 
 
 class NavigationTests(unittest.TestCase):

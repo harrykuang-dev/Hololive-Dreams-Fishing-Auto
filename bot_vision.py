@@ -60,18 +60,97 @@ def close_buttons(cyan, w, h):
     return found
 
 
-def bottom_action_button(cyan, w, h):
-    """Locate the filled bottom-right Continue/Next button, not scenery."""
+def bottom_action_button(cyan, white, w, h):
+    """Require a blue button with four white borders and white glyphs."""
     bx0, by0 = int(.55*w), int(.82*h)
     mask = cyan[by0:int(.985*h), bx0:int(.98*w)]
     buttons = [c for c in components(mask, (bx0, by0))
                if .10*w<c['w']<.32*w and .038*h<c['h']<.135*h
                and 2.4<c['w']/c['h']<6.5
                and c['area']/(c['w']*c['h'])>.45 and c['cx']>.68*w]
-    if not buttons:
-        return None
-    button = max(buttons, key=lambda c:c['cx'])
-    return button['x']+button['w']/2, button['y']+button['h']/2
+    for button in sorted(buttons,key=lambda c:c['cx'],reverse=True):
+        x,y,bw,bh = button['x'],button['y'],button['w'],button['h']
+        pad,edge = max(3,round(.18*bh)),max(1,round(.06*bh))
+        left,right = x+round(.18*bw),x+round(.82*bw)
+        top,bottom = y+round(.30*bh),y+round(.70*bh)
+        borders = (
+            white[max(0,y-pad):y+edge,left:right],
+            white[y+bh-edge:min(h,y+bh+pad),left:right],
+            white[top:bottom,max(0,x-pad):x+edge],
+            white[top:bottom,x+bw-edge:min(w,x+bw+pad)],
+        )
+        if any(p.size==0 for p in borders):
+            continue
+        # Each side must contain a mostly continuous white line. Ocean
+        # patches can pass the cyan size/aspect checks, but have no UI frame.
+        coverage = [(p>0).mean(axis=1 if i<2 else 0).max() for i,p in enumerate(borders)]
+        if min(coverage)<.65:
+            continue
+        inside = white[y+round(.15*bh):y+round(.85*bh),left:right]
+        glyphs = [c for c in components(inside) if c['h']>.20*bh
+                  and c['area']>.004*bw*bh]
+        if len(glyphs)<2 or not (.02<(inside>0).mean()<.55):
+            continue
+        return x+bw/2,y+bh/2
+    return None
+
+
+def bite_prompt(hsv, w, h):
+    """Pink circle + white exclamation + blue-outlined yellow TAP text.
+
+    Pink connected components alone also occur in animated ice/reflections.
+    Require independent UI structure instead of trusting their colour/size.
+    """
+    x0,x1,y0,y1 = int(.40*w),int(.60*w),int(.55*h),int(.88*h)
+    pink = cv2.inRange(hsv[y0:y1,x0:x1],np.array((140,100,150)),np.array((170,255,255)))
+    badges = [c for c in components(pink,(x0,y0))
+              if .025*w<c['w']<.085*w and .045*h<c['h']<.16*h
+              and .75<c['w']/c['h']<1.3 and c['area']/(c['w']*c['h'])>.55]
+    for c in badges:
+        bx,by,bw,bh = c['x'],c['y'],c['w'],c['h']
+        inner = hsv[by+int(.12*bh):by+int(.88*bh),bx+int(.25*bw):bx+int(.75*bw)]
+        white = cv2.inRange(inner,np.array((0,0,210)),np.array((180,65,255)))
+        marks = components(white)
+        stems = [m for m in marks if .20*bh<m['h']<.60*bh and .07*bw<m['w']<.30*bw]
+        dots = [m for m in marks if .08*bh<m['h']<.30*bh and .08*bw<m['w']<.30*bw]
+        if not any(dot['cy']>stem['cy'] and abs(dot['cx']-stem['cx'])<.10*bw
+                   for stem in stems for dot in dots):
+            continue
+        tx0,tx1 = max(0,round(c['cx']-.13*w)),min(w,round(c['cx']+.13*w))
+        # TAP scales during its entrance animation. Anchor text size/search
+        # to the badge, not a fixed screen-height offset that clips small TAP.
+        ty0,ty1 = max(0,round(by-2.8*bh)),max(0,round(by-.25*bh))
+        text = hsv[ty0:ty1,tx0:tx1]
+        yellow = cv2.inRange(text,np.array((20,35,195)),np.array((38,255,255)))
+        blue = cv2.inRange(text,np.array((108,130,160)),np.array((127,255,255)))
+        # Highlighted letter tops can be near-white. Accept them only inside
+        # the blue glyph outline, not arbitrary bright water/snow elsewhere.
+        outlines,_ = cv2.findContours(blue,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        enclosed = np.zeros_like(blue)
+        cv2.drawContours(enclosed,outlines,-1,255,cv2.FILLED)
+        light = cv2.inRange(text,np.array((0,0,210)),np.array((180,65,255)))
+        letter_mask = cv2.bitwise_and(cv2.bitwise_or(yellow,light),enclosed)
+        # The upper letter halves can be nearly white during a glow; the
+        # coloured T stem is narrower than a full T, but still part of TAP.
+        if cv2.countNonZero(blue)<=.12*bw*bh:
+            continue
+        # Check masks separately: a bright cursor can bridge highlighted
+        # letters, while their yellow portions remain separate components.
+        for mask in (yellow,letter_mask):
+            letters = [m for m in components(mask) if .06*bw<m['w']<1.2*bw
+                       and .20*bh<m['h']<1.15*bh and m['area']>.015*bw*bh]
+            # T/A/P must form one centred line; unrelated coloured props
+            # cannot confirm a pink scenery blob elsewhere on screen.
+            for line in letters:
+                aligned = [m for m in letters if abs(m['cy']-line['cy'])<.025*h]
+                if len(aligned)<3:
+                    continue
+                left = min(m['x'] for m in aligned)
+                right = max(m['x']+m['w'] for m in aligned)
+                if not (1.4*bw<right-left<3.2*bw and abs((left+right)/2+tx0-c['cx'])<.50*bw):
+                    continue
+                return True,cv2.countNonZero(pink)
+    return False,cv2.countNonZero(pink)
 
 
 def _analyze(frame):
@@ -153,7 +232,7 @@ def _analyze(frame):
                 d.scene,d.action_button,d.confidence = 'item_detail',point,.95
                 return d
 
-    button = bottom_action_button(cyan,w,h)
+    button = bottom_action_button(cyan,cream,w,h)
     if reward_rows.sum()>.15*h and get_visible:
         # Fishing materials keep Continue visible. Clicking the old blank
         # point instead can open the fish list underneath the reward strip.
@@ -175,13 +254,8 @@ def _analyze(frame):
         d.confidence = .9
         return d
 
-    tx0,tx1,ty0,ty1 = int(.40*w),int(.82*w),int(.55*h),int(.93*h)
-    tapmask = cv2.inRange(hsv[ty0:ty1,tx0:tx1],np.array((140,100,150)),np.array((170,255,255)))
-    badges = [c for c in components(tapmask,(tx0,ty0))
-              if .018*w<c['w']<.07*w and .03*h<c['h']<.14*h
-              and .6<c['w']/c['h']<1.4 and c['area']>.0003*w*h]
-    d.tap_pixels = int(cv2.countNonZero(tapmask))
-    if badges:
+    d.tap,d.tap_pixels = bite_prompt(hsv,w,h)
+    if d.tap:
         d.tap, d.scene, d.confidence = True,'tap',.95
     return d
 

@@ -102,6 +102,35 @@ class ReelControl:
         return pressed,'pulse',error
 
 
+class BiteGuard:
+    """Confirm two fresh frames and click only once per visible prompt."""
+    def __init__(self):
+        self.since = None
+        self.last = None
+        self.absent = None
+        self.clicked = False
+
+    def update(self, d, now):
+        if self.last is not None and (now<self.last or now-self.last>.15):
+            self.since = None
+        self.last = now
+        if not d.tap:
+            self.since = None
+            if self.absent is None:
+                self.absent = now
+            if d.track_present or d.action_button or now-self.absent>.25:
+                self.clicked = False
+            return False
+        self.absent = None
+        if self.since is None:
+            self.since = now
+            return False
+        if self.clicked or now-self.since<.035:
+            return False
+        self.clicked = True
+        return True
+
+
 class Navigation:
     """Cross-frame debounce + bounded retries; never permanently disarm."""
     def __init__(self):

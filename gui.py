@@ -12,7 +12,7 @@ from tkinter import messagebox
 from auto_fishing import enable_dpi_awareness, run
 
 
-APP_VERSION = "0.2.2"
+APP_VERSION = "0.2.4"
 
 
 class FishingApp:

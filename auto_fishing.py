@@ -23,7 +23,7 @@ import win32gui
 import win32ui
 from fishing_auto.vision import save_image
 from bot_vision import Detection, analyze
-from bot_control import ReelTracker, ReelControl, Navigation
+from bot_control import ReelTracker, ReelControl, Navigation, BiteGuard
 
 
 def enable_dpi_awareness() -> None:
@@ -233,11 +233,11 @@ def run(
     tracker = ReelTracker()
     controller = ReelControl(lead=args.lead)
     navigation = Navigation()
+    bite_guard = BiteGuard()
     start_time = time.perf_counter()
     frame_period = 1.0 / args.fps
     frame_count = 0
     previous_state = ""
-    last_tap = -100.
     last_debug = 0.
     minigame_seen = False
     lost_since = None
@@ -270,6 +270,7 @@ def run(
                 break
             d = analyze(frame)
             now = time.perf_counter()
+            bite = bite_guard.update(d,now)
             tracking = tracker.update(d,now,height)
             control_error = None
             control_mode = ""
@@ -313,10 +314,9 @@ def run(
                     emit(f"點擊：{state} ({action[0]:.0f}, {action[1]:.0f}) "
                          f"第 {navigation.attempts} 次；等待畫面切換")
                     mouse.click(action)
-                elif d.tap and now-last_tap>.55:
+                elif bite:
                     state = "TAP"
                     mouse.click((.50*width,.50*height), duration=.045)
-                    last_tap = now
                     minigame_seen = False
                     lost_since = None
                 else:
