@@ -3,13 +3,16 @@ from __future__ import annotations
 import argparse
 import queue
 import threading
+import os
+import time
+from pathlib import Path
 import tkinter as tk
 from tkinter import messagebox
 
 from auto_fishing import enable_dpi_awareness, run
 
 
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.2.2"
 
 
 class FishingApp:
@@ -35,6 +38,8 @@ class FishingApp:
         self.stop_event = threading.Event()
         self.worker: threading.Thread | None = None
         self._closing = False
+        self.session_args = self.bot_args()
+        self.diagnostics = tk.BooleanVar(value=False)
 
         self._build()
         self.root.after(100, self._poll)
@@ -84,7 +89,7 @@ class FishingApp:
             card,
             text=(
                 "請先開啟 hololive-Dreams，進入釣魚畫面後按下開始。\n"
-                "程式會自動辨識 TAP、控制拉扯並進入下一竿。"
+                "自動拉扯、關閉圖鑑／獎勵並續竿。F9 可立即停止。"
             ),
             bg=self.PANEL,
             fg=self.MUTED,
@@ -127,6 +132,12 @@ class FishingApp:
         )
         self.stop_button.pack(side="right", padx=(12, 0))
         self.start_button.pack(side="left", fill="x", expand=True)
+        tk.Checkbutton(
+            self.root,text="儲存本機診斷（畫面與追蹤紀錄，不上傳）",
+            variable=self.diagnostics,bg=self.BG,fg=self.MUTED,
+            activebackground=self.BG,activeforeground=self.TEXT,
+            selectcolor=self.PANEL,highlightthickness=0,
+        ).pack(anchor="w",padx=30,pady=(0,8))
 
         log_card = tk.Frame(
             self.root,
@@ -173,18 +184,21 @@ class FishingApp:
     def bot_args() -> argparse.Namespace:
         return argparse.Namespace(
             window_title="hololive-Dreams",
-            fps=24.0,
-            lead=0.12,
+            fps=40.0,
+            lead=0.20,
             deadband=0.018,
             pulse_hz=7.0,
             once=False,
             max_seconds=0.0,
             debug_dir=None,
+            record=False,
         )
 
     def _append_log(self, message: str) -> None:
         self.log.configure(state="normal")
         self.log.insert("end", message + "\n")
+        if int(self.log.index('end-1c').split('.')[0])>1000:
+            self.log.delete('1.0','101.0')
         self.log.see("end")
         self.log.configure(state="disabled")
 
@@ -200,6 +214,12 @@ class FishingApp:
         self.stop_button.configure(state="normal")
         self._set_status("正在連接遊戲…", self.CYAN)
         self._append_log("開始自動釣魚")
+        self.session_args = self.bot_args()
+        if self.diagnostics.get():
+            base = Path(os.environ.get('LOCALAPPDATA',str(Path.cwd())))
+            directory = base/'HololiveFishingAuto'/'sessions'/time.strftime('%Y%m%d-%H%M%S')
+            self.session_args.debug_dir = str(directory)
+            self._append_log(f"本機診斷：{directory}")
         self.worker = threading.Thread(
             target=self._run_bot, name="fishing-bot", daemon=True
         )
@@ -208,7 +228,7 @@ class FishingApp:
     def _run_bot(self) -> None:
         try:
             run(
-                self.bot_args(),
+                self.session_args,
                 stop_event=self.stop_event,
                 status_callback=lambda text: self.messages.put(("log", text)),
             )
@@ -235,6 +255,7 @@ class FishingApp:
                             "等待": self.CYAN,
                             "TAP": "#ffd65c",
                             "拉扯": self.GREEN,
+                            "追蹤暫失": "#ffd65c",
                             "收尾動畫": "#c7a7ff",
                             "按鈕": self.CYAN,
                         }

@@ -9,12 +9,14 @@ from gui import APP_VERSION, FishingApp
 class GuiConfigurationTests(unittest.TestCase):
     def test_release_version_and_one_click_defaults(self):
         args = FishingApp.bot_args()
-        self.assertEqual(APP_VERSION, "0.1.0")
+        self.assertEqual(APP_VERSION, "0.2.2")
         self.assertEqual(args.window_title, "hololive-Dreams")
         self.assertFalse(args.once)
         self.assertEqual(args.max_seconds, 0.0)
         self.assertEqual(args.pulse_hz, 7.0)
         self.assertIsNone(args.debug_dir)
+        self.assertEqual(args.lead, .20)
+        self.assertFalse(args.record)
 
     @mock.patch("auto_fishing.signal.signal")
     @mock.patch("auto_fishing.MouseController")
