@@ -9,7 +9,7 @@ from gui import APP_VERSION, FishingApp
 class GuiConfigurationTests(unittest.TestCase):
     def test_release_version_and_one_click_defaults(self):
         args = FishingApp.bot_args()
-        self.assertEqual(APP_VERSION, "0.1.0")
+        self.assertEqual(APP_VERSION, "0.1.1")
         self.assertEqual(args.window_title, "hololive-Dreams")
         self.assertFalse(args.once)
         self.assertEqual(args.max_seconds, 0.0)
