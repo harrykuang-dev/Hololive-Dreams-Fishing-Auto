@@ -23,7 +23,7 @@ import win32gui
 import win32ui
 from fishing_auto.vision import save_image
 from bot_vision import Detection, analyze
-from bot_control import ReelTracker, ReelControl, Navigation, BiteGuard
+from bot_control import ReelTracker, ReelControl, Navigation, BiteGuard, CatchLedger
 
 
 def enable_dpi_awareness() -> None:
@@ -234,6 +234,7 @@ def run(
     controller = ReelControl(lead=args.lead)
     navigation = Navigation()
     bite_guard = BiteGuard()
+    ledger = CatchLedger()
     start_time = time.perf_counter()
     frame_period = 1.0 / args.fps
     frame_count = 0
@@ -243,13 +244,16 @@ def run(
     lost_since = None
     trace_file = None
     video = None
-    rounds = 0
     if debug_dir:
         trace_file = (debug_dir / "trace.csv").open("w", encoding="utf-8", newline="")
         trace_file.write("seconds,state,fish_y,player_y,bar_h,player_v,fish_v,error,control,held,predicted,scene,attempts\n")
-    labels = {'reward':'關閉獲得物品','reward_continue':'物品獎勵／繼續','encyclopedia':'關閉新圖鑑',
-              'item_detail':'關閉道具詳情','action':'繼續／下一步'}
-    emit(f"已連接視窗：{args.window_title}（F9 停止）")
+    simplified = getattr(args,'language','auto') == 'zh-CN'
+    labels = ({'reward':'关闭获得物品','reward_continue':'物品奖励／继续','encyclopedia':'关闭新图鉴',
+               'item_detail':'关闭道具详情','action':'继续／下一步','result_continue':'钓获／继续'}
+              if simplified else
+              {'reward':'關閉獲得物品','reward_continue':'物品獎勵／繼續','encyclopedia':'關閉新圖鑑',
+               'item_detail':'關閉道具詳情','action':'繼續／下一步','result_continue':'釣獲／繼續'})
+    emit(f"已連接視窗：{args.window_title}；遊戲語言：{getattr(args,'language','auto')}（F9 停止）")
     try:
         while running and not (stop_event and stop_event.is_set()):
             loop_started = time.perf_counter()
@@ -268,8 +272,12 @@ def run(
             if abs(width/height-16/9)>.10:
                 emit("停止：遊戲客戶區不是 16:9，請恢復遊戲畫面比例。")
                 break
-            d = analyze(frame)
+            d = analyze(frame,getattr(args,'language','auto'))
             now = time.perf_counter()
+            if d.catch_result and ledger.catch_seen():
+                emit(f"成功釣獲：第 {ledger.rounds} 局；連續成功 {ledger.streak} 局")
+                if debug_dir:
+                    save_image(debug_dir/f"catch_{ledger.catches:03d}.png",frame)
             bite = bite_guard.update(d,now)
             tracking = tracker.update(d,now,height)
             control_error = None
@@ -282,8 +290,9 @@ def run(
                 navigation.confirmed = None
             if d.track_present:
                 if not minigame_seen:
-                    rounds += 1
-                    emit(f"第 {rounds} 局拉扯開始")
+                    if ledger.reel_started():
+                        emit(f"上一局未確認釣獲；連續成功歸零（累計 {ledger.failed} 局）")
+                    emit(f"第 {ledger.rounds} 局拉扯開始")
                 minigame_seen = True
                 lost_since = None
                 if tracking:
@@ -361,13 +370,16 @@ def run(
         if video:
             video.release()
     elapsed = time.perf_counter()-start_time
-    emit(f"停止：{frame_count} 幀 / {elapsed:.1f} 秒；{rounds} 局拉扯")
+    emit(f"停止：{frame_count} 幀 / {elapsed:.1f} 秒；{ledger.rounds} 局拉扯；"
+         f"確認釣獲 {ledger.catches} 局；連續成功 {ledger.streak} 局")
     return 0
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="hololive-Dreams 視覺自動釣魚")
     parser.add_argument("--window-title", default="hololive-Dreams")
+    parser.add_argument("--language", choices=("auto","zh-CN","zh-TW"), default="auto",
+                        help="遊戲介面語言（自動／簡體中文／繁體中文）")
     parser.add_argument("--fps", type=float, default=40.0, help="辨識頻率")
     parser.add_argument(
         "--lead", type=float, default=0.20, help="滑塊煞車提前量（秒）"

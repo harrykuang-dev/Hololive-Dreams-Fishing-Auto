@@ -7,12 +7,12 @@ import os
 import time
 from pathlib import Path
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 from auto_fishing import enable_dpi_awareness, run
 
 
-APP_VERSION = "0.2.4"
+APP_VERSION = "0.2.5"
 
 
 class FishingApp:
@@ -38,7 +38,8 @@ class FishingApp:
         self.stop_event = threading.Event()
         self.worker: threading.Thread | None = None
         self._closing = False
-        self.session_args = self.bot_args()
+        self.game_language = tk.StringVar(value="简体中文")
+        self.session_args = self.bot_args("zh-CN")
         self.diagnostics = tk.BooleanVar(value=False)
 
         self._build()
@@ -97,6 +98,15 @@ class FishingApp:
             font=("Microsoft JhengHei UI", 10),
         ).pack(anchor="w", padx=20)
 
+        language_row = tk.Frame(self.root,bg=self.BG)
+        language_row.pack(fill="x",padx=30,pady=(0,12))
+        tk.Label(language_row,text="游戏语言",bg=self.BG,fg=self.TEXT,
+                 font=("Microsoft JhengHei UI",10)).pack(side="left",padx=(0,12))
+        self.language_choice = ttk.Combobox(
+            language_row,textvariable=self.game_language,state="readonly",
+            values=("简体中文","繁體中文","自动识别"),width=17,
+        )
+        self.language_choice.pack(side="left")
         controls = tk.Frame(self.root, bg=self.BG)
         controls.pack(fill="x", padx=30, pady=(0, 18))
         self.start_button = tk.Button(
@@ -181,9 +191,10 @@ class FishingApp:
         ).pack(pady=(0, 18))
 
     @staticmethod
-    def bot_args() -> argparse.Namespace:
+    def bot_args(language: str = "auto") -> argparse.Namespace:
         return argparse.Namespace(
             window_title="hololive-Dreams",
+            language=language,
             fps=40.0,
             lead=0.20,
             deadband=0.018,
@@ -193,6 +204,9 @@ class FishingApp:
             debug_dir=None,
             record=False,
         )
+
+    def language_code(self) -> str:
+        return {"简体中文":"zh-CN","繁體中文":"zh-TW","自动识别":"auto"}[self.game_language.get()]
 
     def _append_log(self, message: str) -> None:
         self.log.configure(state="normal")
@@ -213,8 +227,9 @@ class FishingApp:
         self.start_button.configure(state="disabled")
         self.stop_button.configure(state="normal")
         self._set_status("正在連接遊戲…", self.CYAN)
-        self._append_log("開始自動釣魚")
-        self.session_args = self.bot_args()
+        self._append_log(f"開始自動釣魚；遊戲語言：{self.game_language.get()}")
+        self.session_args = self.bot_args(self.language_code())
+        self.language_choice.configure(state="disabled")
         if self.diagnostics.get():
             base = Path(os.environ.get('LOCALAPPDATA',str(Path.cwd())))
             directory = base/'HololiveFishingAuto'/'sessions'/time.strftime('%Y%m%d-%H%M%S')
@@ -270,6 +285,7 @@ class FishingApp:
                 elif kind == "done":
                     self.start_button.configure(state="normal")
                     self.stop_button.configure(state="disabled")
+                    self.language_choice.configure(state="readonly")
                     if self.status.cget("text") != "發生錯誤":
                         self._set_status("已停止", self.MUTED)
         except queue.Empty:

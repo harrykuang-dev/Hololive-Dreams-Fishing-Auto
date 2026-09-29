@@ -17,6 +17,7 @@ class Detection:
     action_button: tuple[float, float] | None = None
     scene: str = 'unknown'
     confidence: float = 0.0
+    catch_result: bool = False
 
     @property
     def minigame(self):
@@ -95,6 +96,32 @@ def bottom_action_button(cyan, white, w, h):
     return None
 
 
+def catch_result_card(hsv, cream, w, h):
+    """Confirm the fish-card GET badge and paper, independent of UI language.
+
+    This is stronger than a disappearing reel HUD, which can also mean a loss.
+    """
+    paper = (cream[int(.16*h):int(.82*h),int(.56*w):int(.94*w)]>0).mean()
+    if paper < .48:
+        return False
+    x0,x1,y0,y1 = int(.51*w),int(.73*w),int(.015*h),int(.16*h)
+    header = hsv[y0:y1,x0:x1]
+    yellow = cv2.inRange(header,np.array((18,60,160)),np.array((42,255,255)))
+    blue = cv2.inRange(header,np.array((105,100,140)),np.array((132,255,255)))
+    # The bright upper halves of the letters can be almost white. Their
+    # yellow lower halves are only ~2% of frame height in real captures.
+    letters = [c for c in components(yellow) if .008*w<c['w']<.075*w
+               and .016*h<c['h']<.15*h and c['area']>.00015*w*h]
+    if len(letters)<3 or cv2.countNonZero(blue)<.0008*w*h:
+        return False
+    aligned = [c for c in letters if abs(c['cy']-np.median([m['cy'] for m in letters]))<.025*h]
+    if len(aligned)<3:
+        return False
+    left = min(c['x'] for c in aligned)
+    right = max(c['x']+c['w'] for c in aligned)
+    return .085*w<right-left<.21*w
+
+
 def bite_prompt(hsv, w, h):
     """Pink circle + white exclamation + blue-outlined yellow TAP text.
 
@@ -153,7 +180,7 @@ def bite_prompt(hsv, w, h):
     return False,cv2.countNonZero(pink)
 
 
-def _analyze(frame):
+def _analyze(frame, language='auto'):
     h, w = frame.shape[:2]
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     d = Detection()
@@ -233,6 +260,17 @@ def _analyze(frame):
                 return d
 
     button = bottom_action_button(cyan,cream,w,h)
+    # Both Chinese editions retain the illustrated GET badge. The separate
+    # language setting selects UI wording; recognition relies on stable art.
+    d.catch_result = catch_result_card(hsv,cream,w,h)
+    if d.catch_result:
+        # Simplified-Chinese Continue can lose its white glyphs during a
+        # highlight animation. The confirmed card provides a safe anchor for
+        # the bottom-right button even on those frames.
+        d.scene = 'result_continue'
+        d.action_button = button or (.83*w,.915*h)
+        d.confidence = .95 if button else .75
+        return d
     if reward_rows.sum()>.15*h and get_visible:
         # Fishing materials keep Continue visible. Clicking the old blank
         # point instead can open the fish list underneath the reward strip.
@@ -260,12 +298,14 @@ def _analyze(frame):
     return d
 
 
-def analyze(frame):
+def analyze(frame, language='auto'):
     """Bound processing cost; report original client coordinates."""
     h,w = frame.shape[:2]
     scale = min(1., 900/w)
     small = cv2.resize(frame,(round(w*scale),round(h*scale)),interpolation=cv2.INTER_AREA) if scale<1 else frame
-    d = _analyze(small)
+    if language not in ('auto','zh-CN','zh-TW'):
+        raise ValueError(f'Unsupported game language: {language}')
+    d = _analyze(small,language)
     if scale<1:
         for name in ('player_center','fish_center','action_button'):
             value = getattr(d,name)

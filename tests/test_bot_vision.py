@@ -118,6 +118,24 @@ class TrackVisionTests(unittest.TestCase):
 
 
 class PopupVisionTests(unittest.TestCase):
+    def test_fish_get_card_confirms_catch_and_has_safe_continue_fallback(self):
+        f = np.zeros((600,1000,3),np.uint8)
+        cv2.rectangle(f,(520,30),(960,550),(245,245,245),-1)
+        for letter,x in zip('GET!',(530,577,624,671)):
+            cv2.putText(f,letter,(x,88),cv2.FONT_HERSHEY_SIMPLEX,1.5,
+                        color(117,230,250),9)
+            cv2.putText(f,letter,(x,88),cv2.FONT_HERSHEY_SIMPLEX,1.5,
+                        color(30,210,250),4)
+        for language in ('auto','zh-CN','zh-TW'):
+            with self.subTest(language=language):
+                d = analyze(f,language)
+                self.assertTrue(d.catch_result)
+                self.assertEqual(d.scene,'result_continue')
+                self.assertAlmostEqual(d.action_button[0],830,delta=2)
+        no_card = f.copy()
+        no_card[96:550,520:960] = 0
+        self.assertFalse(analyze(no_card).catch_result)
+
     def test_book_x_connected_to_cyan_background_is_detected(self):
         f = np.zeros((600,1000,3),np.uint8)
         cv2.rectangle(f,(0,0),(999,110),color(99,210,245),-1)

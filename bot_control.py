@@ -131,6 +131,35 @@ class BiteGuard:
         return True
 
 
+class CatchLedger:
+    """Count only confirmed fish cards, and reset streak on an unconfirmed round."""
+    def __init__(self):
+        self.rounds = 0
+        self.catches = 0
+        self.streak = 0
+        self.failed = 0
+        self.in_round = False
+        self.result_seen = False
+
+    def reel_started(self):
+        failed_previous = self.in_round and not self.result_seen
+        if failed_previous:
+            self.failed += 1
+            self.streak = 0
+        self.rounds += 1
+        self.in_round = True
+        self.result_seen = False
+        return failed_previous
+
+    def catch_seen(self):
+        if not self.in_round or self.result_seen:
+            return False
+        self.result_seen = True
+        self.catches += 1
+        self.streak += 1
+        return True
+
+
 class Navigation:
     """Cross-frame debounce + bounded retries; never permanently disarm."""
     def __init__(self):

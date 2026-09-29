@@ -1,5 +1,5 @@
 import unittest
-from bot_control import ReelTracker, ReelControl, Navigation, Tracking, BiteGuard
+from bot_control import ReelTracker, ReelControl, Navigation, Tracking, BiteGuard, CatchLedger
 from bot_vision import Detection
 
 
@@ -112,6 +112,7 @@ class NavigationTests(unittest.TestCase):
             self.assertEqual(nav.update(d,1.+i),(800,650))
         self.assertEqual(nav.update(d,7.),'blocked')
 
+
     def test_transient_unclicked_button_is_not_reported_as_confirmation(self):
         nav = Navigation()
         nav.update(Detection(scene='action',action_button=(800,650)),0)
@@ -126,6 +127,21 @@ class NavigationTests(unittest.TestCase):
             d = Detection(scene='encyclopedia',action_button=(1590+(-1)**i,70))
             self.assertIsInstance(nav.update(d,1.+i),tuple)
         self.assertEqual(nav.update(d,7.),'blocked')
+
+
+class CatchLedgerTests(unittest.TestCase):
+    def test_only_confirmed_card_counts_and_failure_resets_streak(self):
+        ledger = CatchLedger()
+        self.assertFalse(ledger.catch_seen())
+        self.assertFalse(ledger.reel_started())
+        self.assertTrue(ledger.catch_seen())
+        self.assertFalse(ledger.catch_seen())
+        self.assertEqual((ledger.catches,ledger.streak),(1,1))
+        self.assertFalse(ledger.reel_started())
+        self.assertTrue(ledger.reel_started())
+        self.assertEqual((ledger.failed,ledger.streak),(1,0))
+        self.assertTrue(ledger.catch_seen())
+        self.assertEqual((ledger.rounds,ledger.catches,ledger.streak),(3,2,1))
 
 
 if __name__ == '__main__':
