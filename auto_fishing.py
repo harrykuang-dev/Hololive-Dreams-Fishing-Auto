@@ -24,10 +24,6 @@ import win32con
 import win32gui
 from PIL import ImageGrab
 
-ACTION_BUTTON_STABLE_SECONDS = 0.20
-ACTION_BUTTON_RETRY_SECONDS = 0.80
-ACTION_BUTTON_MAX_ATTEMPTS = 8
-
 
 def enable_dpi_awareness() -> None:
     """Make Win32 coordinates match physical screenshot pixels."""
@@ -106,14 +102,10 @@ class MouseController:
         win32api.SetCursorPos(self.window.screen_point(point))
 
     def click(self, point: tuple[float, float]) -> None:
-        """Send a UI click long enough to be observed by frame-polled games."""
         self.release()
         self._move_client(point)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)
-        try:
-            time.sleep(0.060)
-        finally:
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
 
     def tap(self, point: tuple[float, float], duration: float = 0.018) -> None:
         """Send a short but game-visible reel pulse."""
@@ -376,9 +368,6 @@ def run(
     last_debug = 0.0
     last_pulse = 0.0
     action_button_since: float | None = None
-    action_button_missing_since: float | None = None
-    last_action_button_click = 0.0
-    action_button_attempts = 0
     minigame_seen = False
     minigame_lost_since: float | None = None
     action_armed = True
@@ -391,23 +380,6 @@ def run(
             "w", encoding="utf-8", newline=""
         )
         trace_file.write("seconds,state,fish_y,player_y,error,control,held\n")
-
-    def click_action_button(point: tuple[float, float]) -> None:
-        nonlocal action_button_attempts, last_action_button_click, last_action
-        attempt = action_button_attempts + 1
-        mouse.click(point)
-        action_button_attempts = attempt
-        last_action_button_click = time.perf_counter()
-        last_action = last_action_button_click
-        emit(
-            f"已發出第 {attempt} 次右下按鈕點擊，"
-            f"位置 {point[0]:.0f}, {point[1]:.0f}。"
-        )
-        if attempt == ACTION_BUTTON_MAX_ATTEMPTS:
-            emit(
-                "按鈕仍未消失，已達 8 次重試上限；"
-                "請檢查遊戲視窗是否有回應。"
-            )
 
     emit(f"已連接視窗：{args.window_title}")
     try:
@@ -426,29 +398,13 @@ def run(
             detection = analyze(frame)
             now = time.perf_counter()
             if detection.action_button:
-                action_button_missing_since = None
                 if action_button_since is None:
                     action_button_since = now
-                    emit(
-                        "已辨識到右下方按鈕，正在確認畫面穩定"
-                        f"（位置 {detection.action_button[0]:.0f},"
-                        f" {detection.action_button[1]:.0f}）"
-                    )
             else:
                 action_button_since = None
-                if action_button_attempts:
-                    if action_button_missing_since is None:
-                        action_button_missing_since = now
-                    elif now - action_button_missing_since >= 0.35:
-                        emit("右下方按鈕已不再可見，等待下一個畫面按鈕。")
-                        action_button_attempts = 0
-                        action_button_missing_since = None
             action_button_ready = (
                 action_button_since is not None
-                and now - action_button_since >= ACTION_BUTTON_STABLE_SECONDS
-            )
-            action_button_retry_due = (
-                now - last_action_button_click >= ACTION_BUTTON_RETRY_SECONDS
+                and now - action_button_since >= 0.20
             )
             control_error: float | None = None
             control_mode = ""
@@ -458,7 +414,6 @@ def run(
                 minigame_seen = True
                 minigame_lost_since = None
                 action_armed = False
-                action_button_attempts = 0
                 reel_point = (0.86 * width, 0.82 * height)
                 player_y = detection.player_center[1]
                 fish_y = detection.fish_center[1]
@@ -534,13 +489,14 @@ def run(
                         not args.once
                         and now - minigame_lost_since > 0.20
                         and action_button_ready
-                        and action_button_retry_due
-                        and action_button_attempts < ACTION_BUTTON_MAX_ATTEMPTS
+                        and now - last_action > 1.2
                     ):
                         state = "繼續"
-                        click_action_button(detection.action_button)
+                        mouse.click(detection.action_button)
+                        last_action = now
                         minigame_seen = False
                         minigame_lost_since = None
+                        action_armed = False
                     elif not args.once and now - minigame_lost_since > 12.0:
                         # Fall back to the regular menu/result classifier if a
                         # transition animation took an unusually long time.
@@ -554,13 +510,12 @@ def run(
                 elif (
                     action_armed
                     and action_button_ready
-                    and action_button_retry_due
-                    and action_button_attempts < ACTION_BUTTON_MAX_ATTEMPTS
+                    and now - last_action > 1.2
                 ):
-                    state = "繼續"
-                    click_action_button(detection.action_button)
-                elif action_button_ready and action_button_attempts >= ACTION_BUTTON_MAX_ATTEMPTS:
-                    state = "繼續"
+                    state = "繼續" if minigame_seen else "按鈕"
+                    mouse.click(detection.action_button)
+                    last_action = now
+                    action_armed = False
                 else:
                     state = "等待"
 
