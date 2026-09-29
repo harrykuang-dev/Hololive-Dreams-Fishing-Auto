@@ -1,6 +1,6 @@
 # Hololive Fishing Auto
 
-Windows 版《hololive Dreams》釣魚小遊戲自動操作工具。`0.1.1` 包含經實機校準的圖形介面與結果頁自動續竿，下載 EXE 後可直接啟動。
+Windows 版《hololive Dreams》釣魚小遊戲自動操作工具。`0.1.2` 包含經實機校準的圖形介面、結果頁自動續竿與點擊重試，下載 EXE 後可直接啟動。
 
 ## EXE 使用方法
 
