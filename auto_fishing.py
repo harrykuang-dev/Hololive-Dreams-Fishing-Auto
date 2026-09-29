@@ -367,7 +367,6 @@ def run(
     last_action = 0.0
     last_debug = 0.0
     last_pulse = 0.0
-    action_button_since: float | None = None
     minigame_seen = False
     minigame_lost_since: float | None = None
     action_armed = True
@@ -397,15 +396,6 @@ def run(
             height, width = frame.shape[:2]
             detection = analyze(frame)
             now = time.perf_counter()
-            if detection.action_button:
-                if action_button_since is None:
-                    action_button_since = now
-            else:
-                action_button_since = None
-            action_button_ready = (
-                action_button_since is not None
-                and now - action_button_since >= 0.20
-            )
             control_error: float | None = None
             control_mode = ""
 
@@ -487,11 +477,11 @@ def run(
                         break
                     if (
                         not args.once
-                        and now - minigame_lost_since > 0.20
-                        and action_button_ready
+                        and now - minigame_lost_since > 1.0
+                        and detection.action_button
                         and now - last_action > 1.2
                     ):
-                        state = "繼續"
+                        state = "按鈕"
                         mouse.click(detection.action_button)
                         last_action = now
                         minigame_seen = False
@@ -509,10 +499,10 @@ def run(
                     action_armed = False
                 elif (
                     action_armed
-                    and action_button_ready
+                    and detection.action_button
                     and now - last_action > 1.2
                 ):
-                    state = "繼續" if minigame_seen else "按鈕"
+                    state = "按鈕"
                     mouse.click(detection.action_button)
                     last_action = now
                     action_armed = False

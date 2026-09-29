@@ -9,7 +9,7 @@ from tkinter import messagebox
 from auto_fishing import enable_dpi_awareness, run
 
 
-APP_VERSION = "0.1.1"
+APP_VERSION = "0.1.0"
 
 
 class FishingApp:
@@ -237,7 +237,6 @@ class FishingApp:
                             "拉扯": self.GREEN,
                             "收尾動畫": "#c7a7ff",
                             "按鈕": self.CYAN,
-                            "繼續": self.CYAN,
                         }
                         self._set_status(state, colors.get(state, self.CYAN))
                     elif value.startswith("已連接視窗"):
