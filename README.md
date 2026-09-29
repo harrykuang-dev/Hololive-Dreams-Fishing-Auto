@@ -1,8 +1,42 @@
-# Hololive Fishing Auto（開發中）
+# Hololive Fishing Auto
 
-《hololive Dreams》Windows 版的畫面辨識釣魚程式，初版需要針對實際遊戲畫面校準。
+Windows 版《hololive Dreams》釣魚小遊戲自動操作工具。`0.1.0` 已包含經實機校準的圖形介面版本，下載 EXE 後可直接啟動。
+
+## EXE 使用方法
+
+1. 開啟 `hololive-Dreams` 並進入釣魚畫面。
+2. 執行 `Hololive-Fishing-Auto.exe`。
+3. 點擊「開始釣魚」。
+4. 如需停止，點擊「停止」；切換到其他視窗時也會自動安全停止。
+
+程式會辨識短暫出現的 `TAP!`，在拉扯階段以三段式閉環控制操作捲線器：距離大時長按上升或放開下降，靠近魚時快速連點以減少滑塊大幅擺動。釣獲後會自動按「繼續」並等待下一竿。
+
+## 從原始碼啟動 GUI
+
+```powershell
+python -m pip install -r requirements-build.txt
+python .\gui.py
+```
+
+## 建置單一 EXE
+
+```powershell
+.\build.ps1
+```
+
+輸出位於 `dist\Hololive-Fishing-Auto.exe`。
+
+## 技術與安全界線
+
+只透過螢幕畫面辨識與正常滑鼠輸入操作，不讀取或修改遊戲記憶體、存檔或程序。程式只在標題完全相符的 `hololive-Dreams` 視窗中操作；遊戲失去焦點時會放開滑鼠並停止。
+
+---
+
+## 舊版校準／研究工具
+
+《hololive Dreams》Windows 版的畫面辨識釣魚程式，以下保留舊版通用校準與回放工具說明。
 目前完成通用控制器、魚／控制區辨識、單局及有界連續遊玩流程、結果記錄與離線回放。
-**尚未讀取遊戲內釣魚教學，尚未完成實機校準，實機測試 0 局，沒有 100% 成功率證據。**
+GUI 版本已根據遊戲內教學與實機畫面完成校準；舊版 profile 工具仍需依其說明自行校準。
 本版不附猜測的畫面座標、遊戲素材或可直接執行的假校準檔。沒有本機 profile 時拒絕輸入。
 
 釣魚是 2026-09-29 更新的新功能；官方公告只確認魚種依魚餌、地點及時間而異，未提供完整
@@ -92,6 +126,6 @@ python tools/control_benchmark.py --output synthetic-benchmark.json
 
 ## 開發狀態
 
-參見 [驗證紀錄](docs/VALIDATION.md)。目前不能直接部署無人值守，缺少實機畫面及釣魚規則確認。
+參見 [驗證紀錄](docs/VALIDATION.md)。`0.1.0` 已完成實機規則確認、畫面校準與多輪釣獲測試；遊戲更新、解析度或 UI 配色改變後仍可能需要重新調整。
 `profiles/`、`screenshots/`、`sessions/`、遊戲資料及本機路徑不會上傳 GitHub。
 只透過畫面與正常滑鼠輸入操作，不修改遊戲、讀取程序記憶體或修改存檔。

@@ -8,3 +8,4 @@ tmp/
 dist/
 build/
 *.spec
+gui_preview*.png
