@@ -11,8 +11,12 @@ class LayoutTests(unittest.TestCase):
     def test_buttons_match_and_controls_fit_at_multiple_dpis(self):
         for dpi in (96,120,144,192):
             root=tk.Tk()
+            # A simulated 200% monitor needs more physical pixels than the
+            # hosted runner's 1024x768 desktop. Validate scaling against an
+            # explicit 4K work area, not the unrelated host's resolution.
+            root.maxsize(3840,2160)
             try:
-                with patch('gui.window_dpi',return_value=dpi):
+                with patch('gui.window_dpi',return_value=dpi), patch('gui.window_work_area',return_value=(3840,2160)):
                     app=FishingApp(root)
                     root.update()
                     for language in GAME_LANGUAGES:
