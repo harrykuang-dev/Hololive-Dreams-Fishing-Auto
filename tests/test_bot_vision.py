@@ -2,6 +2,7 @@ import unittest
 import cv2
 import numpy as np
 from bot_vision import analyze
+from app_locale import GAME_LANGUAGES
 
 
 def color(h,s,v):
@@ -54,6 +55,12 @@ def bite_frame(text=True, bang=True, outline=True):
 
 
 class BiteVisionTests(unittest.TestCase):
+    def test_same_gameplay_art_works_for_every_supported_language(self):
+        for code in GAME_LANGUAGES.values():
+            with self.subTest(language=code):
+                self.assertTrue(analyze(bite_frame(), code).tap)
+                self.assertTrue(analyze(track_frame(), code).minigame)
+
     def test_bite_requires_all_three_independent_ui_features(self):
         for scale in (1,.75,.5):
             with self.subTest(scale=scale):

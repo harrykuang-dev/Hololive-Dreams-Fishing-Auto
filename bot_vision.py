@@ -300,10 +300,11 @@ def _analyze(frame, language='auto'):
 
 def analyze(frame, language='auto'):
     """Bound processing cost; report original client coordinates."""
+    from app_locale import GAME_LANGUAGES
     h,w = frame.shape[:2]
     scale = min(1., 900/w)
     small = cv2.resize(frame,(round(w*scale),round(h*scale)),interpolation=cv2.INTER_AREA) if scale<1 else frame
-    if language not in ('auto','zh-CN','zh-TW'):
+    if language not in ('auto', *GAME_LANGUAGES.values()):
         raise ValueError(f'Unsupported game language: {language}')
     d = _analyze(small,language)
     if scale<1:

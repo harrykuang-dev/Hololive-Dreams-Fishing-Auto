@@ -10,9 +10,10 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from auto_fishing import enable_dpi_awareness, run
+from app_locale import GAME_LANGUAGES, text as tr
 
 
-APP_VERSION = "0.2.5"
+APP_VERSION = "0.3.0"
 
 
 class FishingApp:
@@ -28,7 +29,7 @@ class FishingApp:
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title(f"Hololive Dreams 自動釣魚 v{APP_VERSION}")
+        self.root.title(f"Hololive Dreams v{APP_VERSION}")
         self.root.geometry("560x650")
         self.root.minsize(520, 620)
         self.root.configure(bg=self.BG)
@@ -38,11 +39,13 @@ class FishingApp:
         self.stop_event = threading.Event()
         self.worker: threading.Thread | None = None
         self._closing = False
-        self.game_language = tk.StringVar(value="简体中文")
-        self.session_args = self.bot_args("zh-CN")
+        self.game_language = tk.StringVar(value="繁體中文")
+        self.session_args = self.bot_args("zh-TW")
         self.diagnostics = tk.BooleanVar(value=False)
+        self.has_error = False
 
         self._build()
+        self._apply_language()
         self.root.after(100, self._poll)
 
     def _build(self) -> None:
@@ -55,13 +58,13 @@ class FishingApp:
             fg=self.TEXT,
             font=("Microsoft JhengHei UI", 24, "bold"),
         ).pack(anchor="w")
-        tk.Label(
+        self.subtitle = tk.Label(
             header,
-            text="自動釣魚助手",
             bg=self.BG,
             fg=self.CYAN,
             font=("Microsoft JhengHei UI", 15, "bold"),
-        ).pack(anchor="w", pady=(3, 0))
+        )
+        self.subtitle.pack(anchor="w", pady=(3, 0))
 
         card = tk.Frame(
             self.root,
@@ -79,39 +82,40 @@ class FishingApp:
         self.dot.pack(side="left")
         self.status = tk.Label(
             status_row,
-            text="待命",
+            text="",
             bg=self.PANEL,
             fg=self.TEXT,
             font=("Microsoft JhengHei UI", 16, "bold"),
         )
         self.status.pack(side="left", padx=(10, 0))
 
-        tk.Label(
+        self.instructions = tk.Label(
             card,
-            text=(
-                "請先開啟 hololive-Dreams，進入釣魚畫面後按下開始。\n"
-                "自動拉扯、關閉圖鑑／獎勵並續竿。F9 可立即停止。"
-            ),
             bg=self.PANEL,
             fg=self.MUTED,
             justify="left",
+            anchor="w",
+            wraplength=480,
             font=("Microsoft JhengHei UI", 10),
-        ).pack(anchor="w", padx=20)
+        )
+        self.instructions.pack(anchor="w", padx=20)
 
         language_row = tk.Frame(self.root,bg=self.BG)
         language_row.pack(fill="x",padx=30,pady=(0,12))
-        tk.Label(language_row,text="游戏语言",bg=self.BG,fg=self.TEXT,
-                 font=("Microsoft JhengHei UI",10)).pack(side="left",padx=(0,12))
+        self.language_label = tk.Label(language_row,bg=self.BG,fg=self.TEXT,
+                                       font=("Microsoft JhengHei UI",10))
+        self.language_label.pack(side="left",padx=(0,12))
         self.language_choice = ttk.Combobox(
             language_row,textvariable=self.game_language,state="readonly",
-            values=("简体中文","繁體中文","自动识别"),width=17,
+            values=tuple(GAME_LANGUAGES),width=17,
         )
         self.language_choice.pack(side="left")
+        self.language_choice.bind("<<ComboboxSelected>>",self._apply_language)
         controls = tk.Frame(self.root, bg=self.BG)
         controls.pack(fill="x", padx=30, pady=(0, 18))
         self.start_button = tk.Button(
             controls,
-            text="▶  開始釣魚",
+            text="",
             command=self.start,
             bg=self.CYAN,
             activebackground=self.CYAN_ACTIVE,
@@ -125,7 +129,7 @@ class FishingApp:
         )
         self.stop_button = tk.Button(
             controls,
-            text="■  停止",
+            text="",
             command=self.stop,
             state="disabled",
             bg=self.PANEL_2,
@@ -142,12 +146,13 @@ class FishingApp:
         )
         self.stop_button.pack(side="right", padx=(12, 0))
         self.start_button.pack(side="left", fill="x", expand=True)
-        tk.Checkbutton(
-            self.root,text="儲存本機診斷（畫面與追蹤紀錄，不上傳）",
+        self.diagnostics_check = tk.Checkbutton(
+            self.root,
             variable=self.diagnostics,bg=self.BG,fg=self.MUTED,
             activebackground=self.BG,activeforeground=self.TEXT,
-            selectcolor=self.PANEL,highlightthickness=0,
-        ).pack(anchor="w",padx=30,pady=(0,8))
+            selectcolor=self.PANEL,highlightthickness=0,wraplength=480,
+        )
+        self.diagnostics_check.pack(anchor="w",padx=30,pady=(0,8))
 
         log_card = tk.Frame(
             self.root,
@@ -156,13 +161,13 @@ class FishingApp:
             highlightbackground="#213651",
         )
         log_card.pack(fill="both", expand=True, padx=30, pady=(0, 18))
-        tk.Label(
+        self.log_title = tk.Label(
             log_card,
-            text="運行紀錄",
             bg=self.PANEL,
             fg=self.TEXT,
             font=("Microsoft JhengHei UI", 11, "bold"),
-        ).pack(anchor="w", padx=16, pady=(13, 7))
+        )
+        self.log_title.pack(anchor="w", padx=16, pady=(13, 7))
         self.log = tk.Text(
             log_card,
             bg="#0b1626",
@@ -179,16 +184,29 @@ class FishingApp:
         )
         self.log.pack(fill="both", expand=True, padx=14, pady=(0, 14))
 
-        tk.Label(
+        self.footer = tk.Label(
             self.root,
-            text=(
-                f"v{APP_VERSION}  ·  僅使用畫面辨識與滑鼠輸入  ·  "
-                "切換視窗會自動停止"
-            ),
             bg=self.BG,
             fg="#60748e",
+            wraplength=500,
             font=("Microsoft JhengHei UI", 9),
-        ).pack(pady=(0, 18))
+        )
+        self.footer.pack(pady=(0, 18))
+
+    def _apply_language(self, _event=None) -> None:
+        lang = self.language_code()
+        self.root.title(f"Hololive Dreams {tr(lang,'subtitle')} v{APP_VERSION}")
+        self.subtitle.configure(text=tr(lang,"subtitle"))
+        self.instructions.configure(text=tr(lang,"instructions"))
+        self.language_label.configure(text=tr(lang,"game_language"))
+        self.start_button.configure(text=tr(lang,"start"))
+        self.stop_button.configure(text=tr(lang,"stop"))
+        self.diagnostics_check.configure(text=tr(lang,"diagnostics"))
+        self.log_title.configure(text=tr(lang,"log"))
+        self.footer.configure(text=f"v{APP_VERSION}  ·  {tr(lang,'footer')}")
+        if not self.worker or not self.worker.is_alive():
+            self._set_status(tr(lang,"error" if self.has_error else "idle"),
+                             self.RED if self.has_error else self.MUTED)
 
     @staticmethod
     def bot_args(language: str = "auto") -> argparse.Namespace:
@@ -200,13 +218,14 @@ class FishingApp:
             deadband=0.018,
             pulse_hz=7.0,
             once=False,
+            target_streak=0,
             max_seconds=0.0,
             debug_dir=None,
             record=False,
         )
 
     def language_code(self) -> str:
-        return {"简体中文":"zh-CN","繁體中文":"zh-TW","自动识别":"auto"}[self.game_language.get()]
+        return GAME_LANGUAGES[self.game_language.get()]
 
     def _append_log(self, message: str) -> None:
         self.log.configure(state="normal")
@@ -226,15 +245,17 @@ class FishingApp:
         self.stop_event.clear()
         self.start_button.configure(state="disabled")
         self.stop_button.configure(state="normal")
-        self._set_status("正在連接遊戲…", self.CYAN)
-        self._append_log(f"開始自動釣魚；遊戲語言：{self.game_language.get()}")
-        self.session_args = self.bot_args(self.language_code())
+        lang = self.language_code()
+        self.has_error = False
+        self._set_status(tr(lang,"connecting"), self.CYAN)
+        self._append_log(tr(lang,"started",language=self.game_language.get()))
+        self.session_args = self.bot_args(lang)
         self.language_choice.configure(state="disabled")
         if self.diagnostics.get():
             base = Path(os.environ.get('LOCALAPPDATA',str(Path.cwd())))
             directory = base/'HololiveFishingAuto'/'sessions'/time.strftime('%Y%m%d-%H%M%S')
             self.session_args.debug_dir = str(directory)
-            self._append_log(f"本機診斷：{directory}")
+            self._append_log(tr(lang,"diagnostic_path",path=directory))
         self.worker = threading.Thread(
             target=self._run_bot, name="fishing-bot", daemon=True
         )
@@ -256,38 +277,41 @@ class FishingApp:
         if self.worker and self.worker.is_alive():
             self.stop_event.set()
             self.stop_button.configure(state="disabled")
-            self._set_status("正在停止…", self.MUTED)
+            self._set_status(tr(self.session_args.language,"stopping"), self.MUTED)
 
     def _poll(self) -> None:
         try:
             while True:
                 kind, value = self.messages.get_nowait()
+                lang = self.session_args.language
                 if kind == "log" and value:
                     self._append_log(value)
-                    if value.startswith("狀態："):
-                        state = value.split("：", 1)[1].split(" ", 1)[0]
+                    prefix = tr(lang,"state_prefix")
+                    if value.startswith(prefix):
+                        state = value[len(prefix):]
                         colors = {
-                            "等待": self.CYAN,
-                            "TAP": "#ffd65c",
-                            "拉扯": self.GREEN,
-                            "追蹤暫失": "#ffd65c",
-                            "收尾動畫": "#c7a7ff",
-                            "按鈕": self.CYAN,
+                            tr(lang,"waiting"): self.CYAN,
+                            tr(lang,"tap"): "#ffd65c",
+                            tr(lang,"reeling"): self.GREEN,
+                            tr(lang,"tracking_lost"): "#ffd65c",
+                            tr(lang,"ending"): "#c7a7ff",
+                            tr(lang,"button"): self.CYAN,
                         }
                         self._set_status(state, colors.get(state, self.CYAN))
-                    elif value.startswith("已連接視窗"):
-                        self._set_status("已連接", self.GREEN)
+                    elif value == tr(lang, "connected_window", title=self.session_args.window_title, language=lang):
+                        self._set_status(tr(lang,"connected"), self.GREEN)
                 elif kind == "error":
-                    self._append_log(f"錯誤：{value}")
-                    self._set_status("發生錯誤", self.RED)
+                    self.has_error = True
+                    self._append_log(f"{tr(lang,'error')}: {value}")
+                    self._set_status(tr(lang,"error"), self.RED)
                     if not self._closing:
-                        messagebox.showerror("無法開始自動釣魚", value or "未知錯誤")
+                        messagebox.showerror(tr(lang,"error_title"), value or tr(lang,"unknown_error"))
                 elif kind == "done":
                     self.start_button.configure(state="normal")
                     self.stop_button.configure(state="disabled")
                     self.language_choice.configure(state="readonly")
-                    if self.status.cget("text") != "發生錯誤":
-                        self._set_status("已停止", self.MUTED)
+                    if not self.has_error:
+                        self._set_status(tr(lang,"stopped"), self.MUTED)
         except queue.Empty:
             pass
 
