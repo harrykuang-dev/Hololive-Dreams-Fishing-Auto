@@ -25,7 +25,7 @@ With the build environment active:
 .\build.ps1
 ```
 
-Output: `dist\Hololive-Fishing-Auto-v1.0.exe`.
+Output: `dist\Hololive-Dreams-Fishing-Auto-v1.0.exe`.
 The EXE includes its runtime, icon assets and high-DPI manifest; users need only the EXE.
 
 If an older EXE is running, close it or choose a different output folder before building.
@@ -39,8 +39,8 @@ Run on Windows; GUI tests create temporary Tk windows but do not start fishing.
 python -m unittest discover -s tests -v
 python -m fishing_auto --help
 python tools/control_benchmark.py
-python tools/verify_icon.py dist/Hololive-Fishing-Auto-v1.0.exe
-Get-FileHash dist/Hololive-Fishing-Auto-v1.0.exe -Algorithm SHA256
+python tools/verify_icon.py dist/Hololive-Dreams-Fishing-Auto-v1.0.exe
+Get-FileHash dist/Hololive-Dreams-Fishing-Auto-v1.0.exe -Algorithm SHA256
 ```
 
 Tests cover recognition, input safety, continuation, counters, shortcuts, translations,

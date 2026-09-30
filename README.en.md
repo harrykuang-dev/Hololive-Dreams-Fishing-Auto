@@ -6,7 +6,7 @@ An auto-fishing assistant for the Windows version of **hololive Dreams**. It use
 
 ## Download
 
-Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) and download `Hololive-Fishing-Auto-v1.0.exe` from the release assets.
+Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) and download `Hololive-Dreams-Fishing-Auto-v1.0.exe` from the release assets.
 
 The single EXE includes its runtime and icon assets. You do not need Python or additional files. A SHA-256 checksum file is also available; the source-code ZIP is not the runnable application.
 

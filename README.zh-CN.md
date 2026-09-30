@@ -6,7 +6,7 @@ Windows 版《hololive Dreams》的自动钓鱼助手。通过游戏画面识别
 
 ## 下载
 
-前往 [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)，下载附件中的 `Hololive-Fishing-Auto-v1.0.exe`。
+前往 [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)，下载附件中的 `Hololive-Dreams-Fishing-Auto-v1.0.exe`。
 
 只需这一个 EXE，无需安装 Python，也无需另行复制图标或素材。Release 同时提供 SHA-256 校验文件；源码 ZIP 不是可直接运行的软件。
 

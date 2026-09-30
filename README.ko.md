@@ -6,7 +6,7 @@ Windows용 **hololive Dreams** 자동 낚시 도우미입니다. 화면 인식�
 
 ## 다운로드
 
-[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)의 첨부 파일에서 `Hololive-Fishing-Auto-v1.0.exe`를 다운로드하세요.
+[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)의 첨부 파일에서 `Hololive-Dreams-Fishing-Auto-v1.0.exe`를 다운로드하세요.
 
 실행 환경과 아이콘이 EXE 하나에 포함되어 있습니다. Python 설치나 추가 파일 복사는 필요하지 않습니다. SHA-256 체크섬 파일도 제공합니다. 소스 코드 ZIP은 바로 실행할 수 있는 앱이 아닙니다.
 
