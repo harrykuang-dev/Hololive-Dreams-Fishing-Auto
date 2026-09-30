@@ -79,12 +79,14 @@ class ReelControl:
     def __init__(self, lead=.20):
         self.lead = lead
         self.accumulator = 0.
+        self.duty = .5
 
     def reset(self):
         self.accumulator = 0.
 
-    def decide(self, t, height):
-        # Shorter horizon for agile fish: their next reversal is uncertain.
+    def decide(self, t, height, latency=0.):
+        # Restore the controller validated before 0.3.2. The toy model used
+        # for equal-horizon tuning did not model the game's actual input/UI.
         fish_lead = min(.08,self.lead*.65)
         error = t.player+t.player_velocity*self.lead-(t.fish+t.fish_velocity*fish_lead)
         band = max(3.,t.bar_height*.22)
@@ -95,11 +97,41 @@ class ReelControl:
         # Pulse-density modulation is non-blocking: close to the fish the
         # button alternates rapidly, with duty adjusted to its speed/error.
         duty = max(.18,min(.82,.50+.28*error/band-.12*t.fish_velocity/height))
+        self.duty = duty
         self.accumulator += duty
         pressed = self.accumulator >= 1.
         if pressed:
             self.accumulator -= 1.
         return pressed,'pulse',error
+
+
+class HoldRecovery:
+    """One release frame if a sustained corrective hold has no upward effect.
+
+    Local button bookkeeping does not establish that the game accepted a
+    pointer-down event. Use observed motion, never just elapsed hold time.
+    """
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.since = None
+        self.player = None
+
+    def update(self, t, mode, now, height):
+        if t is None or t.predicted or mode != 'hold' or t.player-t.fish < .35*t.bar_height:
+            self.reset()
+            return False
+        if self.since is None or now < self.since:
+            self.since,self.player = now,t.player
+            return False
+        if t.player < self.player-.015*height:
+            self.since,self.player = now,t.player
+            return False
+        if now-self.since >= .30:
+            self.reset()
+            return True
+        return False
 
 
 class BiteGuard:

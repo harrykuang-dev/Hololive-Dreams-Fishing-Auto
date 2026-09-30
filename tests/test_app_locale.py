@@ -31,6 +31,18 @@ class LocaleTests(unittest.TestCase):
     def test_legacy_auto_keeps_traditional_chinese(self):
         self.assertEqual(text("auto", "idle"), text("zh-TW", "idle"))
 
+    def test_generic_language_labels(self):
+        expected={'zh-TW':'語言 / Language','zh-CN':'语言 / Language',
+                  'en':'Language','ja':'言語 / Language','id':'Bahasa / Language','ko':'언어 / Language'}
+        for code,label in expected.items():
+            self.assertEqual(text(code,'game_language'),label)
+
+    def test_developer_help_matches_confirmed_wording(self):
+        expected = ('啟用後會儲存狀態截圖、魚獲卡片及追蹤與耗時作爲診斷資料，用於定位與排查異常。資料不會自動上傳。'
+                    '\n\n診斷資料位於：\nFOLDER\n\n'
+                    '每次運行會建立以時間命名的資料夾。如遇異常，可透過下方項目地址聯繫作者，並提供問題描述及診斷資料。開啟開發者模式會增加效能負擔。')
+        self.assertEqual(text('zh-TW','developer_help',path='FOLDER'),expected)
+
 
 if __name__ == "__main__":
     unittest.main()

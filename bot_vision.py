@@ -101,12 +101,15 @@ def catch_result_card(hsv, cream, w, h):
 
     This is stronger than a disappearing reel HUD, which can also mean a loss.
     """
-    paper = (cream[int(.16*h):int(.82*h),int(.56*w):int(.94*w)]>0).mean()
+    # A cream card can be dimmer on another display/capture pipeline. Keep
+    # this tolerance local to result confirmation, where GET is also required.
+    paper_mask = cv2.inRange(hsv, np.array((0,0,200)), np.array((180,65,255)))
+    paper = (paper_mask[int(.16*h):int(.82*h),int(.56*w):int(.94*w)]>0).mean()
     if paper < .48:
         return False
     x0,x1,y0,y1 = int(.51*w),int(.73*w),int(.015*h),int(.16*h)
     header = hsv[y0:y1,x0:x1]
-    yellow = cv2.inRange(header,np.array((18,60,160)),np.array((42,255,255)))
+    yellow = cv2.inRange(header,np.array((18,45,160)),np.array((42,255,255)))
     blue = cv2.inRange(header,np.array((105,100,140)),np.array((132,255,255)))
     # The bright upper halves of the letters can be almost white. Their
     # yellow lower halves are only ~2% of frame height in real captures.
@@ -199,7 +202,7 @@ def _analyze(frame, language='auto'):
         # Only the left lane, excluding the adjacent orange progress gauge.
         lx, rx = round(tx+.14*tw), round(tx+.55*tw)
         lane = hsv[ty:ty+th, lx:rx]
-        yellow = cv2.inRange(lane, np.array((20,35,175)), np.array((37,255,255)))
+        yellow = cv2.inRange(lane, np.array((20,20,175)), np.array((37,255,255)))
         rows = np.flatnonzero((yellow>0).mean(axis=1)>.18)
         if rows.size:
             # Boundaries, not colour centroid: an overlapping fish does not
@@ -217,6 +220,17 @@ def _analyze(frame, language='auto'):
         fishes = [c for c in components(fishmask,(fx0,ty))
                   if .018*w<c['w']<.075*w and .018*h<c['h']<.09*h
                   and .75<c['w']/c['h']<2.4 and c['area']>.00013*w*h]
+        if not fishes:
+            # A pale fish loses its saturated fill. Search broad sprite rows,
+            # not the whole pale lane (which can connect to the sprite).
+            pale = cv2.inRange(hsv[ty:ty+th,fx0:fx1],
+                               np.array((84,65,165)),np.array((103,255,255)))
+            pale = cv2.morphologyEx(pale,cv2.MORPH_OPEN,np.ones((3,3),np.uint8))
+            broad_rows = (pale>0).sum(axis=1) > .40*tw
+            pale[~broad_rows] = 0
+            fishes = [c for c in components(pale,(fx0,ty))
+                      if .38*tw<c['w']<.075*w and .018*h<c['h']<.09*h
+                      and .75<c['w']/c['h']<2.4 and c['area']>.00013*w*h]
         if fishes:
             fish = max(fishes,key=lambda c:c['area'])
             d.fish_box = box(fish)
@@ -224,7 +238,12 @@ def _analyze(frame, language='auto'):
         d.confidence = 1.0 if d.minigame else .4
         return d
 
-    cyan = cv2.inRange(hsv,np.array((84,70,170)),np.array((105,255,255)))
+    # Character themes change button hue. UI geometry/white borders/glyphs,
+    # not a particular hue, confirm controls; fishing masks stay separate.
+    # Keep hue families separate: a union joins a cyan X ring to gold paper
+    # decorations and destroys its circular contour.
+    ui_masks = [cv2.inRange(hsv,np.array((lo,70,140)),np.array((hi,255,255)))
+                for lo,hi in ((84,135),(0,20),(21,44),(45,83),(136,179))]
     # Reward strips span the complete screen. Dismiss on blank space below
     # the strip, NEVER on the item icon (that opens item details).
     reward_mask = cv2.inRange(hsv,np.array((75,65,175)),np.array((105,255,255)))
@@ -241,7 +260,7 @@ def _analyze(frame, language='auto'):
             if len(letters)>=3 and max(c['cy'] for c in letters)-min(c['cy'] for c in letters)<.025*h:
                 get_visible = True
                 break
-    closes = close_buttons(cyan,w,h)
+    closes = [point for mask in ui_masks for point in close_buttons(mask,w,h)]
     cream = cv2.inRange(hsv,np.array((0,0,215)),np.array((180,65,255)))
     if closes:
         point = max(closes,key=lambda p:p[0])
@@ -259,7 +278,9 @@ def _analyze(frame, language='auto'):
                 d.scene,d.action_button,d.confidence = 'item_detail',point,.95
                 return d
 
-    button = bottom_action_button(cyan,cream,w,h)
+    button_white = cv2.inRange(hsv,np.array((0,0,200)),np.array((180,65,255)))
+    button = next((point for mask in ui_masks
+                   if (point := bottom_action_button(mask,button_white,w,h))),None)
     # Both Chinese editions retain the illustrated GET badge. The separate
     # language setting selects UI wording; recognition relies on stable art.
     d.catch_result = catch_result_card(hsv,cream,w,h)

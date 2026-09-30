@@ -35,8 +35,11 @@ def main():
     parser.add_argument('--hz', type=float, default=10)
     parser.add_argument('--compare-baseline', action='store_true')
     parser.add_argument('--baseline-ref', default='0.1.0', help='Trusted local Git revision used for comparison')
-    parser.add_argument('--client-rect', type=int, nargs=4, metavar=('X','Y','W','H'),
+    crop_group = parser.add_mutually_exclusive_group()
+    crop_group.add_argument('--client-rect', type=int, nargs=4, metavar=('X','Y','W','H'),
                         help='Explicit client rectangle for occluded or unusually sized desktop recordings')
+    crop_group.add_argument('--client-quad', type=float, nargs=8,
+                            help='Photographed game corners: TL, TR, BR, BL (x y pairs); offline analysis only')
     args = parser.parse_args()
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
@@ -45,12 +48,20 @@ def main():
     count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     stride = max(1, round(fps / args.hz))
     last_rect = None
+    perspective = None
+    if args.client_quad:
+        perspective = cv2.getPerspectiveTransform(
+            np.float32(args.client_quad).reshape(4,2),
+            np.float32([[0,0],[1599,0],[1599,899],[0,899]]))
     counts = {}
     navigation,bite_guard = Navigation(),BiteGuard()
     old_analyze = None
+    old_navigation, old_bite_guard = Navigation(), BiteGuard()
     metrics = dict(track_frames=0,complete_markers=0,tap_frames=0,
                    baseline_track_frames=0,baseline_complete_markers=0,baseline_tap_frames=0,
-                   hypothetical_navigation_clicks=0,hypothetical_hook_clicks=0)
+                   hypothetical_navigation_clicks=0,hypothetical_hook_clicks=0,
+                   catch_result_frames=0,baseline_catch_result_frames=0,
+                   baseline_navigation_clicks=0,baseline_hook_clicks=0)
     if args.compare_baseline:
         vision_source = subprocess.run(['git','show',f'{args.baseline_ref}:bot_vision.py'],
                                        capture_output=True,text=True,encoding='utf-8')
@@ -74,7 +85,9 @@ def main():
             ok, desktop = cap.retrieve()
             if not ok:
                 continue
-            if args.client_rect:
+            if perspective is not None:
+                frame = cv2.warpPerspective(desktop,perspective,(1600,900))
+            elif args.client_rect:
                 x,y,w,h = args.client_rect
                 frame = desktop[y:y+h,x:x+w]
             else:
@@ -92,11 +105,21 @@ def main():
             metrics['track_frames'] += int(d.track_present)
             metrics['complete_markers'] += int(d.minigame)
             metrics['tap_frames'] += int(d.tap)
+            metrics['catch_result_frames'] += int(d.catch_result)
             if old_analyze:
                 old = old_analyze(frame)
+                # Early baselines predate scene labels used by Navigation.
+                if not hasattr(old, 'scene'):
+                    old.scene = 'action' if old.action_button else 'unknown'
                 metrics['baseline_track_frames'] += int(old.track_present)
                 metrics['baseline_complete_markers'] += int(old.minigame)
                 metrics['baseline_tap_frames'] += int(old.tap)
+                metrics['baseline_catch_result_frames'] += int(getattr(old,'catch_result',False))
+                old_action = old_navigation.update(old,index/fps)
+                old_nav_click = isinstance(old_action,tuple) and not old.track_present
+                metrics['baseline_navigation_clicks'] += int(old_nav_click)
+                metrics['baseline_hook_clicks'] += int(old_bite_guard.update(old,index/fps)
+                    and not old.track_present and not old_nav_click)
             scene = getattr(d, 'scene', '') or ('reel' if d.minigame else 'tap' if d.tap else 'button' if d.action_button else 'unknown')
             counts[scene] = counts.get(scene, 0) + 1
             writer.writerow([round(index / fps, 3), int(d.track_present),

@@ -1,5 +1,5 @@
 import unittest
-from bot_control import ReelTracker, ReelControl, Navigation, Tracking, BiteGuard, CatchLedger
+from bot_control import ReelTracker, ReelControl, Navigation, Tracking, BiteGuard, CatchLedger, HoldRecovery
 from bot_vision import Detection
 
 
@@ -9,6 +9,16 @@ def observation(player=350, fish=350, bar=80, track=True):
 
 
 class TemporalControlTests(unittest.TestCase):
+    def test_restored_reel_control_matches_validated_reference_sequence(self):
+        control = ReelControl()
+        t = Tracking(365,350,40,-300,0)
+        self.assertEqual(control.decide(t,700)[1],'release')
+        t = Tracking(380,350,40,0,0)
+        self.assertEqual(control.decide(t,700)[1],'hold')
+        t = Tracking(350,350,40,0,0)
+        self.assertEqual([control.decide(t,700)[0] for _ in range(6)],
+                         [False,True,False,True,False,True])
+
     def test_occlusion_is_bounded_and_track_disappearance_releases(self):
         tracker = ReelTracker()
         tracker.update(observation(),10,700)
@@ -53,6 +63,25 @@ class TemporalControlTests(unittest.TestCase):
         values = [controller.decide(Tracking(350,350,35,0,0),700)[0] for _ in range(12)]
         self.assertEqual(sum(values),6)
         self.assertLessEqual(max(sum(values[i:i+3]) for i in range(10)),2)
+
+
+class HoldRecoveryTests(unittest.TestCase):
+    def test_stuck_hold_gets_one_release_then_fresh_hold(self):
+        recovery = HoldRecovery()
+        t = Tracking(650,100,80,0,0)
+        self.assertFalse(recovery.update(t,'hold',0,700))
+        self.assertFalse(recovery.update(t,'hold',.29,700))
+        self.assertTrue(recovery.update(t,'hold',.31,700))
+        self.assertFalse(recovery.update(t,'hold',.34,700))
+
+    def test_effective_hold_near_target_and_predictions_are_not_rearmed(self):
+        recovery = HoldRecovery()
+        for i in range(20):
+            self.assertFalse(recovery.update(Tracking(650-i*20,100,80,-400,0),'hold',i*.05,700))
+        for t in (Tracking(110,100,80,0,0),Tracking(650,100,80,0,0,True)):
+            recovery.reset()
+            self.assertFalse(recovery.update(t,'hold',0,700))
+            self.assertFalse(recovery.update(t,'hold',1,700))
 
 
 class BiteGuardTests(unittest.TestCase):

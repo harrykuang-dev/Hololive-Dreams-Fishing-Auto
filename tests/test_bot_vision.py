@@ -19,25 +19,26 @@ def track_frame(bar_h=65,bar_y=260,fish_y=280):
     return f
 
 
-def close_x(frame,point):
-    cyan = color(99,210,245)
+def close_x(frame,point,hue=99):
+    cyan = color(hue,210,245)
     cv2.circle(frame,point,25,cyan,4)
     cv2.circle(frame,point,21,(255,255,255),-1)
     cv2.line(frame,(point[0]-9,point[1]-9),(point[0]+9,point[1]+9),cyan,4)
     cv2.line(frame,(point[0]+9,point[1]-9),(point[0]-9,point[1]+9),cyan,4)
 
 
-def action_button(frame,start,end,text=True):
+def action_button(frame,start,end,text=True,hue=99,value=245,white_value=255):
     x,y = start
     x1,y1 = end
     r = (y1-y)//2
-    for inset,c in ((0,(255,255,255)),(3,color(99,210,245))):
+    white = (white_value,)*3
+    for inset,c in ((0,white),(3,color(hue,210,value))):
         cv2.rectangle(frame,(x+r,y+inset),(x1-r,y1-inset),c,-1)
         cv2.circle(frame,(x+r,y+r),r-inset,c,-1)
         cv2.circle(frame,(x1-r,y+r),r-inset,c,-1)
     if text:
         cv2.putText(frame,'NEXT',(x+round((x1-x)*.30),y+round((y1-y)*.70)),
-                    cv2.FONT_HERSHEY_SIMPLEX,(y1-y)/65,(255,255,255),2)
+                    cv2.FONT_HERSHEY_SIMPLEX,(y1-y)/65,white,2)
 
 
 def bite_frame(text=True, bang=True, outline=True):
@@ -93,6 +94,43 @@ class BiteVisionTests(unittest.TestCase):
 
 
 class TrackVisionTests(unittest.TestCase):
+    def test_pale_fish_is_detected_without_accepting_plain_lane(self):
+        f = track_frame()
+        cv2.ellipse(f,(696,280),(25,15),0,0,360,color(97,95,250),-1)
+        d = analyze(f)
+        self.assertTrue(d.minigame)
+        self.assertAlmostEqual(d.fish_center[1],280,delta=3)
+        cv2.rectangle(f,(680,44),(712,264),color(98,100,255),-1)
+        self.assertAlmostEqual(analyze(f).fish_center[1],280,delta=3)
+        cv2.rectangle(f,(669,262),(723,298),color(18,200,150),-1)
+        cv2.rectangle(f,(678,44),(714,535),color(98,95,250),-1)
+        self.assertIsNone(analyze(f).fish_center)
+
+    def test_low_saturation_bar_highlight_keeps_full_height(self):
+        f = track_frame(65,260,230)
+        cv2.rectangle(f,(679,260),(713,290),color(28,25,255),-1)
+        d = analyze(f)
+        self.assertAlmostEqual(d.player_box[3],65,delta=4)
+
+    def test_character_button_hues_require_ui_structure(self):
+        for hue in (0,15,35,60,90,120,150,175):
+            with self.subTest(hue=hue):
+                f = np.zeros((600,1000,3),np.uint8)
+                action_button(f,(750,525),(945,574),hue=hue)
+                self.assertEqual(analyze(f).scene,'action')
+                f = np.zeros_like(f)
+                action_button(f,(750,525),(945,574),hue=hue,text=False)
+                self.assertIsNone(analyze(f).action_button)
+
+    def test_character_x_hues_keep_modal_close_priority(self):
+        for hue in (0,15,35,60,90,120,150,175):
+            with self.subTest(hue=hue):
+                f = np.zeros((600,1000,3),np.uint8)
+                cv2.rectangle(f,(30,65),(970,585),color(25,20,250),-1)
+                close_x(f,(930,55),hue=hue)
+                action_button(f,(750,525),(945,574),hue=hue)
+                self.assertEqual(analyze(f).scene,'encyclopedia')
+
     def test_overlap_does_not_move_bar_center_to_visible_color_centroid(self):
         d = analyze(track_frame(90,250,315))
         self.assertTrue(d.minigame)
@@ -125,6 +163,44 @@ class TrackVisionTests(unittest.TestCase):
 
 
 class PopupVisionTests(unittest.TestCase):
+    def test_blue_violet_continue_keeps_border_and_glyph_requirements(self):
+        for hue in (99,110,120,130):
+            f = np.zeros((600,1000,3),np.uint8)
+            action_button(f,(750,535),(920,575),hue=hue,value=205,white_value=212)
+            for scale in (1,.75,.5):
+                with self.subTest(hue=hue,scale=scale):
+                    d = analyze(cv2.resize(f,None,fx=scale,fy=scale))
+                    self.assertEqual(d.scene,'action')
+                    self.assertAlmostEqual(d.action_button[0],835*scale,delta=3)
+            f[:] = 0
+            action_button(f,(750,535),(920,575),text=False,hue=hue,value=205,white_value=212)
+            self.assertIsNone(analyze(f).action_button)
+            f[:] = 0
+            cv2.rectangle(f,(750,535),(920,575),color(hue,210,205),-1)
+            cv2.line(f,(750,532),(920,532),(212,212,212),3)
+            cv2.line(f,(750,578),(920,578),(212,212,212),3)
+            cv2.putText(f,'NEXT',(790,562),cv2.FONT_HERSHEY_SIMPLEX,.6,(212,212,212),2)
+            self.assertIsNone(analyze(f).action_button)
+
+    def test_dim_fish_card_still_requires_get_badge(self):
+        f = np.zeros((600,1000,3),np.uint8)
+        cv2.rectangle(f,(520,30),(960,550),(212,212,212),-1)
+        self.assertFalse(analyze(f).catch_result)
+        self.assertIsNone(analyze(f).action_button)
+        for letter,x in zip('GET!',(530,577,624,671)):
+            cv2.putText(f,letter,(x,88),cv2.FONT_HERSHEY_SIMPLEX,1.5,color(120,180,205),9)
+            cv2.putText(f,letter,(x,88),cv2.FONT_HERSHEY_SIMPLEX,1.5,color(30,60,215),4)
+        self.assertTrue(analyze(f).catch_result)
+
+    def test_blue_violet_modal_x_still_precedes_continue(self):
+        f = np.zeros((600,1000,3),np.uint8)
+        action_button(f,(750,535),(920,575),hue=120)
+        cv2.rectangle(f,(35,90),(975,520),(235,245,250),-1)
+        close_x(f,(955,55),hue=120)
+        d = analyze(f)
+        self.assertEqual(d.scene,'encyclopedia')
+        self.assertLess(d.action_button[1],100)
+
     def test_fish_get_card_confirms_catch_and_has_safe_continue_fallback(self):
         f = np.zeros((600,1000,3),np.uint8)
         cv2.rectangle(f,(520,30),(960,550),(245,245,245),-1)

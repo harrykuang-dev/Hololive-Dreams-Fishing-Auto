@@ -1,0 +1,82 @@
+# 開發說明 / Development guide
+
+[繁體中文](../README.md) · [简体中文](../README.zh-CN.md) · [English](../README.en.md) · [日本語](../README.ja.md) · [한국어](../README.ko.md) · [Indonesian](../README.id.md)
+
+## 環境 / Environment
+
+Windows 10 / 11 x64. The current release is built with Python 3.13 x64.
+Runtime and build dependencies are declared in `requirements.txt` and `requirements-build.txt`.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-build.txt
+.\.venv\Scripts\python.exe .\gui.py
+```
+
+The GUI uses automatic screen recognition and does not require a legacy profile.
+Do not change reeling parameters solely on the basis of synthetic simulations.
+
+## 單檔建置 / Single-file build
+
+With the build environment active:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+.\build.ps1
+```
+
+Output: `dist\Hololive-Fishing-Auto-v1.0.exe`.
+The EXE includes its runtime, icon assets and high-DPI manifest; users need only the EXE.
+
+If an older EXE is running, close it or choose a different output folder before building.
+Do not overwrite or terminate a running user's copy without checking.
+
+## 驗證 / Validation
+
+Run on Windows; GUI tests create temporary Tk windows but do not start fishing.
+
+```powershell
+python -m unittest discover -s tests -v
+python -m fishing_auto --help
+python tools/control_benchmark.py
+python tools/verify_icon.py dist/Hololive-Fishing-Auto-v1.0.exe
+Get-FileHash dist/Hololive-Fishing-Auto-v1.0.exe -Algorithm SHA256
+```
+
+Tests cover recognition, input safety, continuation, counters, shortcuts, translations,
+layout scaling and icon packaging. Offline tests and synthetic benchmarks are not
+proof of in-game success rates.
+
+## 圖標 / Icon
+
+The active asset is `assets/fish-clear.ico`; both the EXE and Tk windows must use it.
+Artwork and generation provenance are documented in [ICON.md](../assets/ICON.md).
+
+```powershell
+python tools/make_icon.py assets/fish-clear.png assets/fish-clear.ico --pixel
+python tools/preview_icon.py
+```
+
+The preview is a diagnostic contact sheet, not a source asset.
+
+## 離線回放 / Offline replay
+
+```powershell
+python tools/replay_recording.py "local-recording.mp4" sessions/replay --hz 10
+```
+
+Replay analyzes local videos without sending game input. For timestamped traces,
+preserve the original capture timestamps rather than inferring latency from nominal video FPS.
+
+## 隱私 / Privacy
+
+Never commit recordings, screenshots, session diagnostics, local calibration profiles,
+account information or credentials. These local outputs are excluded by `.gitignore`.
+The release asset must not contain user diagnostics.
+
+## 研究工具 / Research tools
+
+The `fishing_auto` package also contains legacy capture, manual calibration and replay
+commands. Use `python -m fishing_auto --help` for their CLI entry point. They are not
+required for the GUI and should not be confused with the single-EXE user workflow.
+Historical verification notes remain under `docs/`; the README introduces the application.

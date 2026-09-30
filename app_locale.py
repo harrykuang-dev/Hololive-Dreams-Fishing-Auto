@@ -191,6 +191,76 @@ TEXT = {
 }
 
 
+UI_KEYS = ('counter','target_count','target_hint','stop_shortcut','developer_mode',
+           'developer_help_title','developer_help','invalid_settings','target_done',
+           'catch_target_reached','hotkey_stop','connected_hotkey','instructions')
+UI_TEXT = {
+    'zh-TW': ('已釣獲 {count} 條魚','目標釣魚數量','0 表示不限；達標後停止','停止快捷鍵','開發者模式',
+        '開發者模式說明','啟用後會儲存狀態截圖、魚獲卡片及追蹤與耗時作爲診斷資料，用於定位與排查異常。資料不會自動上傳。\n\n診斷資料位於：\n{path}\n\n每次運行會建立以時間命名的資料夾。如遇異常，可透過下方項目地址聯繫作者，並提供問題描述及診斷資料。開啟開發者模式會增加效能負擔。',
+        '請輸入非負整數目標及有效快捷鍵，例如 F9、Esc、Ctrl+Alt+Q。',
+        '已達到目標數量；調高目標或設為 0 後可繼續。','已確認釣獲 {target} 條魚，達標停止。',
+        '{hotkey}：已停止。','已連接：{title}；語言：{language}（{hotkey} 停止）',
+        '先進入遊戲釣魚畫面再開始。切換到其他視窗會停止。'),
+    'zh-CN': ('已钓获 {count} 条鱼','目标钓鱼数量','0 表示不限；达标后停止','停止快捷键','开发者模式',
+        '开发者模式说明','启用后会保存状态截图、鱼获卡片及跟踪与耗时数据作为诊断资料，用于定位与排查异常。资料不会自动上传。\n\n诊断资料位于：\n{path}\n\n每次运行会建立以时间命名的文件夹。如遇异常，可通过下方项目地址联系作者，并提供问题描述及诊断资料。开启开发者模式会增加性能负担。',
+        '请输入非负整数目标及有效快捷键，例如 F9、Esc、Ctrl+Alt+Q。',
+        '已达到目标数量；提高目标或设为 0 后可继续。','已确认钓获 {target} 条鱼，达标停止。',
+        '{hotkey}：已停止。','已连接：{title}；语言：{language}（{hotkey} 停止）',
+        '先进入游戏钓鱼画面再开始。切换到其他窗口会停止。'),
+    'en': ('Fish caught: {count}','Target catches','0 = unlimited; stop at target','Stop shortcut','Developer mode',
+        'Developer mode','When enabled, scene screenshots, catch cards, tracking and timing data are saved as diagnostics to help identify and troubleshoot issues. Nothing is uploaded automatically.\n\nDiagnostic data location:\n{path}\n\nEach run creates a timestamped folder. If an issue occurs, contact the author via the project address below and provide a description of the issue and the diagnostic data. Developer mode adds a performance overhead.',
+        'Enter a non-negative integer target and a valid shortcut, e.g. F9, Esc, Ctrl+Alt+Q.',
+        'Target already reached. Increase it or set 0 to continue.','Confirmed {target} catches; target reached.',
+        '{hotkey}: stopped.','Connected to {title}; language: {language} ({hotkey} to stop)',
+        'Open the game fishing screen before starting. Switching windows stops the assistant.'),
+    'ja': ('釣果：{count} 匹','目標の釣果数','0 は無制限；達成すると停止','停止ショートカット','開発者モード',
+        '開発者モードについて','有効にすると、画面、釣果カード、追跡情報と処理時間を診断データとして保存し、問題の特定と調査に使用します。自動アップロードはありません。\n\n診断データの保存先：\n{path}\n\n実行ごとに日時を名前にしたフォルダーを作成します。問題が発生した場合は、下記のプロジェクトURLから作者に連絡し、問題の説明と診断データをお送りください。開発者モードは処理負荷を増やします。',
+        '目標は0以上の整数、キーは F9、Esc、Ctrl+Alt+Q などを指定してください。',
+        '目標達成済みです。目標を増やすか0にしてください。','釣果 {target} 匹を確認し、目標達成で停止しました。',
+        '{hotkey}：停止しました。','接続：{title}；言語：{language}（{hotkey} で停止）',
+        'ゲームの釣り画面を開いてから開始してください。別のウィンドウに切り替えると停止します。'),
+    'id': ('Ikan tertangkap: {count}','Target tangkapan','0 = tanpa batas; berhenti saat tercapai','Pintasan berhenti','Mode pengembang',
+        'Mode pengembang','Jika diaktifkan, tangkapan layar, kartu hasil tangkapan, pelacakan dan waktu proses disimpan sebagai data diagnostik untuk mengidentifikasi dan menelusuri masalah. Data tidak diunggah otomatis.\n\nLokasi data diagnostik:\n{path}\n\nSetiap sesi membuat folder dengan nama berdasarkan waktu. Jika terjadi masalah, hubungi pengembang melalui alamat proyek di bawah dan kirim deskripsi masalah serta data diagnostik. Mode pengembang menambah beban kinerja.',
+        'Masukkan target bilangan bulat non-negatif dan pintasan valid, misalnya F9, Esc, Ctrl+Alt+Q.',
+        'Target tercapai. Naikkan target atau gunakan 0.','{target} tangkapan dikonfirmasi; target tercapai.',
+        '{hotkey}: berhenti.','Terhubung ke {title}; bahasa: {language} ({hotkey} untuk berhenti)',
+        'Buka layar memancing sebelum mulai. Beralih jendela akan menghentikan asisten.'),
+    'ko': ('잡은 물고기: {count} 마리','목표 물고기 수','0 = 무제한; 목표 도달 시 정지','정지 단축키','개발자 모드',
+        '개발자 모드 안내','활성화하면 화면, 물고기 결과 카드, 추적 정보와 처리 시간을 진단 자료로 저장하여 문제를 확인하고 원인을 조사합니다. 자료는 자동으로 업로드되지 않습니다.\n\n진단 자료 위치:\n{path}\n\n실행마다 시간을 이름으로 하는 폴더를 만듭니다. 문제가 발생하면 아래 프로젝트 주소를 통해 제작자에게 연락하여 문제 설명과 진단 자료를 보내 주세요. 개발자 모드는 성능 부하를 증가시킵니다.',
+        '목표는 0 이상의 정수, 단축키는 F9, Esc, Ctrl+Alt+Q 등으로 지정하세요.',
+        '목표를 달성했습니다. 목표를 늘리거나 0으로 설정하세요.','물고기 {target} 마리를 확인하여 정지했습니다.',
+        '{hotkey}: 정지했습니다.','연결: {title}; 언어: {language} ({hotkey} 정지)',
+        '게임 낚시 화면에서 시작하세요. 다른 창으로 전환하면 정지합니다.'),
+}
+for code,values in UI_TEXT.items():
+    TEXT[code].update(dict(zip(UI_KEYS,values)))
+    TEXT[code]['start'] = TEXT[code]['start'].replace('▶  ','')
+    TEXT[code]['stop'] = TEXT[code]['stop'].replace('■  ','')
+
+# Keep an English label in every locale so the selector is discoverable.
+for code,label,prompt in (
+    ('zh-TW','語言 / Language','請按下快捷鍵…'),
+    ('zh-CN','语言 / Language','请按下快捷键…'),
+    ('en','Language','Press a shortcut…'),
+    ('ja','言語 / Language','ショートカットを押してください…'),
+    ('id','Bahasa / Language','Tekan pintasan…'),
+    ('ko','언어 / Language','단축키를 누르세요…'),
+):
+    TEXT[code]['game_language'] = label
+    TEXT[code]['capture_shortcut'] = prompt
+
+for code,label,close in (
+    ('zh-TW','項目地址：','關閉'),
+    ('zh-CN','项目地址：','关闭'),
+    ('en','Project address:','Close'),
+    ('ja','プロジェクトURL：','閉じる'),
+    ('id','Alamat proyek:','Tutup'),
+    ('ko','프로젝트 주소:','닫기'),
+):
+    TEXT[code]['project_address'] = label
+    TEXT[code]['close_help'] = close
+
+
 def text(locale: str, key: str, **values) -> str:
     """Return fully localized text; CLI 'auto' keeps the previous TW default."""
     entry = TEXT["zh-TW" if locale == "auto" else locale][key]
