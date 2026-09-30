@@ -32,9 +32,7 @@ Satu EXE sudah berisi runtime dan aset ikon. Tidak perlu memasang Python atau me
 
 Memerlukan Windows 10 / 11 x64 dan game versi Windows. Pertahankan area klien game pada 16:9; jangan minimalkan, tutupi, atau ubah ukuran jendela saat berjalan. Memancing di latar belakang, membeli umpan, berpindah peta, dan mengisi ulang sumber daya tidak didukung.
 
-Warna karakter, animasi, resolusi, kinerja, dan pembaruan game dapat memengaruhi pengenalan dan input. Dukungan enam bahasa tidak berarti semua adegan atau ikan telah diuji langsung dalam game. Keberhasilan ikan bintang empat / lima atau tingkat kesulitan apa pun tidak dijamin. Hentikan dan kumpulkan diagnostik jika terjadi masalah.
-
-Ini alat tidak resmi. Aplikasi tidak membaca atau mengubah memori proses, save, atau file game. Periksa sendiri aturan game terkait otomatisasi; perlindungan dari sanksi akun tidak dijamin.
+Warna karakter, animasi, resolusi, kinerja, dan pembaruan game masih dapat memengaruhi pengenalan dan input; hentikan dan berikan data diagnostik jika terjadi masalah. Ini adalah alat tidak resmi yang tidak membaca atau mengubah memori proses, data simpanan, atau file game. Alat ini hanya ditujukan untuk pembelajaran pemrograman Python serta penelitian dan pertukaran pengetahuan tentang teknologi pengenalan gambar. Periksa sendiri aturan game mengenai penggunaan alat otomatisasi. Jangan gunakan alat ini untuk merusak ekosistem game atau untuk tujuan komersial maupun mencari keuntungan. Pengembang tidak bertanggung jawab atas masalah apa pun yang timbul akibat penggunaan alat ini.
 
 ## Melaporkan masalah dan Mode pengembang
 

@@ -32,9 +32,7 @@ The single EXE includes its runtime and icon assets. You do not need Python or a
 
 Windows 10 / 11 x64 and the Windows game are required. Keep the game client area at 16:9; do not minimize, cover, or resize it during operation. Background fishing, bait purchases, map changes, and resource replenishment are not supported.
 
-Character colors, animations, resolution, performance, and game updates can affect recognition and input. Six-language support does not mean every scene or fish has been tested in-game. Success with four- or five-star fish, or at any difficulty, is not guaranteed. Stop and collect diagnostics if something goes wrong.
-
-This is an unofficial tool. It does not read or modify game process memory, saves, or game files. Check the game's rules on automation yourself; protection from account penalties is not guaranteed.
+Character colors, animations, resolution, performance, and game updates may still affect recognition and input; stop and provide diagnostics if something goes wrong. This is an unofficial tool. It does not read or modify game process memory, saves, or game files. This tool is intended solely for learning Python programming and researching and exchanging knowledge about image recognition technology. Check the game's rules on automation yourself. Do not use this tool to disrupt the game's ecosystem or for any commercial or profit-making purposes. The developer accepts no responsibility for any problems resulting from its use.
 
 ## Reporting problems and Developer mode
 
