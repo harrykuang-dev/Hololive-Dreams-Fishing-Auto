@@ -266,9 +266,15 @@ def _analyze(frame, language='auto'):
         point = max(closes,key=lambda p:p[0])
         # Encyclopedia has paper across both sides; item details have a
         # central white card and an inset X. Ready/waiting also have an X but
-        # must NOT be closed (their paper area is small).
+        # must NOT be closed. Snow and pale characters can fill the left
+        # side of the ready screen, so require paper on BOTH book pages.
         paper_left = (cream[int(.16*h):int(.84*h),int(.06*w):int(.46*w)]>0).mean()
-        if point[0]>.91*w and paper_left>.55:
+        paper_right = (cream[int(.16*h):int(.84*h),int(.56*w):int(.94*w)]>0).mean()
+        # Ready has separate pale fish/gear cards over a coloured panel;
+        # the book has a continuous paper header above the right-hand grid.
+        paper_right_header = (cream[int(.18*h):int(.24*h),int(.56*w):int(.94*w)]>0).mean()
+        if (point[0]>.91*w and paper_left>.55 and paper_right>.55
+                and paper_right_header>.65):
             d.scene, d.action_button, d.confidence = 'encyclopedia',point,.95
             return d
         if .62*w<point[0]<.87*w and .08*h<point[1]<.5*h:

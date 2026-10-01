@@ -14,7 +14,7 @@ from auto_fishing import enable_dpi_awareness, run
 from app_locale import GAME_LANGUAGES, text as tr
 from app_settings import FishingCounter, parse_stop_hotkey, captured_hotkey
 
-APP_VERSION = '1.0'
+APP_VERSION = '1.0.1'
 PROJECT_URL = 'https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto'
 
 

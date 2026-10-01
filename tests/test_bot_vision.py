@@ -247,6 +247,24 @@ class PopupVisionTests(unittest.TestCase):
         close_x(f,(955,55))
         self.assertIsNone(analyze(f).action_button)
 
+    def test_snowy_ready_screen_must_start_not_close_top_right_x(self):
+        f = np.full((600,1000,3),245,np.uint8)
+        cv2.rectangle(f,(580,0),(999,599),color(110,70,210),-1)
+        # Pale cards occupy most of the right panel, as in the report.
+        cv2.rectangle(f,(615,155),(969,245),(245,245,245),-1)
+        cv2.rectangle(f,(615,280),(969,485),(245,245,245),-1)
+        close_x(f,(955,45))
+        action_button(f,(700,520),(890,572))
+        for scale in (1,.75,.5):
+            with self.subTest(scale=scale):
+                d = analyze(cv2.resize(f,None,fx=scale,fy=scale))
+                self.assertEqual(d.scene,'action')
+                self.assertAlmostEqual(d.action_button[0],795*scale,delta=3)
+                self.assertGreater(d.action_button[1],500*scale)
+        # Without a verified Start button, do nothing instead of clicking X.
+        f[500:] = color(110,70,210)
+        self.assertIsNone(analyze(f).action_button)
+
     def test_item_details_use_inset_x_not_background_continue(self):
         f = np.zeros((600,1000,3),np.uint8)
         cv2.rectangle(f,(240,150),(770,500),(250,250,250),-1)
