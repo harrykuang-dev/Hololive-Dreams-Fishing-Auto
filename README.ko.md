@@ -36,6 +36,8 @@ Windows 10 / 11 x64와 Windows용 게임이 필요합니다. 게임 클라이언
 
 ## 문제 보고 및 개발자 모드
 
+사용 전이나 문제가 발생했을 때 [알려진 문제 및 임시 해결 방법](docs/KNOWN_ISSUES.md)을 확인하세요.
+
 계속하기 실패, 추적 문제 등은 [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues)로 보고할 수 있습니다.
 
 개발자 모드를 켜고 문제를 재현하면 상태 스크린샷, 물고기 획득 카드, 추적 자료 및 처리 시간을 로컬에 저장합니다. 자동 업로드는 없습니다. 스크린샷에는 게임 화면이 포함되며 진단 수집은 성능 부담을 늘립니다.

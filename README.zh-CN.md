@@ -36,6 +36,8 @@ Windows 版《hololive Dreams》的自动钓鱼助手。通过游戏画面识别
 
 ## 问题反馈与开发者模式
 
+使用前或遇到异常时，请查看[已知问题与临时解决方案](docs/KNOWN_ISSUES.md)。
+
 无法继续钓鱼、跟踪异常或其他问题，可通过 [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues) 联系作者。
 
 勾选“开发者模式”后重现问题，会保存状态截图、鱼获卡片、跟踪数据及耗时，仅存于本机，不自动上传。截图包含游戏画面，启用后会增加性能负担。

@@ -36,6 +36,8 @@ Warna karakter, animasi, resolusi, kinerja, dan pembaruan game masih dapat memen
 
 ## Melaporkan masalah dan Mode pengembang
 
+Sebelum menggunakan aplikasi atau saat terjadi masalah, lihat [masalah yang diketahui dan solusi sementara](docs/KNOWN_ISSUES.md).
+
 Laporkan kegagalan melanjutkan ronde, masalah pelacakan, atau masalah lain melalui [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues).
 
 Aktifkan Mode pengembang sebelum mengulangi masalah. Mode ini menyimpan tangkapan layar status, kartu tangkapan, data pelacakan, dan waktu pemrosesan secara lokal; tidak ada unggahan otomatis. Tangkapan layar berisi tampilan game, dan diagnostik menambah beban kinerja.
