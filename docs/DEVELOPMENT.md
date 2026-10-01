@@ -80,3 +80,4 @@ The `fishing_auto` package also contains legacy capture, manual calibration and 
 commands. Use `python -m fishing_auto --help` for their CLI entry point. They are not
 required for the GUI and should not be confused with the single-EXE user workflow.
 Historical verification notes remain under `docs/`; the README introduces the application.
+For stable, beta and future releases, keep one standalone known-issues link immediately below the README title in all six languages. Always link to `main/docs/KNOWN_ISSUES.md` on GitHub as the shared, maintained document; do not duplicate individual issues in README text.

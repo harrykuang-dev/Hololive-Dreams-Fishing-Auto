@@ -1,5 +1,7 @@
 # Hololive Dreams Auto Fishing
 
+[已知問題與臨時解決方案](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+
 [繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
 
 Windows 版《hololive Dreams》的自動釣魚助手。透過遊戲畫面辨識與一般滑鼠輸入，處理咬鉤、拉扯、魚獲結算和續局；提供簡約的圖形介面，無需手動校準即可開始使用。
@@ -35,8 +37,6 @@ Windows 版《hololive Dreams》的自動釣魚助手。透過遊戲畫面辨識
 辨識與操作仍可能受角色配色、動畫、解析度、效能及遊戲更新影響；遇到異常請停止並提供診斷。本工具不是官方軟件，不讀取或修改遊戲程序記憶體、存檔或遊戲檔案。本工具仅供 Python 编程学习、图像识别技术研究交流使用。請自行確認遊戲對自動化工具的使用規定，请勿用于破坏游戏生态或任何商业盈利场景，因使用本工具造成的任何问题开发者概不负责。
 
 ## 異常回報與開發者模式
-
-使用前或遇到異常時，請查看[已知問題與臨時解決方案](docs/KNOWN_ISSUES.md)。
 
 無法續局、追蹤異常或其他問題，可在 [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues) 聯繫作者。
 

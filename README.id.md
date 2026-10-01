@@ -1,5 +1,7 @@
 # Hololive Dreams Auto Fishing
 
+[Masalah yang diketahui dan solusi sementara](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+
 [繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
 
 Asisten memancing otomatis untuk **hololive Dreams** versi Windows. Aplikasi memakai pengenalan layar dan input mouse biasa untuk menangani sambaran, menarik ikan, hasil tangkapan, dan ronde berikutnya melalui antarmuka sederhana tanpa kalibrasi manual.
@@ -35,8 +37,6 @@ Memerlukan Windows 10 / 11 x64 dan game versi Windows. Pertahankan area klien ga
 Warna karakter, animasi, resolusi, kinerja, dan pembaruan game masih dapat memengaruhi pengenalan dan input; hentikan dan berikan data diagnostik jika terjadi masalah. Ini adalah alat tidak resmi yang tidak membaca atau mengubah memori proses, data simpanan, atau file game. Alat ini hanya ditujukan untuk pembelajaran pemrograman Python serta penelitian dan pertukaran pengetahuan tentang teknologi pengenalan gambar. Periksa sendiri aturan game mengenai penggunaan alat otomatisasi. Jangan gunakan alat ini untuk merusak ekosistem game atau untuk tujuan komersial maupun mencari keuntungan. Pengembang tidak bertanggung jawab atas masalah apa pun yang timbul akibat penggunaan alat ini.
 
 ## Melaporkan masalah dan Mode pengembang
-
-Sebelum menggunakan aplikasi atau saat terjadi masalah, lihat [masalah yang diketahui dan solusi sementara](docs/KNOWN_ISSUES.md).
 
 Laporkan kegagalan melanjutkan ronde, masalah pelacakan, atau masalah lain melalui [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues).
 

@@ -44,6 +44,9 @@ class ReadmeTests(unittest.TestCase):
                 self.assertIn(term,content,(name,term))
 
     def test_all_guides_link_known_issues(self):
+        target='https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md'
         for name in GUIDES:
             content=(ROOT/name).read_text(encoding='utf-8')
-            self.assertIn('](docs/KNOWN_ISSUES.md)',content,name)
+            self.assertIn(f']({target})',content.splitlines()[2],name)
+            self.assertEqual(content.count('KNOWN_ISSUES.md'),1,name)
+            self.assertNotIn('Fuwawa',content,name)
