@@ -36,6 +36,8 @@ Character colors, animations, resolution, performance, and game updates may stil
 
 ## Reporting problems and Developer mode
 
+Known issue in the stable release: light-UI characters such as Fuwawa may not work correctly with auto-fishing because the top-right X can be mistaken for the encyclopedia close button. As a temporary workaround, switch to another character. See [known issues and workarounds](docs/KNOWN_ISSUES.md).
+
 Report continuation failures, tracking issues, or other problems through [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues).
 
 Enable Developer mode before reproducing the issue. It saves state screenshots, catch cards, tracking data, and timing information locally; nothing is automatically uploaded. Screenshots include the game view, and diagnostics add performance overhead.

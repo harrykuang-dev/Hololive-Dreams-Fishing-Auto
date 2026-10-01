@@ -36,6 +36,8 @@ Windows 版《hololive Dreams》的自動釣魚助手。透過遊戲畫面辨識
 
 ## 異常回報與開發者模式
 
+已知問題：正式版中，淺色 UI 角色（例如 Fuwawa）可能無法正常自動釣魚：右上角 X 會被誤認成圖鑑關閉按鈕。臨時解決方案是更換其他角色。詳見[已知問題與臨時解決方案](docs/KNOWN_ISSUES.md)。
+
 無法續局、追蹤異常或其他問題，可在 [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues) 聯繫作者。
 
 勾選「開發者模式」後再重現問題。它會儲存狀態截圖、魚獲卡片、追蹤資料及耗時；資料只存於本機，不會自動上傳。截圖包含遊戲畫面，啟用後會增加效能負擔。
