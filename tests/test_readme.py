@@ -10,6 +10,14 @@ GUIDES=('README.md','README.zh-CN.md','README.en.md','README.ja.md','README.ko.m
 
 
 class ReadmeTests(unittest.TestCase):
+    def test_known_issues_is_one_top_level_link_not_inline_details(self):
+        target='https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md'
+        for name in GUIDES:
+            content=(ROOT/name).read_text(encoding='utf-8')
+            self.assertIn(f']({target})',content.splitlines()[2],name)
+            self.assertEqual(content.count('KNOWN_ISSUES.md'),1,name)
+            self.assertNotIn('Fuwawa',content,name)
+
     def test_each_supported_language_has_a_complete_guide(self):
         self.assertEqual(len(GUIDES),len(GAME_LANGUAGES))
         for name in GUIDES:

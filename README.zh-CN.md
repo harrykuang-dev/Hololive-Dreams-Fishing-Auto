@@ -1,5 +1,7 @@
 # Hololive Dreams Auto Fishing
 
+[已知问题与临时解决方案](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+
 [繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
 
 Windows 版《hololive Dreams》的自动钓鱼助手。通过游戏画面识别与普通鼠标输入，处理咬钩、拉扯、鱼获结算和继续钓鱼；提供简洁的图形界面，无需手动校准即可使用。
@@ -35,8 +37,6 @@ Windows 版《hololive Dreams》的自动钓鱼助手。通过游戏画面识别
 识别与操作仍可能受角色配色、动画、分辨率、性能及游戏更新影响；遇到异常请停止并提供诊断。本工具不是官方软件，不读取或修改游戏进程内存、存档或游戏文件。本工具仅供 Python 编程学习、图像识别技术研究交流使用。请自行确认游戏对自动化工具的使用规定，请勿用于破坏游戏生态或任何商业盈利场景，因使用本工具造成的任何问题开发者概不负责。
 
 ## 问题反馈与开发者模式
-
-已知问题：正式版中，浅色 UI 角色（例如 Fuwawa）可能无法正常自动钓鱼：右上角 X 会被误认成图鉴关闭按钮。临时解决方案是更换其他角色。详见[已知问题与临时解决方案](docs/KNOWN_ISSUES.md)。
 
 无法继续钓鱼、跟踪异常或其他问题，可通过 [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues) 联系作者。
 

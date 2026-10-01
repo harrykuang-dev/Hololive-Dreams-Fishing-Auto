@@ -1,5 +1,7 @@
 # Hololive Dreams Auto Fishing
 
+[알려진 문제 및 임시 해결 방법](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+
 [繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
 
 Windows용 **hololive Dreams** 자동 낚시 도우미입니다. 화면 인식과 일반 마우스 입력으로 입질, 물고기 끌어올리기, 결과 확인, 다음 낚시를 처리합니다. 간단한 GUI로 사용할 수 있으며 수동 보정은 필요하지 않습니다.
@@ -35,8 +37,6 @@ Windows 10 / 11 x64와 Windows용 게임이 필요합니다. 게임 클라이언
 캐릭터 색상, 애니메이션, 해상도, 성능 및 게임 업데이트가 인식과 입력에 영향을 줄 수 있습니다. 문제가 생기면 중지하고 진단 자료를 제공하세요. 본 도구는 비공식 소프트웨어이며 게임 프로세스 메모리, 저장 데이터 또는 게임 파일을 읽거나 수정하지 않습니다. Python 프로그래밍 학습과 이미지 인식 기술 연구 및 정보 교류 목적으로만 사용하세요. 자동화 도구 사용에 관한 게임 규정은 직접 확인하세요. 게임 생태계를 해치거나 상업적 또는 영리 목적으로 사용하지 마세요. 본 도구 사용으로 발생하는 어떠한 문제에 대해서도 개발자는 책임을 지지 않습니다.
 
 ## 문제 보고 및 개발자 모드
-
-정식 버전의 알려진 문제: Fuwawa 등 밝은 색 UI를 사용하는 캐릭터에서는 오른쪽 위 X를 도감 닫기 버튼으로 잘못 인식하여 자동 낚시가 정상적으로 작동하지 않을 수 있습니다. 임시 해결 방법은 다른 캐릭터로 변경하는 것입니다. 자세한 내용은 [알려진 문제 및 임시 해결 방법](docs/KNOWN_ISSUES.md)을 확인하세요.
 
 계속하기 실패, 추적 문제 등은 [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues)로 보고할 수 있습니다.
 
