@@ -11,6 +11,7 @@ class BaitObservation:
     dim_continue: bool = False
     change_point: tuple | None = None
     continue_point: tuple | None = None
+    continue_visible: bool = False
     dialog: bool = False
     infinite_point: tuple | None = None
     selected_infinite: bool = False
@@ -53,6 +54,7 @@ def observe_bait(frame, detection):
         bright = cv2.inRange(hsv, (0,0,235), (179,55,255))
         point = detection.action_button
         o.continue_point = point
+        o.continue_visible = bool(point and detection.confidence >= .9)
         if point:
             cx,cy = point[0]/w0, point[1]/h0
             o.dim_continue = bool(fraction(bright, (cx-.035,cy-.018,cx+.035,cy+.018)) < .06)

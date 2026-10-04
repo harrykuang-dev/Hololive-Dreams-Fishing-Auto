@@ -11,8 +11,14 @@ class BaitDecision:
 
 
 class BaitSwitcher:
-    def __init__(self, enabled=False):
+    def __init__(self, enabled=False, result_settle=1.5, button_settle=.65):
         self.enabled = enabled
+        self.result_settle = result_settle
+        self.button_settle = button_settle
+        self.result_since = None
+        self.buttons_since = None
+        self.result_absent_since = None
+        self.pending_exhausted = False
         self.phase = 'idle'
         self.since = 0.
         self.stable_since = None
@@ -41,10 +47,35 @@ class BaitSwitcher:
         if not self.enabled:
             return BaitDecision()
         if self.phase == 'idle':
-            if o.result and (o.exhausted or o.dim_continue or continue_attempts >= 2):
+            if not o.result:
+                self.buttons_since = None
+                if self.result_absent_since is None:
+                    self.result_absent_since = now
+                if now-self.result_absent_since >= .4:
+                    self.result_since = self.buttons_since = None
+                    self.pending_exhausted = False
+                return BaitDecision()
+            self.result_absent_since = None
+            if self.result_since is None:
+                self.result_since = now
+            self.pending_exhausted |= o.exhausted
+            if o.change_point and o.continue_visible:
+                if self.buttons_since is None:
+                    self.buttons_since = now
+            else:
+                self.buttons_since = None
+            # GET can appear before the bottom buttons exist. A fallback
+            # Continue coordinate is not evidence that input is accepted.
+            if (now-self.result_since < self.result_settle or self.buttons_since is None
+                    or now-self.buttons_since < self.button_settle):
+                if now-self.result_since > 8.:
+                    self.enter('failed',now)
+                    return BaitDecision(True,failed=True,phase='failed')
+                return BaitDecision(True, phase='settling')
+            if o.result and (self.pending_exhausted or o.dim_continue or continue_attempts >= 2):
                 self.probed = continue_attempts > 0
                 self.retry_suspected = continue_attempts >= 2
-                self.latched = o.exhausted
+                self.latched = self.pending_exhausted
                 self.enter('inspect', now)
             else:
                 return BaitDecision()
@@ -94,6 +125,7 @@ class BaitSwitcher:
         elif self.phase == 'returning':
             if self.stable(o.result and not o.exhausted and not o.dim_continue, now, .65):
                 self.latched = False
+                self.pending_exhausted = False
                 self.enter('idle', now)
             return decision
         decision.phase = self.phase

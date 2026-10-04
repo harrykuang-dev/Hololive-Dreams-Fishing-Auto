@@ -69,7 +69,7 @@ stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
 - Synthetic 4K noise respects the image-byte limit; deterministic slow-encoder,
   bounded queue, retention, archive exclusions, writer error and CSV rotation
   tests cover diagnostics under load/failure.
-- All 152 unit tests passed, including UI layout, localization, input safety,
+- All 156 unit tests passed, including UI layout, localization, input safety,
   palette/shape positives and negatives, and bounded asynchronous diagnostics.
 - Replayed 159 historical screenshots from nine available diagnostic folders;
   scene/TAP/catch classifications match stable 1.0 on all of these. Candidate
@@ -151,3 +151,28 @@ geometry now also allows recovery after 1.5 seconds. Replaying the actual
 failed image at 10 Hz predicts one probe at 0.3 seconds and Change Bait at
 1.9 seconds, with no repeated Continue clicks. This is offline verification,
 not evidence that this corrected EXE has yet completed a live bait change.
+
+### Live follow-up: confirmed recovery and premature Continue
+
+Session `20261004-141007-081865100` confirms the grey-result fallback:
+result 19.3331s, opening 21.7595s, selecting 22.1646s, selection click
+22.9779s, confirmation click 24.1859s, returning 24.3406s, ordinary result
+25.1190s, Continue 25.3676s, a new reel 35.6553s and the second catch
+43.3405s. The Japanese dialog shows the formerly selected red sliced bait
+at zero and the later selected first dough bait at infinity. This is evidence
+of a completed bait change and subsequent fishing in this supplied session.
+
+The premature click is also confirmed: the first result's Continue was
+clicked at 19.5766s, only 0.2435s after card recognition, while the diagnostic
+card image has no bottom buttons. The card's fallback coordinate had bypassed
+actual button readiness. The second catch also received premature retries.
+
+The enabled switch now holds all ordinary result navigation as `bait_settling`
+until the card has been observed for at least 1.5s and the actual Continue
+button plus Change Bait pill have been continuously detected for 0.65s.
+An absent button is not established by a fallback coordinate. Red warnings
+seen during settling are retained; absent result frames reset button stability.
+Settling is bounded at 8s. The one-probe and persistent-grey fallback then run
+as before. A simulated 10Hz timeline from this session's actual early card and
+later ready-button images first probes at 2.0s and opens Change Bait at 3.6s,
+instead of clicking at 0.24s. The updated timing itself is not yet live-tested.

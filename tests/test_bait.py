@@ -10,10 +10,47 @@ from bot_vision import Detection
 
 
 class BaitControlTests(unittest.TestCase):
-    depleted = BaitObservation(result=True, exhausted=True, dim_continue=True, change_point=(100,450))
+    depleted = BaitObservation(result=True, exhausted=True, dim_continue=True, change_point=(100,450), continue_visible=True)
     blank = BaitObservation()
-    healthy = BaitObservation(result=True, change_point=(100,450))
+    healthy = BaitObservation(result=True, change_point=(100,450), continue_visible=True)
     dialog = BaitObservation(dialog=True, infinite_point=(222,151), confirm_point=(798,463))
+
+    def test_card_before_buttons_blocks_every_action(self):
+        c = BaitSwitcher(True)
+        card = replace(self.healthy, change_point=None, continue_visible=False)
+        for t in (0,.24,.9,1.5):
+            d=c.update(card,t)
+            self.assertTrue(d.managed)
+            self.assertEqual(d.phase,'settling')
+            self.assertIsNone(d.action)
+        self.assertTrue(c.update(self.healthy,1.6).managed)
+        self.assertTrue(c.update(self.healthy,2.2).managed)
+        self.assertFalse(c.update(self.healthy,2.26).managed)
+
+    def test_probe_waits_for_actual_buttons_and_result_animation(self):
+        c = BaitSwitcher(True)
+        card=replace(self.depleted,exhausted=False,change_point=None,continue_visible=False,continue_point=(748,463))
+        self.assertIsNone(c.update(card,0).action)
+        ready=replace(card,change_point=(100,450),continue_visible=True)
+        self.assertIsNone(c.update(ready,.9).action)
+        self.assertIsNone(c.update(ready,1.54).action)
+        self.assertIsNone(c.update(ready,1.56).action)
+        self.assertIsNone(c.update(ready,1.8).action)
+        self.assertEqual(c.update(ready,1.82).action,(748,463))
+
+    def test_blinking_warning_during_settle_is_retained(self):
+        c = BaitSwitcher(True)
+        c.update(self.depleted,0)
+        c.update(self.healthy,.6)
+        d=c.update(self.healthy,1.6)
+        self.assertTrue(d.managed)
+        self.assertTrue(c.latched)
+        self.assertEqual(c.update(self.healthy,2.3).action,(100,450))
+
+    def test_ready_old_result_does_not_fail_settle_timeout(self):
+        c = BaitSwitcher(True)
+        c.result_since = c.buttons_since = 0.
+        self.assertFalse(c.update(self.healthy,9.).failed)
 
     def test_disabled_preserves_normal_navigation(self):
         c = BaitSwitcher()
@@ -21,7 +58,7 @@ class BaitControlTests(unittest.TestCase):
             self.assertFalse(c.update(self.depleted,t,6).managed)
 
     def test_one_warning_frame_latches_through_blink_and_scene_disappearance(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         self.assertIsNone(c.update(self.depleted,0).action)
         for t in (.1,.3,.6):
             self.assertTrue(c.update(self.blank,t).managed)
@@ -30,7 +67,7 @@ class BaitControlTests(unittest.TestCase):
         self.assertTrue(c.latched)
 
     def test_unverified_change_button_holds_without_clicking_continue(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         o = replace(self.depleted,exhausted=False,change_point=None)
         for t in (0,.3,1.,2.,7.):
             d = c.update(o,t)
@@ -39,7 +76,7 @@ class BaitControlTests(unittest.TestCase):
         self.assertTrue(c.update(o,8.1).failed)
 
     def test_persistently_dim_result_opens_bait_without_red_warning(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         o = replace(self.depleted, exhausted=False)
         for t in (0,.4,1.,1.49):
             self.assertIsNone(c.update(o,t).action)
@@ -49,7 +86,7 @@ class BaitControlTests(unittest.TestCase):
         self.assertEqual(c.phase,'opening')
 
     def test_continue_probe_is_once_then_warning_can_blink(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         o = replace(self.depleted, exhausted=False, continue_point=(748,463))
         self.assertIsNone(c.update(o,0).action)
         self.assertEqual(c.update(o,.3).action,(748,463))
@@ -60,14 +97,14 @@ class BaitControlTests(unittest.TestCase):
         self.assertTrue(c.latched)
 
     def test_existing_continue_click_counts_as_probe(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         o = replace(self.depleted, exhausted=False, continue_point=(748,463))
         c.update(o,0,1)
         self.assertIsNone(c.update(o,.3).action)
         self.assertEqual(c.update(o,1.51).action,(100,450))
 
     def test_interrupted_dim_frames_do_not_establish_depletion(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         o = replace(self.depleted, exhausted=False)
         c.update(o,0)
         c.update(o,1.)
@@ -77,7 +114,7 @@ class BaitControlTests(unittest.TestCase):
         self.assertFalse(c.latched)
 
     def test_transient_dim_recovers_only_after_quiet_interval(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         c.update(replace(self.depleted,exhausted=False),0)
         self.assertTrue(c.update(self.healthy,.1).managed)
         self.assertTrue(c.update(self.healthy,1.59).managed)
@@ -85,13 +122,13 @@ class BaitControlTests(unittest.TestCase):
         self.assertFalse(c.update(self.healthy,1.7).managed)
 
     def test_repeated_continue_cannot_reset_retry_limit_during_animation(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         c.update(self.healthy,0,2)
         self.assertTrue(c.update(self.healthy,.4,0).managed)
         self.assertTrue(c.update(self.healthy,1.51,0).failed)
 
     def test_selection_and_confirm_require_stable_infinite_selection(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         c.update(self.depleted,0)
         self.assertEqual(c.update(self.depleted,.7).action,(100,450))
         # A wrong bait's enabled confirm is never clicked.
@@ -111,7 +148,7 @@ class BaitControlTests(unittest.TestCase):
         self.assertFalse(c.update(self.healthy,4.7).managed)
 
     def test_wrong_dialog_cannot_close_x_or_click_other_bait(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         c.update(self.depleted,0)
         c.update(self.depleted,.7)
         for t in (1.,2.,4.,7.):
@@ -119,7 +156,7 @@ class BaitControlTests(unittest.TestCase):
         self.assertTrue(c.update(self.blank,8.71).failed)
 
     def test_open_attempts_bounded_and_spaced(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         actions=[]
         for i in range(81):
             d=c.update(self.depleted,i*.1)
@@ -128,7 +165,7 @@ class BaitControlTests(unittest.TestCase):
         self.assertTrue(all(b-a >= 1.19 for a,b in zip(actions,actions[1:])))
 
     def test_return_requires_visible_enabled_continue(self):
-        c = BaitSwitcher(True)
+        c = BaitSwitcher(True, result_settle=0, button_settle=0)
         c.enter('returning',0)
         for t in (0,1.,3.,7.):
             self.assertIsNone(c.update(self.depleted,t).action)
@@ -219,13 +256,14 @@ class BaitRuntimeTests(unittest.TestCase):
         stop=Mock(); stop.is_set.side_effect=[False]*9+[True]
         # Simulated clock .4 s between screenshots, no real waits or game input.
         clock=iter([0.] + [i*.5+offset for i in range(9) for offset in (0.,.005,.01,.02,.025)] + [5.])
-        exhausted=BaitObservation(result=True,exhausted=True,dim_continue=True,change_point=(100,450))
+        exhausted=BaitObservation(result=True,exhausted=True,dim_continue=True,change_point=(100,450), continue_visible=True)
         wrong=BaitObservation(dialog=True,infinite_point=(222,151),confirm_point=(798,463))
         selected=replace(wrong,selected_infinite=True)
         observations=[exhausted]*3+[wrong]*3+[selected]*3
         detections=[Detection(catch_result=True,scene='result_continue',action_button=(748,463))]*3+[Detection(scene='item_detail',action_button=(733,61))]*6
         with (patch('auto_fishing.WindowCapture') as capture,
               patch('auto_fishing.MouseController') as mouse,
+              patch('auto_fishing.BaitSwitcher',side_effect=lambda enabled: BaitSwitcher(enabled,result_settle=0,button_settle=0)),
               patch('auto_fishing.win32gui.GetForegroundWindow',return_value=123),
               patch('auto_fishing.stop_hotkey_pressed',return_value=False),
               patch('auto_fishing.signal.signal'),patch('auto_fishing.time.sleep'),
