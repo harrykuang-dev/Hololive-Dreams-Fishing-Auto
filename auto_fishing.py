@@ -24,8 +24,6 @@ import win32ui
 from diagnostics import DiagnosticWriter, BoundedTrace
 from bot_vision import Detection, analyze
 from bot_control import ReelTracker, ReelControl, Navigation, BiteGuard, CatchLedger, HoldRecovery
-from bait_vision import observe_bait
-from bait_control import BaitSwitcher, BaitDecision
 from app_settings import parse_stop_hotkey, stop_hotkey_pressed
 
 
@@ -165,12 +163,6 @@ class MouseController:
         finally:
             self.release()
 
-    def scroll_up(self, point: tuple[float, float]) -> None:
-        self.release()
-        self._move_client(point)
-        if win32gui.GetForegroundWindow() == self.window.hwnd:
-            win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 960)
-
     def press(self, point: tuple[float, float]) -> None:
         if win32gui.GetForegroundWindow() != self.window.hwnd:
             self.release()
@@ -283,7 +275,6 @@ def run(
     controller = ReelControl(lead=args.lead)
     recovery = HoldRecovery()
     navigation = Navigation()
-    bait_switcher = BaitSwitcher(getattr(args, "auto_bait", False) and not args.once)
     bite_guard = BiteGuard()
     ledger = CatchLedger()
     start_time = time.perf_counter()
@@ -354,30 +345,11 @@ def run(
             rearm = False
             # Feed all scenes to navigation so disappearance confirms the
             # previous UI action. No one-shot action_armed latch.
-            bait_decision = BaitDecision()
-            if bait_switcher.enabled:
-                if age <= .15:
-                    bait_decision = bait_switcher.update(observe_bait(frame,d), now, navigation.attempts if d.scene == 'result_continue' else 0)
-                else:
-                    bait_decision = BaitDecision(managed=True, phase='inspect')
-            if bait_decision.managed:
-                # Bait recovery has priority over Continue and generic dialog X.
-                navigation = Navigation()
-                mouse.release()
-                action = bait_decision.action
-                d.scene = 'bait_' + bait_decision.phase
-                d.action_button = action
-                if bait_decision.failed:
-                    emit(msg('bait_failed'))
-                    if diagnostics:
-                        diagnostics.submit(f'{frame_count:08d}_bait_failed.jpg',frame,d)
-                    break
-            else:
-                action = navigation.update(d,now)
+            action = navigation.update(d,now)
             if navigation.confirmed:
                 emit(msg('switched_scene', scene=labels.get(navigation.confirmed, navigation.confirmed)))
                 navigation.confirmed = None
-            if d.track_present and not bait_decision.managed:
+            if d.track_present:
                 if not minigame_seen:
                     if ledger.reel_started():
                         emit(msg('lost_streak', failed=ledger.failed))
@@ -413,21 +385,17 @@ def run(
                     emit(msg('retry_stop', scene=labels.get(d.scene,d.scene)))
                     break
                 if isinstance(action,tuple) and not args.once:
-                    state = msg('bait_working') if bait_decision.managed else labels.get(d.scene, msg('action'))
-                    if bait_decision.scroll:
-                        control_mode = 'scroll_up'
-                        mouse.scroll_up(action)
-                    else:
-                        emit(msg('click_action', scene=state, x=round(action[0]),
-                                 y=round(action[1]), attempt=bait_switcher.attempts if bait_decision.managed else navigation.attempts))
-                        mouse.click(action)
-                elif bite and not bait_decision.managed:
+                    state = labels.get(d.scene, msg('action'))
+                    emit(msg('click_action', scene=state, x=round(action[0]),
+                             y=round(action[1]), attempt=navigation.attempts))
+                    mouse.click(action)
+                elif bite:
                     state = msg('tap')
                     mouse.click_gameplay(width,height)
                     minigame_seen = False
                     lost_since = None
                 else:
-                    state = msg('bait_working') if bait_decision.managed else msg('ending') if lost_since is not None and now-lost_since<1.2 else msg('waiting')
+                    state = msg('ending') if lost_since is not None and now-lost_since<1.2 else msg('waiting')
             if state != previous_state:
                 emit(msg('state_prefix') + state)
                 previous_state = state
@@ -521,7 +489,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-seconds", type=float, default=0.0)
     parser.add_argument("--debug-dir", help="儲存狀態切換和最新辨識畫面")
     parser.add_argument("--record", action="store_true", help="另存實測影片（需 debug-dir）")
-    parser.add_argument("--auto-bait", action="store_true", help="魚餌耗盡時切換無限練餌")
     return parser.parse_args()
 
 

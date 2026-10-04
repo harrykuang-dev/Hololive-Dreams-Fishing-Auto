@@ -15,7 +15,6 @@ Satu EXE sudah berisi runtime dan aset ikon. Tidak perlu memasang Python atau me
 
 ## Fitur
 
-- Versi pengembangan 1.1 menambahkan opsi umpan adonan tak terbatas saat umpan habis (nonaktif secara default). Tombol Lanjut dijeda, kehabisan umpan diperiksa, lalu umpan bertanda ∞ dipilih dan dikonfirmasi. Jika verifikasi gagal, bot berhenti; pilih umpan secara manual lalu mulai lagi.
 - Mengenali tanda sambaran serta melacak ikan dan zona tangkapan saat menarik ikan.
 - Menangani tombol Lanjut / Berikutnya serta menutup koleksi atau pop-up item untuk melanjutkan memancing.
 - Enam bahasa antarmuka: 繁體中文, 简体中文, English, 日本語, 한국어, dan Indonesian. Pilihan ini mengubah bahasa asisten, bukan bahasa game.

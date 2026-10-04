@@ -39,23 +39,6 @@ class GameplayInputTests(unittest.TestCase):
                 self.mouse.click_gameplay(1600,900)
             event.assert_not_called()
 
-    def test_bait_scroll_checks_focus_and_occlusion_before_wheel_input(self):
-        self.mouse._move_client=Mock()
-        with (patch('auto_fishing.win32gui.GetForegroundWindow',return_value=123),
-              patch('auto_fishing.win32api.mouse_event') as event):
-            self.mouse.scroll_up((340,250))
-            self.mouse._move_client.assert_called_once_with((340,250))
-            event.assert_called_once_with(0x0800,0,0,960)
-        with (patch('auto_fishing.win32gui.GetForegroundWindow',return_value=999),
-              patch('auto_fishing.win32api.mouse_event') as event):
-            self.mouse.scroll_up((340,250))
-            event.assert_not_called()
-        self.mouse._move_client.side_effect=RuntimeError('occluded')
-        with patch('auto_fishing.win32api.mouse_event') as event:
-            with self.assertRaisesRegex(RuntimeError,'occluded'):
-                self.mouse.scroll_up((340,250))
-            event.assert_not_called()
-
     def test_moved_window_and_lost_focus_cannot_press(self):
         self.mouse.window.screen_point.side_effect = RuntimeError('moved window')
         with (patch('auto_fishing.win32gui.GetForegroundWindow',return_value=123),
