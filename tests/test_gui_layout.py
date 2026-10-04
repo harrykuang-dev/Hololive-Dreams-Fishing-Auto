@@ -72,29 +72,70 @@ class LayoutTests(unittest.TestCase):
             self.assertEqual(app.shortcut_display.get(),'Ctrl+Alt+Q')
             self.assertFalse(app._shortcut_capturing)
             # Refocusing does not rearm. Click again even while already focused.
-            next_key=SimpleNamespace(keysym='F8',state=0,keycode=0x77)
+            next_key=SimpleNamespace(keysym='F7',state=0,keycode=0x76)
             app._capture_shortcut(next_key)
             self.assertEqual(app.stop_key.get(),'Ctrl+Alt+Q')
             app._begin_shortcut_capture()
             app._capture_shortcut(next_key)
-            self.assertEqual(app.stop_key.get(),'F8')
+            self.assertEqual(app.stop_key.get(),'F7')
             app._set_controls(True)
             self.assertTrue(app.auto_bait_check.instate(['disabled']))
             app._begin_shortcut_capture()
             app._capture_shortcut(key)
-            self.assertEqual(app.stop_key.get(),'F8')
+            self.assertEqual(app.stop_key.get(),'F7')
             app._set_controls(False)
             self.assertTrue(app.shortcut_entry.instate(['readonly']))
             app._begin_shortcut_capture()
             app._end_shortcut_capture()
-            self.assertEqual(app.shortcut_display.get(),'F8')
+            self.assertEqual(app.shortcut_display.get(),'F7')
             # Cancelling by clicking elsewhere keeps the last complete binding.
             app._begin_shortcut_capture()
             app._cancel_shortcut_on_click(SimpleNamespace(widget=app.target_entry))
             self.assertFalse(app._shortcut_capturing)
-            self.assertEqual(app.shortcut_display.get(),'F8')
+            self.assertEqual(app.shortcut_display.get(),'F7')
             app._capture_shortcut(key)
-            self.assertEqual(app.stop_key.get(),'F8')
+            self.assertEqual(app.stop_key.get(),'F7')
+        finally:
+            app._closing=True
+            for callback in root.tk.splitlist(root.tk.call('after','info')):
+                root.after_cancel(callback)
+            root.destroy()
+
+    def test_custom_start_binding_conflict_and_global_poll_guards(self):
+        root=tk.Tk(); app=FishingApp(root)
+        down=set()
+        try:
+            self.assertEqual(app.start_key.get(),'F8')
+            app._begin_shortcut_capture(target='start')
+            with patch('gui.messagebox.showerror') as error:
+                app._capture_shortcut(SimpleNamespace(keysym='F9',state=0,keycode=0x78))
+                error.assert_called_once()
+            self.assertEqual(app.start_key.get(),'F8')
+            app._begin_shortcut_capture(target='start')
+            app._capture_shortcut(SimpleNamespace(keysym='q',state=0x20004,keycode=0x51))
+            self.assertEqual(app.start_key.get(),'Ctrl+Alt+Q')
+            self.assertEqual(app.start_shortcut_display.get(),'Ctrl+Alt+Q')
+            with patch('gui.win32api.GetAsyncKeyState',side_effect=lambda vk:0x8000 if vk in down else 0), patch.object(app,'start') as start:
+                app._poll_start_hotkey()
+                down.update((ord('Q'),0x11,0x12)); app._poll_start_hotkey()
+                start.assert_called_once()
+                app._poll_start_hotkey(); start.assert_called_once()
+                for guard in ('capture','running','modal','closing'):
+                    down.clear(); app._poll_start_hotkey()
+                    app._shortcut_capturing=guard=='capture'
+                    app._closing=guard=='closing'
+                    app.worker=SimpleNamespace(is_alive=lambda:guard=='running')
+                    with patch.object(root,'grab_current',return_value=object() if guard=='modal' else None):
+                        down.update((ord('Q'),0x11,0x12)); app._poll_start_hotkey()
+                    app._shortcut_capturing=False; app._closing=False; app.worker=None
+                    app._poll_start_hotkey(); start.assert_called_once()
+                down.clear(); app._poll_start_hotkey()
+                down.update((ord('Q'),0x11,0x12)); app._poll_start_hotkey()
+                self.assertEqual(start.call_count,2)
+            app._set_controls(True)
+            self.assertTrue(app.start_shortcut_entry.instate(['disabled']))
+            app._set_controls(False)
+            self.assertTrue(app.start_shortcut_entry.instate(['readonly']))
         finally:
             app._closing=True
             for callback in root.tk.splitlist(root.tk.call('after','info')):

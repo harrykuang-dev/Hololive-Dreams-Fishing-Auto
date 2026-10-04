@@ -12,7 +12,7 @@ from tkinter import font, messagebox, ttk
 import win32api
 from auto_fishing import enable_dpi_awareness, run
 from app_locale import GAME_LANGUAGES, text as tr
-from app_settings import FishingCounter, parse_stop_hotkey, captured_hotkey
+from app_settings import FishingCounter, parse_stop_hotkey, captured_hotkey, hotkeys_conflict, StartHotkey
 
 APP_VERSION = '1.1-dev'
 PROJECT_URL = 'https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto'
@@ -60,6 +60,10 @@ class FishingApp:
         self.counter = FishingCounter()
         self.game_language = tk.StringVar(value='繁體中文')
         self.target = tk.StringVar(value='0')
+        self.start_key = tk.StringVar(value='F8')
+        self.start_shortcut_display = tk.StringVar(value='F8')
+        self._start_hotkey = StartHotkey()
+        self._capture_target = 'stop'
         self.stop_key = tk.StringVar(value='F9')
         self.shortcut_display = tk.StringVar(value='F9')
         self._shortcut_capturing = False
@@ -171,15 +175,22 @@ class FishingApp:
         self.target_entry.grid(row=1,column=1,sticky='ew',pady=self.py(6))
         self.target_hint = ttk.Label(form,style='Muted.TLabel',wraplength=self.px(390))
         self.target_hint.grid(row=2,column=1,sticky='w',pady=(0,self.py(6)))
+        self.start_shortcut_label = ttk.Label(form)
+        self.start_shortcut_label.grid(row=3,column=0,sticky='w',pady=self.py(6))
+        self.start_shortcut_entry = ttk.Entry(form,textvariable=self.start_shortcut_display,state='readonly',width=23)
+        self.start_shortcut_entry.grid(row=3,column=1,sticky='ew',pady=self.py(6))
+        self.start_shortcut_entry.bind('<Button-1>',lambda event:self._begin_shortcut_capture(event,'start'))
+        self.start_shortcut_entry.bind('<FocusOut>',self._end_shortcut_capture)
+        self.start_shortcut_entry.bind('<KeyPress>',self._capture_shortcut)
         self.shortcut_label = ttk.Label(form)
-        self.shortcut_label.grid(row=3,column=0,sticky='w',pady=self.py(6))
+        self.shortcut_label.grid(row=4,column=0,sticky='w',pady=self.py(6))
         self.shortcut_entry = ttk.Entry(form,textvariable=self.shortcut_display,state='readonly',width=23)
-        self.shortcut_entry.grid(row=3,column=1,sticky='ew',pady=self.py(6))
+        self.shortcut_entry.grid(row=4,column=1,sticky='ew',pady=self.py(6))
         self.shortcut_entry.bind('<Button-1>',self._begin_shortcut_capture)
         self.shortcut_entry.bind('<FocusOut>',self._end_shortcut_capture)
         self.shortcut_entry.bind('<KeyPress>',self._capture_shortcut)
         self.auto_bait_check = ttk.Checkbutton(form, variable=self.auto_bait)
-        self.auto_bait_check.grid(row=4, column=0, columnspan=2, sticky='w', pady=self.py(6))
+        self.auto_bait_check.grid(row=5, column=0, columnspan=2, sticky='w', pady=self.py(6))
         controls = ttk.Frame(main)
         controls.grid(row=5,column=0,sticky='ew',pady=(self.py(16),self.py(14)))
         controls.columnconfigure((0,1),weight=1,uniform='actions')
@@ -229,35 +240,57 @@ class FishingApp:
 
     def language_code(self): return GAME_LANGUAGES[self.game_language.get()]
 
-    def _begin_shortcut_capture(self,_event=None):
-        if not self.shortcut_entry.instate(['disabled']):
+    def _begin_shortcut_capture(self,_event=None,target='stop'):
+        entry = self.start_shortcut_entry if target=='start' else self.shortcut_entry
+        if not entry.instate(['disabled']):
+            self._end_shortcut_capture()
+            self._capture_target = target
             self._shortcut_capturing = True
-            self.shortcut_entry.focus_set()
-            self.shortcut_display.set(tr(self.language_code(),'capture_shortcut'))
+            self._start_hotkey.disarm()
+            entry.focus_set()
+            display = self.start_shortcut_display if target=='start' else self.shortcut_display
+            display.set(tr(self.language_code(),'capture_shortcut'))
         return 'break'
 
     def _end_shortcut_capture(self,_event=None):
         self._shortcut_capturing = False
         self.shortcut_display.set(self.stop_key.get())
+        self.start_shortcut_display.set(self.start_key.get())
 
     def _cancel_shortcut_on_click(self,event):
-        if event.widget is not self.shortcut_entry:
+        if event.widget not in (self.shortcut_entry,self.start_shortcut_entry):
             self._end_shortcut_capture()
 
     def _capture_shortcut(self,event):
-        if not self._shortcut_capturing or self.shortcut_entry.instate(['disabled']):
+        entry = self.start_shortcut_entry if self._capture_target=='start' else self.shortcut_entry
+        if not self._shortcut_capturing or entry.instate(['disabled']):
             return
         value = captured_hotkey(event.keysym,event.state,event.keycode)
         if value:
-            self.stop_key.set(value)
+            variable = self.start_key if self._capture_target=='start' else self.stop_key
+            other = self.stop_key if self._capture_target=='start' else self.start_key
+            self._start_hotkey.disarm()
             self._end_shortcut_capture()
-        return 'break'  # No character insertion or default navigation actions.
+            if hotkeys_conflict(value,other.get()):
+                messagebox.showerror(tr(self.language_code(),'error'),tr(self.language_code(),'shortcut_conflict'),parent=self.root)
+            else:
+                variable.set(value)
+                self._end_shortcut_capture()
+        return 'break'
+
+    def _poll_start_hotkey(self):
+        enabled = (not self._closing and not self._shortcut_capturing
+                   and not self.start_button.instate(['disabled'])
+                   and not (self.worker and self.worker.is_alive())
+                   and self.root.grab_current() is None)
+        if self._start_hotkey.poll(self.start_key.get(),win32api.GetAsyncKeyState,enabled):
+            self.start()
 
     def _apply_language(self,_event=None):
         lang = self.language_code()
         self.root.title(f'Hololive Dreams — {tr(lang,"subtitle")} v{APP_VERSION}')
         for widget,key in ((self.subtitle,'subtitle'),(self.instructions,'instructions'),(self.language_label,'game_language'),
-                           (self.target_label,'target_count'),(self.target_hint,'target_hint'),(self.shortcut_label,'stop_shortcut'),
+                           (self.target_label,'target_count'),(self.target_hint,'target_hint'),(self.shortcut_label,'stop_shortcut'),(self.start_shortcut_label,'start_shortcut'),
                            (self.start_button,'start'),(self.stop_button,'stop'),(self.auto_bait_check,'auto_bait'),(self.diagnostics_check,'developer_mode'),(self.log_title,'log')):
             widget.configure(text=tr(lang,key))
         self.footer.configure(text=f'v{APP_VERSION}')
@@ -352,6 +385,10 @@ class FishingApp:
             if target<0: raise ValueError('Negative target')
             hotkey = self.stop_key.get().strip()
             parse_stop_hotkey(hotkey)
+            parse_stop_hotkey(self.start_key.get())
+            if hotkeys_conflict(self.start_key.get(),hotkey):
+                messagebox.showerror(tr(lang,'error'),tr(lang,'shortcut_conflict'),parent=self.root)
+                return
         except ValueError:
             messagebox.showerror(tr(lang,'error'),tr(lang,'invalid_settings'),parent=self.root)
             return
@@ -379,6 +416,7 @@ class FishingApp:
         self.stop_button.configure(state='normal' if running else 'disabled')
         self.language_choice.configure(state='disabled' if running else 'readonly')
         self.shortcut_entry.configure(state='disabled' if running else 'readonly')
+        self.start_shortcut_entry.configure(state='disabled' if running else 'readonly')
         for widget in (self.target_entry,self.diagnostics_check,self.auto_bait_check):
             widget.configure(state='disabled' if running else 'normal')
 
@@ -396,6 +434,7 @@ class FishingApp:
             self._set_status(tr(self.session_args.language,'stopping'),self.MUTED)
 
     def _poll(self):
+        self._poll_start_hotkey()
         try:
             while True:
                 kind,value = self.messages.get_nowait()

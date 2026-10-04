@@ -286,6 +286,17 @@ for code, label, working, failed in (
 
 
 
+for code, label, conflict in (
+    ('zh-TW','開始快捷鍵','開始與停止快捷鍵不能相同。'),
+    ('zh-CN','开始快捷键','开始与停止快捷键不能相同。'),
+    ('en','Start shortcut','Start and stop shortcuts must be different.'),
+    ('ja','開始ショートカット','開始と停止には異なるショートカットを設定してください。'),
+    ('id','Pintasan mulai','Pintasan mulai dan berhenti harus berbeda.'),
+    ('ko','시작 단축키','시작과 정지 단축키는 서로 달라야 합니다.'),
+):
+    TEXT[code].update(start_shortcut=label, shortcut_conflict=conflict)
+
+
 def text(locale: str, key: str, **values) -> str:
     """Return fully localized text; CLI 'auto' keeps the previous TW default."""
     entry = TEXT["zh-TW" if locale == "auto" else locale][key]

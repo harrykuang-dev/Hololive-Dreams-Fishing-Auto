@@ -21,7 +21,7 @@ Satu EXE sudah berisi runtime dan aset ikon. Tidak perlu memasang Python atau me
 - Enam bahasa antarmuka: 繁體中文, 简体中文, English, 日本語, 한국어, dan Indonesian. Pilihan ini mengubah bahasa asisten, bukan bahasa game.
 - Penghitung tangkapan terkonfirmasi dan target opsional yang menghentikan asisten.
 - Setiap kali Mulai ditekan, hitungan kembali ke nol. Material dan hasil yang belum terkonfirmasi tidak dihitung; hitungan tidak disimpan.
-- Tombol pintas berhenti dapat diubah, dengan F9 sebagai bawaan. Klik kolomnya lalu tekan tombol atau kombinasi; kembali ke jendela tidak memulai pengikatan ulang.
+- Pintasan mulai bawaan F8 dan berhenti F9. Klik masing-masing kolom lalu tekan tombol atau kombinasi untuk mengubahnya. Pintasan yang bertabrakan ditolak; menahan tombol mulai hanya memulai sekali.
 - Antarmuka terang sederhana, penskalaan DPI tinggi, riwayat aktivitas, dan diagnostik lokal opsional melalui Mode pengembang.
 
 ## Cara menggunakan

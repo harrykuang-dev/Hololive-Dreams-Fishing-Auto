@@ -21,7 +21,7 @@ The single EXE includes its runtime and icon assets. You do not need Python or a
 - Six interface languages: 繁體中文, 简体中文, English, 日本語, 한국어, and Indonesian. This setting changes the assistant, not the game.
 - Confirmed-catch counter and an optional catch target that stops the assistant.
 - Every Start resets the counter to zero. Materials and unconfirmed results are not counted; counts are not saved.
-- Customizable stop shortcut, F9 by default. Click the shortcut field and press a key or combination; refocusing the window does not rebind it.
+- Start shortcut defaults to F8; stop defaults to F9. Click either field and press a key or combination to customize it. Conflicting bindings are rejected; holding start triggers only once.
 - Simple light interface, high-DPI scaling, activity log, and optional local developer diagnostics.
 
 ## Quick start
