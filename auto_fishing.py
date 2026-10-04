@@ -290,7 +290,7 @@ def run(
         message = msg(key)
         # Stage messages are GUI-only; retain legacy CLI callback ordering.
         if getattr(args,'start_source',None):
-            startup_log(message)
+            startup_log(message, getattr(args,'debug_dir',None))
             emit(message)
 
     startup('startup_find')

@@ -5,7 +5,7 @@ python -m PyInstaller `
     --clean `
     --onefile `
     --windowed `
-    --name 'Hololive-Dreams-Fishing-Auto-v1.1-dev' `
+    --name 'Hololive-Dreams-Fishing-Auto-v1.1' `
     --icon '.\assets\fish-clear.ico' `
     --manifest '.\assets\windows.manifest' `
     --add-data '.\assets;assets' `
@@ -13,4 +13,4 @@ python -m PyInstaller `
     '.\gui.py'
 
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed with exit code $LASTEXITCODE" }
-Write-Host "Built: $((Resolve-Path '.\dist\Hololive-Dreams-Fishing-Auto-v1.1-dev.exe').Path)"
+Write-Host "Built: $((Resolve-Path '.\dist\Hololive-Dreams-Fishing-Auto-v1.1.exe').Path)"

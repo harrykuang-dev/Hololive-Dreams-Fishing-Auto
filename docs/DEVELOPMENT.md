@@ -25,7 +25,7 @@ With the build environment active:
 .\build.ps1
 ```
 
-Output: `dist\Hololive-Dreams-Fishing-Auto-v1.1-dev.exe`.
+Output: `dist\Hololive-Dreams-Fishing-Auto-v1.1.exe`.
 The EXE includes its runtime, icon assets and high-DPI manifest; users need only the EXE.
 
 If an older EXE is running, close it or choose a different output folder before building.
@@ -39,8 +39,8 @@ Run on Windows; GUI tests create temporary Tk windows but do not start fishing.
 python -m unittest discover -s tests -v
 python -m fishing_auto --help
 python tools/control_benchmark.py
-python tools/verify_icon.py dist/Hololive-Dreams-Fishing-Auto-v1.1-dev.exe
-Get-FileHash dist/Hololive-Dreams-Fishing-Auto-v1.1-dev.exe -Algorithm SHA256
+python tools/verify_icon.py dist/Hololive-Dreams-Fishing-Auto-v1.1.exe
+Get-FileHash dist/Hololive-Dreams-Fishing-Auto-v1.1.exe -Algorithm SHA256
 ```
 
 Tests cover recognition, input safety, continuation, counters, shortcuts, translations,
@@ -81,10 +81,10 @@ commands. Use `python -m fishing_auto --help` for their CLI entry point. They ar
 required for the GUI and should not be confused with the single-EXE user workflow.
 Historical verification notes remain under `docs/`; the README introduces the application.
 
-## 1.1 development
+## 1.1
 
 Based on stable tag `v1.0` (`b95229a`); includes the beta preparation-screen guard.
-See [1.1 research and validation](RESEARCH-1.1.md). This branch is an unpublished development candidate.
+See [1.1 research and validation](RESEARCH-1.1.md). The formal release is tagged `v1.1`.
 
 
 Successful diagnostic shutdown leaves a dated ZIP only. Session folders use
@@ -93,3 +93,8 @@ are removed only after archive verification; packing failures retain originals.
 Explicit recordings and unrelated files remain separate.
 
 For every release, keep one standalone known-issues link immediately below the README title in all six languages, pointing to main/docs/KNOWN_ISSUES.md.
+
+Normal mode writes no persistent startup journal. Developer mode includes a bounded
+startup.log inside the dated diagnostic ZIP; verified packed originals are removed.
+The earlier development build's two application-level startup journals are removed
+on launch. Diagnostic ZIPs remain available for users to report problems.

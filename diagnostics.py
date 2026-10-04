@@ -52,7 +52,7 @@ def cleanup_archived_files(archive_path):
         if len(names) != len(set(names)):
             raise OSError('Duplicate ZIP entries; originals retained')
         for name in names:
-            if Path(name).name != name or not (name.endswith('.jpg') or name in ('trace.csv','trace.previous.csv','diagnostics.json')):
+            if Path(name).name != name or not (name.endswith('.jpg') or name in ('trace.csv','trace.previous.csv','diagnostics.json','startup.log')):
                 continue
             path = directory/name
             if path.is_symlink() or path.resolve().parent != directory:
@@ -149,7 +149,7 @@ class DiagnosticWriter:
             self.error = 'Diagnostic worker did not finish within 5 seconds; ZIP was not created'
             return None
         manifest = {
-            'format': 1, 'version': '1.1-dev', 'image_max_bytes': IMAGE_LIMIT,
+            'format': 1, 'version': '1.1', 'image_max_bytes': IMAGE_LIMIT,
             'image_max_width': 1280, 'retained_image_limit': IMAGE_COUNT,
             'images_written': self.written, 'queued_frames_dropped': self.dropped,
             'max_image_write_ms': round(self.max_write_ms, 2), 'error': self.error,
@@ -163,7 +163,7 @@ class DiagnosticWriter:
         # An explicit file list excludes arbitrary files and optional large video.
         paths = [*self._retained, self.directory/'latest.jpg',
                  self.directory/'trace.previous.csv', self.directory/'trace.csv',
-                 self.directory/'diagnostics.json']
+                 self.directory/'diagnostics.json', self.directory/'startup.log']
         paths = list(dict.fromkeys(paths))
         output = self.directory/('diagnostics-'+time.strftime('%Y-%m-%d_%H-%M-%S')+'.zip')
         temporary = output.with_suffix('.zip.tmp')

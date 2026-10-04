@@ -1,7 +1,7 @@
 # 1.1 development research and validation
 
 Date: 2026-10-04 (Asia/Shanghai). Development branch `version/1.1`, based on
-stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
+stable `v1.0`, commit `b95229a`. The following sections record the development-stage evidence; the formal release is `v1.1`.
 
 ## Source review
 
@@ -165,3 +165,16 @@ with start-r2 is still needed.
 
 References: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey
 and https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-hotkey .
+
+
+## Formal 1.1 release
+
+The user reported that the independent start version appears fixed and requested
+publication. Formal 1.1 retains the independent listener and updates version
+metadata. Normal mode no longer writes persistent startup journals. Developer
+startup records are bounded to 128 KiB, stored in the session, and included in
+the verified diagnostic ZIP; late shutdown writes cannot recreate loose logs.
+Early connection failures are archived too. Existing diagnostics that failed
+packing are preserved rather than repackaged. The two journals from the earlier
+development build are removed on application launch. Diagnostic ZIPs remain
+available for reporting and are not automatically deleted.

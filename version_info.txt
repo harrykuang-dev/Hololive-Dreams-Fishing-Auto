@@ -17,11 +17,11 @@ VSVersionInfo(
         [
           StringStruct(u'CompanyName', u'harrykuang-dev'),
           StringStruct(u'FileDescription', u'Hololive Dreams Auto Fishing'),
-          StringStruct(u'FileVersion', u'1.1-dev'),
+          StringStruct(u'FileVersion', u'1.1'),
           StringStruct(u'InternalName', u'Hololive-Fishing-Auto'),
-          StringStruct(u'OriginalFilename', u'Hololive-Dreams-Fishing-Auto-v1.1-dev.exe'),
+          StringStruct(u'OriginalFilename', u'Hololive-Dreams-Fishing-Auto-v1.1.exe'),
           StringStruct(u'ProductName', u'Hololive Dreams Auto Fishing'),
-          StringStruct(u'ProductVersion', u'1.1-dev')
+          StringStruct(u'ProductVersion', u'1.1')
         ]
       )
     ]),

@@ -8,7 +8,7 @@ Windows 版 **hololive Dreams** の自動さかな釣りアシスタントです
 
 ## ダウンロード
 
-[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) の添付ファイルから `Hololive-Dreams-Fishing-Auto-v1.0.exe` をダウンロードしてください。
+[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) の添付ファイルから `Hololive-Dreams-Fishing-Auto-v1.1.exe` をダウンロードしてください。
 
 EXE 1 個に実行環境とアイコンが含まれるため、Python のインストールや素材の別途コピーは不要です。SHA-256 チェックサムも提供します。ソースコードの ZIP は実行用アプリではありません。
 

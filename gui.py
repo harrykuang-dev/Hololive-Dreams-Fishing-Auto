@@ -11,13 +11,13 @@ import tkinter as tk
 from tkinter import font, messagebox, ttk
 import win32api
 from global_hotkey import GlobalHotkey
-from startup_trace import startup_log
+from startup_trace import startup_log, remove_legacy_startup_logs
 from auto_fishing import enable_dpi_awareness, run
 from app_locale import GAME_LANGUAGES, text as tr
 from app_settings import FishingCounter, parse_stop_hotkey, captured_hotkey, hotkeys_conflict
 
-APP_VERSION = '1.1-dev'
-APP_BUILD = 'start-r2'
+APP_VERSION = '1.1'
+APP_BUILD = '1.1'
 PROJECT_URL = 'https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto'
 
 
@@ -326,7 +326,7 @@ class FishingApp:
                            (self.target_label,'target_count'),(self.target_hint,'target_hint'),(self.shortcut_label,'stop_shortcut'),(self.start_shortcut_label,'start_shortcut'),
                            (self.start_button,'start'),(self.stop_button,'stop'),(self.diagnostics_check,'developer_mode'),(self.log_title,'log')):
             widget.configure(text=tr(lang,key))
-        self.footer.configure(text=f'v{APP_VERSION} · {APP_BUILD}')
+        self.footer.configure(text=f'v{APP_VERSION}')
         self._refresh_count()
         if not self.worker or not self.worker.is_alive():
             self._set_status(tr(lang,'error' if self.has_error else 'idle'),self.RED if self.has_error else self.MUTED)
@@ -445,12 +445,12 @@ class FishingApp:
             self.stop_event.clear()
             info = (run_id,args,language_name,source)
             self.messages.put((run_id,'starting',info))
-            startup_log(f'{APP_BUILD} launch run={run_id} source={source} start={start_key} stop={stop_key}')
+            startup_log(f'{APP_BUILD} launch run={run_id} source={source} start={start_key} stop={stop_key}', args.debug_dir)
             self.worker = threading.Thread(target=self._run_bot,args=(args,run_id),name='fishing-bot',daemon=True)
             try:
                 self.worker.start()
             except Exception as exc:
-                startup_log(f'{APP_BUILD} cannot start worker: {exc}')
+                startup_log(f'{APP_BUILD} cannot start worker: {exc}', args.debug_dir)
                 self.messages.put((run_id,'error',str(exc)))
                 self.messages.put((run_id,'done',None))
             return info
@@ -485,11 +485,20 @@ class FishingApp:
             run(args,stop_event=self.stop_event,status_callback=lambda value:self.messages.put((run_id,'log',value)),
                 progress_callback=lambda value:self.messages.put((run_id,'progress',value)))
         except Exception as exc:
-            startup_log(f'{APP_BUILD} run={run_id} failed: {exc}')
+            startup_log(f'{APP_BUILD} run={run_id} failed: {exc}', args.debug_dir)
             self.messages.put((run_id,'error',str(exc)))
         finally:
             self.messages.put((run_id,'done',None))
-            startup_log(f'{APP_BUILD} run={run_id} finished')
+            startup_log(f'{APP_BUILD} run={run_id} finished', args.debug_dir)
+            if args.debug_dir:
+                folder = Path(args.debug_dir)
+                if ((folder/'startup.log').is_file() and not any(folder.glob('diagnostics-*.zip'))
+                        and not (folder/'trace.csv').exists() and not (folder/'diagnostics.json').exists()):
+                    try:
+                        from diagnostics import DiagnosticWriter
+                        DiagnosticWriter(folder).close()
+                    except Exception as exc:
+                        self.messages.put((run_id,'log',str(exc)))
 
     def stop(self):
         if self.worker and self.worker.is_alive():
@@ -547,6 +556,7 @@ class FishingApp:
 
 
 def main():
+    remove_legacy_startup_logs()
     enable_dpi_awareness()
     # New icon identity avoids reusing the old pinned/taskbar icon identity.
     try: ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('HololiveFishingAuto.Desktop.ClearIcon')
