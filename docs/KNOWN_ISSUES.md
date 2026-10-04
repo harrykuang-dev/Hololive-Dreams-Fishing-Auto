@@ -20,8 +20,8 @@
 ### 3. 部分用户遇到 SetCursorPos 错误后停止
 
 - 状态：已有用户报错截图，根因未确认；1.0.1 beta 未修复。
-- 表现：提示 `(0, 'SetCursorPos', 'No error message is available')`，表示移动鼠标调用失败，不等同于图像识别失败。
-- 临时排查：重新打开游戏和助手，优先让两者都以普通权限运行；不要锁屏、切换用户或在 UAC 提示期间测试。使用远程控制时，尝试在本机操作对照。请提供诊断及报错所处阶段。上述步骤是排查建议，不是保证有效的修复。
+- 表现：提示 `(0, 'SetCursorPos', 'No error message is available')`，表示移动鼠标调用失败。
+- 解决方案：以系统管理员身份执行。
 
 ### 4. Ina 的深紫色 UI 导致奖励界面无法自动继续
 
@@ -36,7 +36,7 @@
 
 1. **Fishing preparation screen mistaken for the encyclopedia — fixed in 1.0.1 beta.** Snow and pale character art could trigger the old encyclopedia check, causing the assistant to click the preparation screen's X and leave fishing. Light-UI characters such as Fuwawa may be affected. On 1.0.0, switch to another character, or try the beta. Stop if incorrect actions persist. The fix passed real-image offline checks, not exhaustive live testing.
 2. **Developer mode may introduce reeling stalls — under investigation, not fixed in this beta.** One session showed roughly nine control updates per second and periodic 200–350 ms sampling gaps consistent with synchronous diagnostic image saving. A same-machine comparison with diagnostics disabled is still needed. Keep Developer mode off for normal use and enable it briefly for reproductions; this is not a guaranteed solution.
-3. **SetCursorPos failure stops some sessions — cause unknown, not fixed in this beta.** Restart the game and assistant, preferably both without elevation. Avoid locking the screen, switching users, or testing during UAC prompts. Compare local operation if remote-control software is involved. Send diagnostics and identify the phase where the error occurs; these are troubleshooting steps, not a confirmed fix.
+3. **SetCursorPos failure stops some sessions — cause unknown, not fixed in this beta.**  Run as administrator.
 
 4. **Ina's dark-purple UI prevents automatic continuation after a material reward — reproduced, not fixed in 1.0.0 or 1.0.1 beta.** The assistant may remain on the reward screen after receiving the drifting-metal material. Current color filters do not fully cover the purple reward strip and dark, low-saturation Continue button, so the screen is classified as `unknown` and no continuation click is attempted. The item itself is not the cause. Temporarily click Continue manually or switch to a character with a different UI color scheme. The screenshot attached to [Issue #1](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues/1) reproduces the failure in both the current source and the recognition code bundled in the beta EXE; other items, dark themes and animations have not been exhaustively tested.
 
