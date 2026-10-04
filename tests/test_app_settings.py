@@ -37,6 +37,17 @@ class SettingsTests(unittest.TestCase):
         self.assertIsNone(captured_hotkey('Super_L',0,0x5B))
         self.assertIsNone(captured_hotkey('q',0x40,0x51))
 
+    def test_windows_lock_states_never_add_alt_to_captured_shortcut(self):
+        # Num Lock, Caps Lock, Scroll Lock and the extended-key flag do not
+        # modify a shortcut. Actual Alt remains valid with locks enabled.
+        for locks in (0,0x8,0x2,0x20,0x2A,0x40008):
+            with self.subTest(locks=locks):
+                self.assertEqual(captured_hotkey('F8',locks,0x77),'F8')
+                self.assertEqual(captured_hotkey('q',locks,0x51),'Q')
+                self.assertEqual(captured_hotkey('q',locks|0x4,0x51),'Ctrl+Q')
+                self.assertEqual(captured_hotkey('q',locks|0x20000,0x51),'Alt+Q')
+                self.assertEqual(captured_hotkey('q',locks|0x20005,0x51),'Ctrl+Alt+Shift+Q')
+
     def test_shortcut_requires_all_modifiers_and_a_down_key(self):
         down={0x11,0x12,ord('Q')}
         get=lambda vk:0x8000 if vk in down else 0
