@@ -91,3 +91,5 @@ Successful diagnostic shutdown leaves a dated ZIP only. Session folders use
 `YYYY-MM-DD_HH-MM-SS` and ZIP filenames include shutdown time. Packed originals
 are removed only after archive verification; packing failures retain originals.
 Explicit recordings and unrelated files remain separate.
+
+For every release, keep one standalone known-issues link immediately below the README title in all six languages, pointing to main/docs/KNOWN_ISSUES.md.
