@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import cv2
 import numpy as np
+from bot_vision import bottom_action_button
 
 
 @dataclass
@@ -54,8 +55,25 @@ def observe_bait(frame, detection):
     if o.result:
         bright = cv2.inRange(hsv, (0,0,235), (179,55,255))
         point = detection.action_button
-        o.continue_point = point
         o.continue_visible = bool(point and detection.confidence >= .9)
+        if not o.continue_visible:
+            # Disabled Continue has grey glyphs and a grey-white border.
+            # Verify the actual pill on a confirmed card; a fallback anchor
+            # alone must never advance the settling gate.
+            grey_white = cv2.inRange(hsv, (0,0,175), (179,65,255))
+            button_ink = ink.copy()
+            pale_edge = cv2.inRange(hsv, (0,0,140), (179,65,255))
+            button_ink[pale_edge > 0] = 0
+            visible = bottom_action_button(button_ink, grey_white, w, h)
+            if visible is None:
+                # The Continue icon animates behind the text. A second ink
+                # threshold separates joined grey glyphs on those frames.
+                grey_glyphs = cv2.inRange(hsv, (0,0,185), (179,65,255))
+                visible = bottom_action_button(button_ink, grey_glyphs, w, h)
+            if visible:
+                point = (visible[0]/scale, visible[1]/scale)
+                o.continue_visible = True
+        o.continue_point = point
         if point:
             cx,cy = point[0]/w0, point[1]/h0
             o.dim_continue = bool(fraction(bright, (cx-.035,cy-.018,cx+.035,cy+.018)) < .06)

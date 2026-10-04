@@ -212,6 +212,30 @@ class BaitVisionTests(unittest.TestCase):
             self.assertFalse(o.exhausted,scale)
             self.assertFalse(o.dim_continue,scale)
 
+    def test_grey_continue_requires_real_bordered_pill_not_card_anchor(self):
+        for width in (900,1280,1920,2560):
+            f=np.full((506,900,3),100,np.uint8)
+            d=Detection(catch_result=True,confidence=.75,action_button=(.83*width,.915*width*506/900))
+            height=round(width*506/900)
+            def observation():
+                return observe_bait(cv2.resize(f,(width,height),interpolation=cv2.INTER_AREA),d)
+            self.assertFalse(observation().continue_visible)
+            # A filled patch or glyphs alone cannot release the settling gate.
+            cv2.rectangle(f,(675,444),(821,483),(65,40,45),-1)
+            cv2.putText(f,'G O',(735,471),cv2.FONT_HERSHEY_SIMPLEX,.6,(185,185,185),2)
+            self.assertFalse(observation().continue_visible)
+            f[:]=100
+            for color,pad in (((225,225,225),0),((65,40,45),3)):
+                cv2.rectangle(f,(694,444+pad),(802,483-pad),color,-1)
+                for x in (694,802):
+                    cv2.ellipse(f,(x,463),(19-pad,19-pad),0,0,360,color,-1)
+            cv2.putText(f,'G O',(735,471),cv2.FONT_HERSHEY_SIMPLEX,.6,(185,185,185),2)
+            o=observation()
+            self.assertTrue(o.continue_visible,width)
+            self.assertTrue(o.dim_continue,width)
+            self.assertAlmostEqual(o.continue_point[0]/width,.831,delta=.01)
+            self.assertFalse(observe_bait(cv2.resize(f,(width,height)),Detection()).continue_visible)
+
     def test_red_fish_without_white_exclamation_does_not_trigger(self):
         f,d=self.result(warning=False,active=True)
         cv2.ellipse(f,(446,454),(12,9),0,0,360,(30,40,230),-1)
