@@ -14,7 +14,7 @@ from auto_fishing import enable_dpi_awareness, run
 from app_locale import GAME_LANGUAGES, text as tr
 from app_settings import FishingCounter, parse_stop_hotkey, captured_hotkey
 
-APP_VERSION = '1.0'
+APP_VERSION = '1.1-dev'
 PROJECT_URL = 'https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto'
 
 
@@ -363,7 +363,7 @@ class FishingApp:
         self._set_status(tr(lang,'connecting'),self.CYAN)
         self._append_log(tr(lang,'started',language=self.game_language.get()))
         if self.diagnostics.get():
-            directory = self.diagnostic_base()/time.strftime('%Y%m%d-%H%M%S')
+            directory = self.diagnostic_base()/(time.strftime('%Y%m%d-%H%M%S')+f'-{time.time_ns()%1000000000:09d}')
             self.session_args.debug_dir = str(directory)
             self._append_log(tr(lang,'diagnostic_path',path=directory))
         self.worker = threading.Thread(target=self._run_bot,name='fishing-bot',daemon=True)

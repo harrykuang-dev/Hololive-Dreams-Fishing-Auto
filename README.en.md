@@ -1,12 +1,14 @@
 # Hololive Dreams Auto Fishing
 
+[Known issues and workarounds](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+
 [繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
 
 An auto-fishing assistant for the Windows version of **hololive Dreams**. It uses screen recognition and normal mouse input to handle bites, reeling, catch results, and the next round, with a simple graphical interface and no manual calibration required.
 
 ## Download
 
-Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) and download `Hololive-Fishing-Auto-v1.0.exe` from the release assets.
+Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) and download `Hololive-Dreams-Fishing-Auto-v1.0.exe` from the release assets.
 
 The single EXE includes its runtime and icon assets. You do not need Python or additional files. A SHA-256 checksum file is also available; the source-code ZIP is not the runnable application.
 
@@ -32,9 +34,7 @@ The single EXE includes its runtime and icon assets. You do not need Python or a
 
 Windows 10 / 11 x64 and the Windows game are required. Keep the game client area at 16:9; do not minimize, cover, or resize it during operation. Background fishing, bait purchases, map changes, and resource replenishment are not supported.
 
-Character colors, animations, resolution, performance, and game updates can affect recognition and input. Six-language support does not mean every scene or fish has been tested in-game. Success with four- or five-star fish, or at any difficulty, is not guaranteed. Stop and collect diagnostics if something goes wrong.
-
-This is an unofficial tool. It does not read or modify game process memory, saves, or game files. Check the game's rules on automation yourself; protection from account penalties is not guaranteed.
+Character colors, animations, resolution, performance, and game updates may still affect recognition and input; stop and provide diagnostics if something goes wrong. This is an unofficial tool. It does not read or modify game process memory, saves, or game files. This tool is intended solely for learning Python programming and researching and exchanging knowledge about image recognition technology. Check the game's rules on automation yourself. Do not use this tool to disrupt the game's ecosystem or for any commercial or profit-making purposes. The developer accepts no responsibility for any problems resulting from its use.
 
 ## Reporting problems and Developer mode
 
@@ -44,11 +44,13 @@ Enable Developer mode before reproducing the issue. It saves state screenshots, 
 
 Click `?` beside Developer mode to view and open the diagnostic folder:
 
+JPEG screenshots are saved in the background, up to 192 KiB each. The latest 64 event images and latest view are retained, along with two recent 4 MiB trace segments. The diagnostic ZIP excludes optional video.
+
 ```text
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
 ```
 
-The path follows your Windows account. Each run creates a timestamp-named folder. Include the app version, game language / character, resolution, Windows display scaling, a description, and a ZIP of the entire relevant session folder. Review screenshots for information you do not want to share before submitting them.
+The path follows your Windows account. Each run creates a timestamp-named folder. Include the app version, game language / character, resolution, Windows display scaling, a description, and the automatically generated `diagnostics.zip` after stopping. Review screenshots for information you do not want to share before submitting them.
 
 ## Source and license
 

@@ -1,12 +1,14 @@
 # Hololive Dreams Auto Fishing
 
+[알려진 문제 및 임시 해결 방법](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+
 [繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
 
 Windows용 **hololive Dreams** 자동 낚시 도우미입니다. 화면 인식과 일반 마우스 입력으로 입질, 물고기 끌어올리기, 결과 확인, 다음 낚시를 처리합니다. 간단한 GUI로 사용할 수 있으며 수동 보정은 필요하지 않습니다.
 
 ## 다운로드
 
-[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)의 첨부 파일에서 `Hololive-Fishing-Auto-v1.0.exe`를 다운로드하세요.
+[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)의 첨부 파일에서 `Hololive-Dreams-Fishing-Auto-v1.0.exe`를 다운로드하세요.
 
 실행 환경과 아이콘이 EXE 하나에 포함되어 있습니다. Python 설치나 추가 파일 복사는 필요하지 않습니다. SHA-256 체크섬 파일도 제공합니다. 소스 코드 ZIP은 바로 실행할 수 있는 앱이 아닙니다.
 
@@ -32,9 +34,7 @@ Windows용 **hololive Dreams** 자동 낚시 도우미입니다. 화면 인식�
 
 Windows 10 / 11 x64와 Windows용 게임이 필요합니다. 게임 클라이언트 영역을 16:9로 유지하고 실행 중에 최소화하거나 가리거나 크기를 변경하지 마세요. 백그라운드 낚시, 미끼 구매, 지도 이동, 자원 보충은 지원하지 않습니다.
 
-캐릭터 색상, 애니메이션, 해상도, 성능 및 게임 업데이트가 인식과 입력에 영향을 줄 수 있습니다. 6개 언어 지원은 모든 화면이나 물고기를 실제 게임에서 검증했다는 뜻이 아닙니다. 4 / 5성 물고기를 포함하여 어떤 난이도에서도 성공률을 보장하지 않습니다. 문제가 생기면 중지하고 진단 자료를 수집하세요.
-
-비공식 도구입니다. 게임 프로세스 메모리, 저장 데이터 또는 게임 파일을 읽거나 수정하지 않습니다. 자동화에 관한 게임 규정은 직접 확인하세요. 계정 제재 방지는 보장하지 않습니다.
+캐릭터 색상, 애니메이션, 해상도, 성능 및 게임 업데이트가 인식과 입력에 영향을 줄 수 있습니다. 문제가 생기면 중지하고 진단 자료를 제공하세요. 본 도구는 비공식 소프트웨어이며 게임 프로세스 메모리, 저장 데이터 또는 게임 파일을 읽거나 수정하지 않습니다. Python 프로그래밍 학습과 이미지 인식 기술 연구 및 정보 교류 목적으로만 사용하세요. 자동화 도구 사용에 관한 게임 규정은 직접 확인하세요. 게임 생태계를 해치거나 상업적 또는 영리 목적으로 사용하지 마세요. 본 도구 사용으로 발생하는 어떠한 문제에 대해서도 개발자는 책임을 지지 않습니다.
 
 ## 문제 보고 및 개발자 모드
 
@@ -44,11 +44,13 @@ Windows 10 / 11 x64와 Windows용 게임이 필요합니다. 게임 클라이언
 
 옆의 `?`를 눌러 진단 폴더를 확인하고 열 수 있습니다.
 
+JPEG를 백그라운드 저장하며 이미지당 최대 192 KiB, 최근 64장과 최신 화면을 유지합니다. 추적 CSV는 최근 두 구간(각 4 MiB)을 유지합니다. 진단 ZIP에는 선택적 동영상이 포함되지 않습니다.
+
 ```text
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
 ```
 
-경로는 현재 Windows 계정에 따라 정해지며 실행마다 시간 이름의 폴더를 만듭니다. 앱 버전, 게임 언어 / 캐릭터, 해상도, Windows 배율, 문제 설명과 해당 폴더 전체의 ZIP 파일을 보내주세요. 공유 전 스크린샷에 공개하고 싶지 않은 정보가 없는지 확인하세요.
+경로는 현재 Windows 계정에 따라 정해지며 실행마다 시간 이름의 폴더를 만듭니다. 앱 버전, 게임 언어 / 캐릭터, 해상도, Windows 배율, 문제 설명과 정지 후 자동 생성되는 `diagnostics.zip` 파일을 보내주세요. 공유 전 스크린샷에 공개하고 싶지 않은 정보가 없는지 확인하세요.
 
 ## 소스 및 라이선스
 

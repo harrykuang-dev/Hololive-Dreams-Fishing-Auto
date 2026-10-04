@@ -261,6 +261,25 @@ for code,label,close in (
     TEXT[code]['close_help'] = close
 
 
+for code, archive, error, help_text in (
+    ('zh-TW', '診斷壓縮檔：{path}', '診斷保存未完成：{error}',
+     '截圖以壓縮 JPEG 背景保存，最多保留最近 64 張及最新畫面。停止後會自動建立 diagnostics.zip；回報時只需提供此檔。'),
+    ('zh-CN', '诊断压缩包：{path}', '诊断保存未完成：{error}',
+     '截图以压缩 JPEG 后台保存，最多保留最近 64 张及最新画面。停止后自动生成 diagnostics.zip；反馈时只需提供此文件。'),
+    ('en', 'Diagnostic ZIP: {path}', 'Diagnostics incomplete: {error}',
+     'Compressed JPEGs are saved in the background; the latest 64 event images and latest view are retained. Stopping creates diagnostics.zip. Send this file with your report.'),
+    ('ja', '診断 ZIP：{path}', '診断保存が未完了：{error}',
+     '圧縮 JPEG をバックグラウンドで保存し、直近64枚と最新画面を保持します。停止後に diagnostics.zip を作成します。問題報告にはこのファイルを添付してください。'),
+    ('ko', '진단 ZIP: {path}', '진단 저장 미완료: {error}',
+     '압축 JPEG를 백그라운드로 저장하며 최근 64장과 최신 화면을 유지합니다. 정지 후 diagnostics.zip을 만듭니다. 문제 신고 시 이 파일을 보내 주세요.'),
+    ('id', 'ZIP diagnostik: {path}', 'Diagnostik belum lengkap: {error}',
+     'JPEG terkompresi disimpan di latar belakang; 64 gambar kejadian terakhir dan tampilan terbaru dipertahankan. Setelah berhenti, diagnostics.zip dibuat. Kirim file ini bersama laporan masalah.'),
+):
+    TEXT[code]['diagnostic_archive'] = archive
+    TEXT[code]['diagnostic_error'] = error
+    TEXT[code]['developer_help'] += '\n\n'+help_text
+
+
 def text(locale: str, key: str, **values) -> str:
     """Return fully localized text; CLI 'auto' keeps the previous TW default."""
     entry = TEXT["zh-TW" if locale == "auto" else locale][key]

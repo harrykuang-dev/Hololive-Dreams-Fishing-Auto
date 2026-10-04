@@ -25,7 +25,7 @@ With the build environment active:
 .\build.ps1
 ```
 
-Output: `dist\Hololive-Fishing-Auto-v1.0.exe`.
+Output: `dist\Hololive-Dreams-Fishing-Auto-v1.1-dev.exe`.
 The EXE includes its runtime, icon assets and high-DPI manifest; users need only the EXE.
 
 If an older EXE is running, close it or choose a different output folder before building.
@@ -39,8 +39,8 @@ Run on Windows; GUI tests create temporary Tk windows but do not start fishing.
 python -m unittest discover -s tests -v
 python -m fishing_auto --help
 python tools/control_benchmark.py
-python tools/verify_icon.py dist/Hololive-Fishing-Auto-v1.0.exe
-Get-FileHash dist/Hololive-Fishing-Auto-v1.0.exe -Algorithm SHA256
+python tools/verify_icon.py dist/Hololive-Dreams-Fishing-Auto-v1.1-dev.exe
+Get-FileHash dist/Hololive-Dreams-Fishing-Auto-v1.1-dev.exe -Algorithm SHA256
 ```
 
 Tests cover recognition, input safety, continuation, counters, shortcuts, translations,
@@ -80,3 +80,8 @@ The `fishing_auto` package also contains legacy capture, manual calibration and 
 commands. Use `python -m fishing_auto --help` for their CLI entry point. They are not
 required for the GUI and should not be confused with the single-EXE user workflow.
 Historical verification notes remain under `docs/`; the README introduces the application.
+
+## 1.1 development
+
+Based on stable tag `v1.0` (`b95229a`); includes the beta preparation-screen guard.
+See [1.1 research and validation](RESEARCH-1.1.md). This branch is an unpublished development candidate.

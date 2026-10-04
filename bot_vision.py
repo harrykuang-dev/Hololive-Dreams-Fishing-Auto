@@ -62,7 +62,7 @@ def close_buttons(cyan, w, h):
 
 
 def bottom_action_button(cyan, white, w, h):
-    """Require a blue button with four white borders and white glyphs."""
+    """Require a themed button with four white borders and white glyphs."""
     bx0, by0 = int(.55*w), int(.82*h)
     mask = cyan[by0:int(.985*h), bx0:int(.98*w)]
     buttons = [c for c in components(mask, (bx0, by0))
@@ -94,6 +94,25 @@ def bottom_action_button(cyan, white, w, h):
             continue
         return x+bw/2,y+bh/2
     return None
+
+
+def reward_strip(hsv, w, h):
+    """Find a full-width themed strip, including Ina's dim purple.
+
+    Compare each row with its own edge colour; the curved strip and its
+    vertical gradient need not have one fixed hue. GET is checked separately.
+    Restrict this tolerance to the overlay region, never the reel markers.
+    """
+    roi = hsv[int(.23*h):int(.75*h)]
+    reference = np.median(np.concatenate((roi[:, :max(1, int(.08*w))],
+                                         roi[:, int(.92*w):]), axis=1), axis=1)
+    diff = abs(roi.astype(np.float32)-reference[:, None, :])
+    hue_diff = np.minimum(diff[:, :, 0], 180-diff[:, :, 0])
+    same = (hue_diff < 8) & (diff[:, :, 1] < 35) & (diff[:, :, 2] < 35)
+    rows = (same.mean(axis=1) > .84) & (reference[:, 1] > 25) & (reference[:, 2] > 55)
+    # A continuous strip, rather than unrelated patches across many rows.
+    runs = np.split(np.flatnonzero(rows), np.flatnonzero(np.diff(np.flatnonzero(rows)) > 1)+1)
+    return any(len(run) > .15*h for run in runs)
 
 
 def catch_result_card(hsv, cream, w, h):
@@ -246,12 +265,11 @@ def _analyze(frame, language='auto'):
                 for lo,hi in ((84,135),(0,20),(21,44),(45,83),(136,179))]
     # Reward strips span the complete screen. Dismiss on blank space below
     # the strip, NEVER on the item icon (that opens item details).
-    reward_mask = cv2.inRange(hsv,np.array((75,65,175)),np.array((105,255,255)))
-    reward_rows = (reward_mask[int(.23*h):int(.75*h)]>0).mean(axis=1)>.84
+    reward_visible = reward_strip(hsv,w,h)
     # The strip alone can match a smooth blue ocean during a fade. Require
     # the three aligned light GET letters as independent positive evidence.
     get_visible = False
-    if reward_rows.sum()>.15*h:
+    if reward_visible:
         for brightness in (238,220,205):
             get_mask = cv2.inRange(hsv[int(.04*h):int(.22*h),int(.40*w):int(.61*w)],
                                   np.array((0,0,brightness)),np.array((180,55,255)))
@@ -260,15 +278,30 @@ def _analyze(frame, language='auto'):
             if len(letters)>=3 and max(c['cy'] for c in letters)-min(c['cy'] for c in letters)<.025*h:
                 get_visible = True
                 break
-    closes = [point for mask in ui_masks for point in close_buttons(mask,w,h)]
+    # Theme tolerance for close buttons is local too; round-ring/X structure
+    # plus the modal's paper layout still confirms an actual close action.
+    close_masks = []
+    cx,cy = int(.55*w),int(.015*h)
+    for lo,hi in ((84,135),(0,20),(21,44),(45,83),(136,179)):
+        mask = np.zeros((h,w),np.uint8)
+        mask[cy:int(.55*h),cx:int(.99*w)] = cv2.inRange(
+            hsv[cy:int(.55*h),cx:int(.99*w)],np.array((lo,25,55)),np.array((hi,255,255)))
+        close_masks.append(mask)
+    closes = [point for mask in close_masks for point in close_buttons(mask,w,h)]
     cream = cv2.inRange(hsv,np.array((0,0,215)),np.array((180,65,255)))
     if closes:
         point = max(closes,key=lambda p:p[0])
         # Encyclopedia has paper across both sides; item details have a
         # central white card and an inset X. Ready/waiting also have an X but
-        # must NOT be closed (their paper area is small).
+        # must NOT be closed. Snow and pale characters can fill the left
+        # side of the ready screen, so require paper on BOTH book pages.
         paper_left = (cream[int(.16*h):int(.84*h),int(.06*w):int(.46*w)]>0).mean()
-        if point[0]>.91*w and paper_left>.55:
+        paper_right = (cream[int(.16*h):int(.84*h),int(.56*w):int(.94*w)]>0).mean()
+        # Ready has separate pale fish/gear cards over a coloured panel;
+        # the book has a continuous paper header above the right-hand grid.
+        paper_right_header = (cream[int(.18*h):int(.24*h),int(.56*w):int(.94*w)]>0).mean()
+        if (point[0]>.91*w and paper_left>.55 and paper_right>.55
+                and paper_right_header>.65):
             d.scene, d.action_button, d.confidence = 'encyclopedia',point,.95
             return d
         if .62*w<point[0]<.87*w and .08*h<point[1]<.5*h:
@@ -279,8 +312,16 @@ def _analyze(frame, language='auto'):
                 return d
 
     button_white = cv2.inRange(hsv,np.array((0,0,200)),np.array((180,65,255)))
+    # Dark/low-saturation themes only broaden candidate generation in the
+    # bottom-right button ROI. Four white borders and glyphs remain required.
+    themed_button = np.zeros((h,w),np.uint8)
+    bx,by = int(.55*w),int(.82*h)
+    themed_button[by:int(.985*h),bx:int(.98*w)] = cv2.inRange(
+        hsv[by:int(.985*h),bx:int(.98*w)],np.array((0,25,55)),np.array((179,255,255)))
     button = next((point for mask in ui_masks
                    if (point := bottom_action_button(mask,button_white,w,h))),None)
+    if button is None:
+        button = bottom_action_button(themed_button,button_white,w,h)
     # Both Chinese editions retain the illustrated GET badge. The separate
     # language setting selects UI wording; recognition relies on stable art.
     d.catch_result = catch_result_card(hsv,cream,w,h)
@@ -292,7 +333,7 @@ def _analyze(frame, language='auto'):
         d.action_button = button or (.83*w,.915*h)
         d.confidence = .95 if button else .75
         return d
-    if reward_rows.sum()>.15*h and get_visible:
+    if reward_visible and get_visible:
         # Fishing materials keep Continue visible. Clicking the old blank
         # point instead can open the fish list underneath the reward strip.
         # Modal close buttons above must still take precedence over Continue.
@@ -303,7 +344,7 @@ def _analyze(frame, language='auto'):
         d.confidence = .95
         return d
 
-    if reward_rows.sum()>.15*h:
+    if reward_visible:
         d.scene = 'overlay_animation'
         return d
 
@@ -314,6 +355,9 @@ def _analyze(frame, language='auto'):
         return d
 
     d.tap,d.tap_pixels = bite_prompt(hsv,w,h)
+    if not d.tap:
+        from asset_vision import tap_art_prompt
+        d.tap,_ = tap_art_prompt(hsv,w,h)
     if d.tap:
         d.tap, d.scene, d.confidence = True,'tap',.95
     return d

@@ -1,12 +1,14 @@
 # Hololive Dreams Auto Fishing
 
+[Masalah yang diketahui dan solusi sementara](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+
 [繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
 
 Asisten memancing otomatis untuk **hololive Dreams** versi Windows. Aplikasi memakai pengenalan layar dan input mouse biasa untuk menangani sambaran, menarik ikan, hasil tangkapan, dan ronde berikutnya melalui antarmuka sederhana tanpa kalibrasi manual.
 
 ## Unduh
 
-Buka [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) dan unduh `Hololive-Fishing-Auto-v1.0.exe` dari lampiran rilis.
+Buka [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) dan unduh `Hololive-Dreams-Fishing-Auto-v1.0.exe` dari lampiran rilis.
 
 Satu EXE sudah berisi runtime dan aset ikon. Tidak perlu memasang Python atau menyalin file tambahan. File checksum SHA-256 juga tersedia; ZIP kode sumber bukan aplikasi siap jalan.
 
@@ -32,9 +34,7 @@ Satu EXE sudah berisi runtime dan aset ikon. Tidak perlu memasang Python atau me
 
 Memerlukan Windows 10 / 11 x64 dan game versi Windows. Pertahankan area klien game pada 16:9; jangan minimalkan, tutupi, atau ubah ukuran jendela saat berjalan. Memancing di latar belakang, membeli umpan, berpindah peta, dan mengisi ulang sumber daya tidak didukung.
 
-Warna karakter, animasi, resolusi, kinerja, dan pembaruan game dapat memengaruhi pengenalan dan input. Dukungan enam bahasa tidak berarti semua adegan atau ikan telah diuji langsung dalam game. Keberhasilan ikan bintang empat / lima atau tingkat kesulitan apa pun tidak dijamin. Hentikan dan kumpulkan diagnostik jika terjadi masalah.
-
-Ini alat tidak resmi. Aplikasi tidak membaca atau mengubah memori proses, save, atau file game. Periksa sendiri aturan game terkait otomatisasi; perlindungan dari sanksi akun tidak dijamin.
+Warna karakter, animasi, resolusi, kinerja, dan pembaruan game masih dapat memengaruhi pengenalan dan input; hentikan dan berikan data diagnostik jika terjadi masalah. Ini adalah alat tidak resmi yang tidak membaca atau mengubah memori proses, data simpanan, atau file game. Alat ini hanya ditujukan untuk pembelajaran pemrograman Python serta penelitian dan pertukaran pengetahuan tentang teknologi pengenalan gambar. Periksa sendiri aturan game mengenai penggunaan alat otomatisasi. Jangan gunakan alat ini untuk merusak ekosistem game atau untuk tujuan komersial maupun mencari keuntungan. Pengembang tidak bertanggung jawab atas masalah apa pun yang timbul akibat penggunaan alat ini.
 
 ## Melaporkan masalah dan Mode pengembang
 
@@ -44,11 +44,13 @@ Aktifkan Mode pengembang sebelum mengulangi masalah. Mode ini menyimpan tangkapa
 
 Klik `?` di sebelah Mode pengembang untuk melihat dan membuka folder diagnostik:
 
+JPEG disimpan di latar belakang, maksimum 192 KiB per gambar. Sebanyak 64 gambar kejadian terakhir dan tampilan terbaru disimpan, beserta dua segmen pelacakan terakhir masing-masing 4 MiB. ZIP diagnostik tidak menyertakan video opsional.
+
 ```text
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
 ```
 
-Lokasi mengikuti akun Windows Anda. Setiap sesi membuat folder bernama waktu. Sertakan versi aplikasi, bahasa / karakter game, resolusi, skala tampilan Windows, deskripsi masalah, dan ZIP seluruh folder sesi terkait. Periksa tangkapan layar sebelum membagikannya agar tidak ada informasi yang tidak ingin dipublikasikan.
+Lokasi mengikuti akun Windows Anda. Setiap sesi membuat folder bernama waktu. Sertakan versi aplikasi, bahasa / karakter game, resolusi, skala tampilan Windows, deskripsi masalah, dan `diagnostics.zip` yang dibuat otomatis setelah berhenti. Periksa tangkapan layar sebelum membagikannya agar tidak ada informasi yang tidak ingin dipublikasikan.
 
 ## Kode sumber dan lisensi
 

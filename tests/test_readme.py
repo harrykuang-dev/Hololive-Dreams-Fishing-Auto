@@ -39,6 +39,14 @@ class ReadmeTests(unittest.TestCase):
     def test_all_guides_cover_the_current_user_workflow(self):
         for name in GUIDES:
             content=(ROOT/name).read_text(encoding='utf-8')
-            for term in ('Hololive-Fishing-Auto-v1.0.exe','F9','`0`','16:9',
+            for term in ('Hololive-Dreams-Fishing-Auto-v1.0.exe','F9','`0`','16:9',
                          '%LOCALAPPDATA%\\HololiveFishingAuto\\sessions\\','SHA-256'):
                 self.assertIn(term,content,(name,term))
+
+    def test_all_guides_link_known_issues(self):
+        target='https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md'
+        for name in GUIDES:
+            content=(ROOT/name).read_text(encoding='utf-8')
+            self.assertIn(f']({target})',content.splitlines()[2],name)
+            self.assertEqual(content.count('KNOWN_ISSUES.md'),1,name)
+            self.assertNotIn('Fuwawa',content,name)

@@ -21,7 +21,7 @@ import win32api
 import win32con
 import win32gui
 import win32ui
-from fishing_auto.vision import save_image
+from diagnostics import DiagnosticWriter, BoundedTrace
 from bot_vision import Detection, analyze
 from bot_control import ReelTracker, ReelControl, Navigation, BiteGuard, CatchLedger, HoldRecovery
 from app_settings import parse_stop_hotkey, stop_hotkey_pressed
@@ -119,6 +119,8 @@ class MouseController:
     def __init__(self, window: WindowCapture) -> None:
         self.window = window
         self.held = False
+        self.input_down_count = 0
+        self.input_move_count = 0
         self.original_position = win32api.GetCursorPos()
 
     def _move_client(self, point: tuple[float, float]) -> None:
@@ -126,7 +128,27 @@ class MouseController:
         root = win32gui.GetAncestor(win32gui.WindowFromPoint(screen),win32con.GA_ROOT)
         if root != self.window.hwnd:
             raise RuntimeError("操作位置被其他視窗遮擋，已停止。")
-        win32api.SetCursorPos(screen)
+        if win32api.GetCursorPos() != screen:
+            win32api.SetCursorPos(screen)
+            self.input_move_count = getattr(self,'input_move_count',0)+1
+
+    def gameplay_point(self, width: int, height: int) -> tuple[float, float]:
+        """TAP and reeling accept any client point; no UI target to locate.
+
+        Reuse the cursor if it is safely inside the captured client, otherwise
+        choose its centre. _move_client still checks geometry and occlusion.
+        """
+        x1,y1,x2,y2 = self.window._capture_rect
+        x,y = win32api.GetCursorPos()
+        if x1 <= x < x2 and y1 <= y < y2:
+            return x-x1,y-y1
+        return .5*width,.5*height
+
+    def click_gameplay(self, width: int, height: int) -> None:
+        self.click(self.gameplay_point(width,height), duration=.045)
+
+    def press_gameplay(self, width: int, height: int) -> None:
+        self.press(self.gameplay_point(width,height))
 
     def click(self, point: tuple[float, float], duration: float = .065) -> None:
         self.release()
@@ -136,6 +158,7 @@ class MouseController:
         self.held = True
         try:
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)
+            self.input_down_count = getattr(self,'input_down_count',0)+1
             time.sleep(duration)
         finally:
             self.release()
@@ -155,6 +178,7 @@ class MouseController:
         self.held = True
         try:
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)
+            self.input_down_count = getattr(self,'input_down_count',0)+1
         except Exception:
             self.release()
             raise
@@ -247,8 +271,6 @@ def run(
         signal.signal(signal.SIGINT, stop_handler)
         signal.signal(signal.SIGTERM, stop_handler)
     debug_dir = Path(args.debug_dir) if args.debug_dir else None
-    if debug_dir:
-        debug_dir.mkdir(parents=True, exist_ok=True)
     tracker = ReelTracker()
     controller = ReelControl(lead=args.lead)
     recovery = HoldRecovery()
@@ -259,20 +281,23 @@ def run(
     frame_period = 1.0 / args.fps
     frame_count = 0
     previous_state = ""
+    previous_scene = ""
     last_debug = 0.
+    last_evidence = 0.
     minigame_seen = False
     lost_since = None
     trace_file = None
+    diagnostics = None
     video = None
     previous_sample = None
-    if debug_dir:
-        trace_file = (debug_dir / "trace.csv").open("w", encoding="utf-8", newline="")
-        trace_file.write("seconds,state,fish_y,player_y,bar_h,player_v,fish_v,error,control,held,predicted,scene,attempts,capture_ms,vision_ms,sample_ms,age_ms,os_down,rearm\n")
     labels = {scene: msg(scene) for scene in
               ('reward', 'reward_continue', 'encyclopedia', 'item_detail', 'action', 'result_continue')}
     emit(msg('connected_window', title=args.window_title, language=language) if stop_hotkey.upper()=='F9'
          else msg('connected_hotkey', title=args.window_title, language=language, hotkey=stop_hotkey))
     try:
+        if debug_dir:
+            diagnostics = DiagnosticWriter(debug_dir,annotate=annotate)
+            trace_file = BoundedTrace(debug_dir,"seconds,state,fish_y,player_y,bar_h,player_v,fish_v,error,control,held,predicted,scene,attempts,capture_ms,vision_ms,sample_ms,age_ms,os_down,rearm,diagnostic_write_ms,diagnostic_dropped,input_down_count,input_move_count\n")
         while running and not (stop_event and stop_event.is_set()):
             loop_started = time.perf_counter()
             if args.max_seconds and loop_started-start_time >= args.max_seconds:
@@ -302,8 +327,8 @@ def run(
                 if progress_callback:
                     progress_callback({'catches':ledger.catches,'rounds':ledger.rounds,'streak':ledger.streak})
                 emit(msg('catch_confirmed', round=ledger.rounds, streak=ledger.streak))
-                if debug_dir:
-                    save_image(debug_dir/f"catch_{ledger.catches:03d}.png",frame)
+                if diagnostics:
+                    diagnostics.submit(f"catch_{ledger.catches:06d}.jpg",frame,d)
                 if target_streak and ledger.streak >= target_streak:
                     emit(msg('target_reached', target=target_streak))
                     break
@@ -334,13 +359,12 @@ def run(
                 if tracking:
                     state = msg('reeling')
                     pressed,control_mode,control_error = controller.decide(tracking,height,latency=age)
-                    reel_point = (.86*width,.82*height)
                     rearm = recovery.update(tracking,control_mode,now,height)
                     if rearm:
                         mouse.release()
                         control_mode = 'rearm'
                     elif pressed:
-                        mouse.press(reel_point)
+                        mouse.press_gameplay(width,height)
                     else:
                         mouse.release()
                 else:
@@ -367,7 +391,7 @@ def run(
                     mouse.click(action)
                 elif bite:
                     state = msg('tap')
-                    mouse.click((.50*width,.50*height), duration=.045)
+                    mouse.click_gameplay(width,height)
                     minigame_seen = False
                     lost_since = None
                 else:
@@ -375,8 +399,10 @@ def run(
             if state != previous_state:
                 emit(msg('state_prefix') + state)
                 previous_state = state
-                if debug_dir:
-                    save_image(debug_dir/f"{frame_count:06d}_{d.scene}.png",annotate(frame,d,d.scene))
+            if diagnostics and (d.scene != previous_scene or bite or rearm or now-last_evidence > 5.):
+                diagnostics.submit(f"{frame_count:08d}_{d.scene}.jpg",frame,d)
+                last_evidence = now
+            previous_scene = d.scene
             if debug_dir:
                 if getattr(args,'record',False) and video is None:
                     video = cv2.VideoWriter(str(debug_dir/"game.mp4"),cv2.VideoWriter_fourcc(*"mp4v"),
@@ -384,10 +410,8 @@ def run(
                 if video and video.isOpened():
                     video.write(frame)
                 if now-last_debug>.5:
-                    save_image(debug_dir/"latest.png",annotate(frame,d,d.scene))
+                    diagnostics.submit('latest.jpg',frame,d)
                     last_debug = now
-                if d.action_button and frame_count % 8 == 0:
-                    save_image(debug_dir/f"ui_{frame_count:06d}_{d.scene}.png",frame)
             if trace_file:
                 values = (tracking.fish,tracking.player,tracking.bar_height,
                           tracking.player_velocity,tracking.fish_velocity) if tracking else ("",)*5
@@ -396,7 +420,9 @@ def run(
                                  f"{int(mouse.held)},{int(bool(tracking and tracking.predicted))},"
                                  f"{d.scene},{navigation.attempts},{(capture_end-capture_start)*1000:.2f},"
                                  f"{(now-capture_end)*1000:.2f},{sample_ms:.2f},{age*1000:.2f},"
-                                 f"{int(bool(win32api.GetAsyncKeyState(win32con.VK_LBUTTON)&0x8000))},{int(rearm)}\n")
+                                 f"{int(bool(win32api.GetAsyncKeyState(win32con.VK_LBUTTON)&0x8000))},{int(rearm)},"
+                                 f"{diagnostics.write_ms:.2f},{diagnostics.dropped},"
+                                 f"{mouse.input_down_count},{mouse.input_move_count}\n")
                 if frame_count%30==0:
                     trace_file.flush()
             frame_count += 1
@@ -406,13 +432,33 @@ def run(
                     stop_event.wait(remaining)
                 else:
                     time.sleep(remaining)
+    except Exception as exc:
+        if diagnostics:
+            diagnostics.runtime_error = str(exc)
+            if 'frame' in locals() and 'd' in locals():
+                diagnostics.submit(f"{frame_count:08d}_error_{d.scene}.jpg",frame,d)
+        raise
     finally:
-        mouse.close()
-        window.close()
-        if trace_file:
-            trace_file.close()
-        if video:
-            video.release()
+        # Always release input before waiting for diagnostics or making a ZIP.
+        try:
+            mouse.close()
+        finally:
+            try:
+                window.close()
+            finally:
+                if trace_file:
+                    trace_file.close()
+                if video:
+                    video.release()
+                if diagnostics:
+                    try:
+                        archive = diagnostics.close()
+                        if archive:
+                            emit(msg('diagnostic_archive',path=archive))
+                        if diagnostics.error:
+                            emit(msg('diagnostic_error',error=diagnostics.error))
+                    except Exception as exc:
+                        emit(msg('diagnostic_error',error=exc))
     elapsed = time.perf_counter()-start_time
     emit(msg('final_stop', frames=frame_count, seconds=elapsed, rounds=ledger.rounds,
              catches=ledger.catches, streak=ledger.streak))

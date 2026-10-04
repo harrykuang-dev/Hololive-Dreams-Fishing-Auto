@@ -56,6 +56,26 @@ def bite_frame(text=True, bang=True, outline=True):
 
 
 class BiteVisionTests(unittest.TestCase):
+    def test_asset_shape_recovers_dim_badge_but_requires_outline_and_bang(self):
+        from asset_vision import tap_templates
+        template = cv2.resize(tap_templates(),(190,61),interpolation=cv2.INTER_AREA)
+        f = np.zeros((600,1000,3),np.uint8)
+        mask = np.zeros(f.shape[:2],np.uint8)
+        mask[275:336,405:595] = template
+        outline = cv2.dilate((mask>100).astype(np.uint8),np.ones((9,9),np.uint8))
+        f[outline>0] = color(117,220,220)
+        f[mask>100] = color(30,120,245)
+        cv2.circle(f,(500,409),33,color(155,60,120),-1)
+        cv2.rectangle(f,(496,389),(504,410),(245,245,245),-1)
+        cv2.circle(f,(500,424),5,(245,245,245),-1)
+        self.assertTrue(analyze(f).tap)
+        no_bang = f.copy()
+        no_bang[370:450,465:535] = color(155,60,120)
+        self.assertFalse(analyze(no_bang).tap)
+        no_outline = f.copy()
+        no_outline[(outline>0)&(mask<=100)] = 0
+        self.assertFalse(analyze(no_outline).tap)
+
     def test_same_gameplay_art_works_for_every_supported_language(self):
         for code in GAME_LANGUAGES.values():
             with self.subTest(language=code):
@@ -163,6 +183,49 @@ class TrackVisionTests(unittest.TestCase):
 
 
 class PopupVisionTests(unittest.TestCase):
+    def test_dim_themed_new_book_close_retains_ready_screen_guard(self):
+        for hue in (0,35,60,99,128,155):
+            f = np.zeros((600,1000,3),np.uint8)
+            cv2.rectangle(f,(35,90),(975,590),(235,245,250),-1)
+            close_x(f,(955,55),hue=hue)
+            hsv = cv2.cvtColor(f,cv2.COLOR_BGR2HSV)
+            selected = hsv[:,:,1] > 70
+            hsv[selected,1] = 60
+            hsv[selected,2] = 126
+            f = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
+            with self.subTest(hue=hue):
+                self.assertEqual(analyze(f).scene,'encyclopedia')
+                f[108:144,560:940] = 0
+                self.assertNotEqual(analyze(f).scene,'encyclopedia')
+
+    def test_dark_reward_themes_keep_get_and_button_structure(self):
+        for hue in (0,15,35,60,90,120,128,150,175):
+            for saturation in (35,60,110,210):
+                f = np.zeros((600,1000,3),np.uint8)
+                cv2.rectangle(f,(0,190),(999,410),color(hue,saturation,130),-1)
+                for letter,x in zip('GET',(430,473,516)):
+                    cv2.putText(f,letter,(x,92),cv2.FONT_HERSHEY_SIMPLEX,1.5,(255,255,255),4)
+                action_button(f,(785,525),(945,575),hue=hue,value=126)
+                # Ina's button has a low-saturation fill and ornamental strokes.
+                hsv = cv2.cvtColor(f,cv2.COLOR_BGR2HSV)
+                roi = hsv[525:576,785:946]
+                roi[roi[:,:,1]>0,1] = saturation
+                f = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
+                with self.subTest(hue=hue,saturation=saturation):
+                    d = analyze(f)
+                    self.assertEqual(d.scene,'reward_continue')
+                    self.assertGreater(d.action_button[0],785)
+                    # GET removal must prevent navigation through an overlay.
+                    f[20:150] = 0
+                    self.assertIsNone(analyze(f).action_button)
+
+    def test_dark_colour_without_four_borders_or_glyphs_cannot_click(self):
+        f = np.zeros((600,1000,3),np.uint8)
+        cv2.rectangle(f,(750,535),(920,575),color(129,60,126),-1)
+        self.assertIsNone(analyze(f).action_button)
+        action_button(f,(750,535),(920,575),text=False,hue=129,value=126)
+        self.assertIsNone(analyze(f).action_button)
+
     def test_blue_violet_continue_keeps_border_and_glyph_requirements(self):
         for hue in (99,110,120,130):
             f = np.zeros((600,1000,3),np.uint8)
@@ -245,6 +308,24 @@ class PopupVisionTests(unittest.TestCase):
         f[:] = 0
         cv2.rectangle(f,(620,240),(780,480),(255,255,255),-1)
         close_x(f,(955,55))
+        self.assertIsNone(analyze(f).action_button)
+
+    def test_snowy_ready_screen_must_start_not_close_top_right_x(self):
+        f = np.full((600,1000,3),245,np.uint8)
+        cv2.rectangle(f,(580,0),(999,599),color(110,70,210),-1)
+        # Pale cards occupy most of the right panel, as in the report.
+        cv2.rectangle(f,(615,155),(969,245),(245,245,245),-1)
+        cv2.rectangle(f,(615,280),(969,485),(245,245,245),-1)
+        close_x(f,(955,45))
+        action_button(f,(700,520),(890,572))
+        for scale in (1,.75,.5):
+            with self.subTest(scale=scale):
+                d = analyze(cv2.resize(f,None,fx=scale,fy=scale))
+                self.assertEqual(d.scene,'action')
+                self.assertAlmostEqual(d.action_button[0],795*scale,delta=3)
+                self.assertGreater(d.action_button[1],500*scale)
+        # Without a verified Start button, do nothing instead of clicking X.
+        f[500:] = color(110,70,210)
         self.assertIsNone(analyze(f).action_button)
 
     def test_item_details_use_inset_x_not_background_continue(self):
