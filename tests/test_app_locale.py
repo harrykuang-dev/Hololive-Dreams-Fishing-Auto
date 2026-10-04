@@ -38,12 +38,11 @@ class LocaleTests(unittest.TestCase):
             self.assertEqual(text(code,'game_language'),label)
 
     def test_developer_help_matches_confirmed_wording(self):
-        expected = ('啟用後會儲存狀態截圖、魚獲卡片及追蹤與耗時作爲診斷資料，用於定位與排查異常。資料不會自動上傳。'
+        expected = ('會儲存以日期時間為標題的狀態截圖、魚獲卡片及追蹤與耗時作為診斷資料，用於定位與排查異常。資料不會自動上傳。'
                     '\n\n診斷資料位於：\nFOLDER\n\n'
                     '每次運行會建立以時間命名的資料夾。如遇異常，可透過下方項目地址聯繫作者，並提供問題描述及診斷資料。開啟開發者模式會增加效能負擔。')
         actual = text('zh-TW','developer_help',path='FOLDER')
-        self.assertTrue(actual.startswith(expected))
-        self.assertIn('diagnostics-YYYY-MM-DD_HH-MM-SS.zip',actual)
+        self.assertEqual(actual,expected)
 
 
 if __name__ == "__main__":

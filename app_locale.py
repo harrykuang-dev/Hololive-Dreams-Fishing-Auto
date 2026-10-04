@@ -196,37 +196,37 @@ UI_KEYS = ('counter','target_count','target_hint','stop_shortcut','developer_mod
            'catch_target_reached','hotkey_stop','connected_hotkey','instructions')
 UI_TEXT = {
     'zh-TW': ('已釣獲 {count} 條魚','目標釣魚數量','0 表示不限；達標後停止','停止快捷鍵','開發者模式',
-        '開發者模式說明','啟用後會儲存狀態截圖、魚獲卡片及追蹤與耗時作爲診斷資料，用於定位與排查異常。資料不會自動上傳。\n\n診斷資料位於：\n{path}\n\n每次運行會建立以時間命名的資料夾。如遇異常，可透過下方項目地址聯繫作者，並提供問題描述及診斷資料。開啟開發者模式會增加效能負擔。',
+        '開發者模式說明','會儲存以日期時間為標題的狀態截圖、魚獲卡片及追蹤與耗時作為診斷資料，用於定位與排查異常。資料不會自動上傳。\n\n診斷資料位於：\n{path}\n\n每次運行會建立以時間命名的資料夾。如遇異常，可透過下方項目地址聯繫作者，並提供問題描述及診斷資料。開啟開發者模式會增加效能負擔。',
         '請輸入非負整數目標及有效快捷鍵，例如 F9、Esc、Ctrl+Alt+Q。',
         '已達到目標數量；調高目標或設為 0 後可繼續。','已確認釣獲 {target} 條魚，達標停止。',
         '{hotkey}：已停止。','已連接：{title}；語言：{language}（{hotkey} 停止）',
         '先進入遊戲釣魚畫面再開始。切換到其他視窗會停止。'),
     'zh-CN': ('已钓获 {count} 条鱼','目标钓鱼数量','0 表示不限；达标后停止','停止快捷键','开发者模式',
-        '开发者模式说明','启用后会保存状态截图、鱼获卡片及跟踪与耗时数据作为诊断资料，用于定位与排查异常。资料不会自动上传。\n\n诊断资料位于：\n{path}\n\n每次运行会建立以时间命名的文件夹。如遇异常，可通过下方项目地址联系作者，并提供问题描述及诊断资料。开启开发者模式会增加性能负担。',
+        '开发者模式说明','会保存以日期时间为标题的状态截图、鱼获卡片及跟踪与耗时数据作为诊断资料，用于定位与排查异常。资料不会自动上传。\n\n诊断资料位于：\n{path}\n\n每次运行会建立以时间命名的文件夹。如遇异常，可通过下方项目地址联系作者，并提供问题描述及诊断资料。开启开发者模式会增加性能负担。',
         '请输入非负整数目标及有效快捷键，例如 F9、Esc、Ctrl+Alt+Q。',
         '已达到目标数量；提高目标或设为 0 后可继续。','已确认钓获 {target} 条鱼，达标停止。',
         '{hotkey}：已停止。','已连接：{title}；语言：{language}（{hotkey} 停止）',
         '先进入游戏钓鱼画面再开始。切换到其他窗口会停止。'),
     'en': ('Fish caught: {count}','Target catches','0 = unlimited; stop at target','Stop shortcut','Developer mode',
-        'Developer mode','When enabled, scene screenshots, catch cards, tracking and timing data are saved as diagnostics to help identify and troubleshoot issues. Nothing is uploaded automatically.\n\nDiagnostic data location:\n{path}\n\nEach run creates a timestamped folder. If an issue occurs, contact the author via the project address below and provide a description of the issue and the diagnostic data. Developer mode adds a performance overhead.',
+        'Developer mode','Scene screenshots, catch cards, tracking and timing data are saved under date-and-time titles as diagnostics to help identify and troubleshoot issues. Nothing is uploaded automatically.\n\nDiagnostic data location:\n{path}\n\nEach run creates a timestamped folder. If an issue occurs, contact the author via the project address below and provide a description of the issue and the diagnostic data. Developer mode adds a performance overhead.',
         'Enter a non-negative integer target and a valid shortcut, e.g. F9, Esc, Ctrl+Alt+Q.',
         'Target already reached. Increase it or set 0 to continue.','Confirmed {target} catches; target reached.',
         '{hotkey}: stopped.','Connected to {title}; language: {language} ({hotkey} to stop)',
         'Open the game fishing screen before starting. Switching windows stops the assistant.'),
     'ja': ('釣果：{count} 匹','目標の釣果数','0 は無制限；達成すると停止','停止ショートカット','開発者モード',
-        '開発者モードについて','有効にすると、画面、釣果カード、追跡情報と処理時間を診断データとして保存し、問題の特定と調査に使用します。自動アップロードはありません。\n\n診断データの保存先：\n{path}\n\n実行ごとに日時を名前にしたフォルダーを作成します。問題が発生した場合は、下記のプロジェクトURLから作者に連絡し、問題の説明と診断データをお送りください。開発者モードは処理負荷を増やします。',
+        '開発者モードについて','日時をタイトルにした画面、釣果カード、追跡情報と処理時間を診断データとして保存し、問題の特定と調査に使用します。自動アップロードはありません。\n\n診断データの保存先：\n{path}\n\n実行ごとに日時を名前にしたフォルダーを作成します。問題が発生した場合は、下記のプロジェクトURLから作者に連絡し、問題の説明と診断データをお送りください。開発者モードは処理負荷を増やします。',
         '目標は0以上の整数、キーは F9、Esc、Ctrl+Alt+Q などを指定してください。',
         '目標達成済みです。目標を増やすか0にしてください。','釣果 {target} 匹を確認し、目標達成で停止しました。',
         '{hotkey}：停止しました。','接続：{title}；言語：{language}（{hotkey} で停止）',
         'ゲームの釣り画面を開いてから開始してください。別のウィンドウに切り替えると停止します。'),
     'id': ('Ikan tertangkap: {count}','Target tangkapan','0 = tanpa batas; berhenti saat tercapai','Pintasan berhenti','Mode pengembang',
-        'Mode pengembang','Jika diaktifkan, tangkapan layar, kartu hasil tangkapan, pelacakan dan waktu proses disimpan sebagai data diagnostik untuk mengidentifikasi dan menelusuri masalah. Data tidak diunggah otomatis.\n\nLokasi data diagnostik:\n{path}\n\nSetiap sesi membuat folder dengan nama berdasarkan waktu. Jika terjadi masalah, hubungi pengembang melalui alamat proyek di bawah dan kirim deskripsi masalah serta data diagnostik. Mode pengembang menambah beban kinerja.',
+        'Mode pengembang','Tangkapan layar, kartu hasil tangkapan, pelacakan dan waktu proses disimpan dengan judul tanggal dan waktu sebagai data diagnostik untuk mengidentifikasi dan menelusuri masalah. Data tidak diunggah otomatis.\n\nLokasi data diagnostik:\n{path}\n\nSetiap sesi membuat folder dengan nama berdasarkan waktu. Jika terjadi masalah, hubungi pengembang melalui alamat proyek di bawah dan kirim deskripsi masalah serta data diagnostik. Mode pengembang menambah beban kinerja.',
         'Masukkan target bilangan bulat non-negatif dan pintasan valid, misalnya F9, Esc, Ctrl+Alt+Q.',
         'Target tercapai. Naikkan target atau gunakan 0.','{target} tangkapan dikonfirmasi; target tercapai.',
         '{hotkey}: berhenti.','Terhubung ke {title}; bahasa: {language} ({hotkey} untuk berhenti)',
         'Buka layar memancing sebelum mulai. Beralih jendela akan menghentikan asisten.'),
     'ko': ('잡은 물고기: {count} 마리','목표 물고기 수','0 = 무제한; 목표 도달 시 정지','정지 단축키','개발자 모드',
-        '개발자 모드 안내','활성화하면 화면, 물고기 결과 카드, 추적 정보와 처리 시간을 진단 자료로 저장하여 문제를 확인하고 원인을 조사합니다. 자료는 자동으로 업로드되지 않습니다.\n\n진단 자료 위치:\n{path}\n\n실행마다 시간을 이름으로 하는 폴더를 만듭니다. 문제가 발생하면 아래 프로젝트 주소를 통해 제작자에게 연락하여 문제 설명과 진단 자료를 보내 주세요. 개발자 모드는 성능 부하를 증가시킵니다.',
+        '개발자 모드 안내','날짜와 시간을 제목으로 하는 화면, 물고기 결과 카드, 추적 정보와 처리 시간을 진단 자료로 저장하여 문제를 확인하고 원인을 조사합니다. 자료는 자동으로 업로드되지 않습니다.\n\n진단 자료 위치:\n{path}\n\n실행마다 시간을 이름으로 하는 폴더를 만듭니다. 문제가 발생하면 아래 프로젝트 주소를 통해 제작자에게 연락하여 문제 설명과 진단 자료를 보내 주세요. 개발자 모드는 성능 부하를 증가시킵니다.',
         '목표는 0 이상의 정수, 단축키는 F9, Esc, Ctrl+Alt+Q 등으로 지정하세요.',
         '목표를 달성했습니다. 목표를 늘리거나 0으로 설정하세요.','물고기 {target} 마리를 확인하여 정지했습니다.',
         '{hotkey}: 정지했습니다.','연결: {title}; 언어: {language} ({hotkey} 정지)',
@@ -261,23 +261,16 @@ for code,label,close in (
     TEXT[code]['close_help'] = close
 
 
-for code, archive, error, help_text in (
-    ('zh-TW', '診斷壓縮檔：{path}', '診斷保存未完成：{error}',
-     '截圖以壓縮 JPEG 背景保存，最多保留最近 64 張及最新畫面。停止後會自動建立 diagnostics.zip；回報時只需提供此檔。'),
-    ('zh-CN', '诊断压缩包：{path}', '诊断保存未完成：{error}',
-     '截图以压缩 JPEG 后台保存，最多保留最近 64 张及最新画面。停止后自动生成 diagnostics.zip；反馈时只需提供此文件。'),
-    ('en', 'Diagnostic ZIP: {path}', 'Diagnostics incomplete: {error}',
-     'Compressed JPEGs are saved in the background; the latest 64 event images and latest view are retained. Stopping creates diagnostics.zip. Send this file with your report.'),
-    ('ja', '診断 ZIP：{path}', '診断保存が未完了：{error}',
-     '圧縮 JPEG をバックグラウンドで保存し、直近64枚と最新画面を保持します。停止後に diagnostics.zip を作成します。問題報告にはこのファイルを添付してください。'),
-    ('ko', '진단 ZIP: {path}', '진단 저장 미완료: {error}',
-     '압축 JPEG를 백그라운드로 저장하며 최근 64장과 최신 화면을 유지합니다. 정지 후 diagnostics.zip을 만듭니다. 문제 신고 시 이 파일을 보내 주세요.'),
-    ('id', 'ZIP diagnostik: {path}', 'Diagnostik belum lengkap: {error}',
-     'JPEG terkompresi disimpan di latar belakang; 64 gambar kejadian terakhir dan tampilan terbaru dipertahankan. Setelah berhenti, diagnostics.zip dibuat. Kirim file ini bersama laporan masalah.'),
+for code, archive, error in (
+    ('zh-TW', '診斷壓縮檔：{path}', '診斷保存未完成：{error}'),
+    ('zh-CN', '诊断压缩包：{path}', '诊断保存未完成：{error}'),
+    ('en', 'Diagnostic ZIP: {path}', 'Diagnostics incomplete: {error}'),
+    ('ja', '診断 ZIP：{path}', '診断保存が未完了：{error}'),
+    ('ko', '진단 ZIP: {path}', '진단 저장 미완료: {error}'),
+    ('id', 'ZIP diagnostik: {path}', 'Diagnostik belum lengkap: {error}'),
 ):
     TEXT[code]['diagnostic_archive'] = archive
     TEXT[code]['diagnostic_error'] = error
-    TEXT[code]['developer_help'] += '\n\n'+help_text
 
 
 for code, label, working, failed in (
@@ -291,8 +284,6 @@ for code, label, working, failed in (
     TEXT[code].update(auto_bait=label, bait_working=working, bait_failed=failed)
 
 
-for code, detail in {'zh-TW': '打包驗證成功後會刪除已打包的原始檔，只保留 ZIP；失敗時保留原始檔。資料夾及 ZIP 名稱包含日期時間。', 'zh-CN': '打包验证成功后删除已打包的原始文件，仅保留 ZIP；失败时保留原始文件。文件夹及 ZIP 名称包含日期时间。', 'en': 'After the ZIP is verified, its original files are removed. Originals remain if packing fails. Folder and ZIP names include the date and time.', 'ja': 'ZIP の検証成功後、元の診断ファイルを削除し ZIP のみ残します。失敗時は元のファイルを保持します。フォルダーと ZIP の名前には日時が入ります。', 'ko': 'ZIP 검증 후 원본 진단 파일을 삭제하고 ZIP만 보관합니다. 실패 시 원본을 유지합니다. 폴더와 ZIP 이름에 날짜와 시간이 포함됩니다.', 'id': 'Setelah ZIP diverifikasi, berkas asal dihapus. Jika pengarsipan gagal, berkas asal tetap disimpan. Nama folder dan ZIP memuat tanggal dan waktu.'}.items():
-    TEXT[code]['developer_help'] = TEXT[code]['developer_help'].replace('diagnostics.zip','diagnostics-YYYY-MM-DD_HH-MM-SS.zip')+'\n\n'+detail
 
 
 def text(locale: str, key: str, **values) -> str:

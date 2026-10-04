@@ -229,3 +229,11 @@ The four supplied completed sessions with existing ZIPs were checked and
 unarchived folders were not deleted. Tests cover ZIP-only retention, dated
 names, unrelated/video preservation, write failures, changed-original safety,
 repeated close and runtime shutdown ordering.
+
+## Developer-help wording revision
+
+Per the supplied screenshot, the two appended paragraphs about JPEG retention,
+ZIP filename format and cleanup are removed from the help dialog. The first
+paragraph now introduces diagnostics under date-and-time titles, preserving the
+purpose and no-upload sentence. All six help translations were updated. The
+nine localization/layout tests passed; diagnostic saving behavior is unchanged.
