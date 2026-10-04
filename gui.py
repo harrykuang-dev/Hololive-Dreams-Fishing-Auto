@@ -10,11 +10,14 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import font, messagebox, ttk
 import win32api
+from global_hotkey import GlobalHotkey
+from startup_trace import startup_log
 from auto_fishing import enable_dpi_awareness, run
 from app_locale import GAME_LANGUAGES, text as tr
-from app_settings import FishingCounter, parse_stop_hotkey, captured_hotkey, hotkeys_conflict, StartHotkey
+from app_settings import FishingCounter, parse_stop_hotkey, captured_hotkey, hotkeys_conflict
 
 APP_VERSION = '1.1-dev'
+APP_BUILD = 'start-r2'
 PROJECT_URL = 'https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto'
 
 
@@ -62,7 +65,11 @@ class FishingApp:
         self.target = tk.StringVar(value='0')
         self.start_key = tk.StringVar(value='F8')
         self.start_shortcut_display = tk.StringVar(value='F8')
-        self._start_hotkey = StartHotkey()
+        self._launch_lock = threading.Lock()
+        self._run_id = 0
+        self._display_run_id = 0
+        self._start_snapshot = None
+        self._hotkey_enabled = True
         self._capture_target = 'stop'
         self.stop_key = tk.StringVar(value='F9')
         self.shortcut_display = tk.StringVar(value='F9')
@@ -77,6 +84,12 @@ class FishingApp:
         root.bind('<Configure>',self._dpi_changed,add='+')
         root.bind('<Configure>',self._fit_content,add='+')
         root.bind('<Button-1>',self._cancel_shortcut_on_click,add='+')
+        self._hotkey = GlobalHotkey(self._hotkey_start, self._hotkey_report)
+        for variable in (self.game_language,self.target,self.start_key,self.stop_key,self.diagnostics):
+            variable.trace_add('write',self._snapshot_settings)
+        self._snapshot_settings()
+        self._hotkey.start()
+        root.bind('<Destroy>',self._destroy_listener,add='+')
         root.after(100,self._poll)
 
     def px(self,value): return round(value*self.scale)
@@ -243,7 +256,7 @@ class FishingApp:
             self._end_shortcut_capture()
             self._capture_target = target
             self._shortcut_capturing = True
-            self._start_hotkey.disarm()
+            self._hotkey.configure(enabled=False)
             entry.focus_set()
             display = self.start_shortcut_display if target=='start' else self.shortcut_display
             display.set(tr(self.language_code(),'capture_shortcut'))
@@ -266,7 +279,7 @@ class FishingApp:
         if value:
             variable = self.start_key if self._capture_target=='start' else self.stop_key
             other = self.stop_key if self._capture_target=='start' else self.start_key
-            self._start_hotkey.disarm()
+            self._hotkey.configure(enabled=False)
             self._end_shortcut_capture()
             if hotkeys_conflict(value,other.get()):
                 messagebox.showerror(tr(self.language_code(),'error'),tr(self.language_code(),'shortcut_conflict'),parent=self.root)
@@ -275,13 +288,36 @@ class FishingApp:
                 self._end_shortcut_capture()
         return 'break'
 
+    def _snapshot_settings(self,*_):
+        # Only the GUI thread reads Tk variables. The listener reads this
+        # immutable snapshot and can launch while Tk is hidden or busy.
+        self._start_snapshot = (self.language_code(),self.game_language.get(),
+                                self.target.get(),self.start_key.get(),self.stop_key.get(),self.diagnostics.get())
+        self._hotkey.configure(value=self.start_key.get())
+
+    def _hotkey_report(self,value,registered,error):
+        startup_log(f'{APP_BUILD} hotkey {value} registered={registered} error={error}')
+        self.messages.put(('hotkey_status',(value,registered,error)))
+
     def _poll_start_hotkey(self):
-        enabled = (not self._closing and not self._shortcut_capturing
-                   and not self.start_button.instate(['disabled'])
-                   and not (self.worker and self.worker.is_alive())
-                   and self.root.grab_current() is None)
-        if self._start_hotkey.poll(self.start_key.get(),win32api.GetAsyncKeyState,enabled):
-            self.start()
+        self._hotkey_enabled = (not self._closing and not self._shortcut_capturing
+                                and self.root.grab_current() is None)
+        self._hotkey.configure(enabled=self._hotkey_enabled)
+
+    def _hotkey_start(self):
+        # No Tk calls: Windows message -> snapshot -> fishing worker.
+        if self._closing or self._shortcut_capturing or not self._hotkey_enabled:
+            return
+        startup_log(f'{APP_BUILD} global start received')
+        try:
+            self._launch(self._start_snapshot,'hotkey')
+        except Exception as exc:
+            startup_log(f'{APP_BUILD} global launch failed: {exc}')
+            self.messages.put(('settings_error',str(exc)))
+
+    def _destroy_listener(self,event):
+        if event.widget is self.root:
+            self._hotkey.close()
 
     def _apply_language(self,_event=None):
         lang = self.language_code()
@@ -290,7 +326,7 @@ class FishingApp:
                            (self.target_label,'target_count'),(self.target_hint,'target_hint'),(self.shortcut_label,'stop_shortcut'),(self.start_shortcut_label,'start_shortcut'),
                            (self.start_button,'start'),(self.stop_button,'stop'),(self.diagnostics_check,'developer_mode'),(self.log_title,'log')):
             widget.configure(text=tr(lang,key))
-        self.footer.configure(text=f'v{APP_VERSION}')
+        self.footer.configure(text=f'v{APP_VERSION} · {APP_BUILD}')
         self._refresh_count()
         if not self.worker or not self.worker.is_alive():
             self._set_status(tr(lang,'error' if self.has_error else 'idle'),self.RED if self.has_error else self.MUTED)
@@ -375,36 +411,64 @@ class FishingApp:
     def _set_status(self,text,color): self.status.configure(text=text,foreground=color)
 
     def start(self):
-        if self.worker and self.worker.is_alive(): return
-        lang = self.language_code()
+        self._snapshot_settings()
         try:
-            target = int(self.target.get())
-            if target<0: raise ValueError('Negative target')
-            hotkey = self.stop_key.get().strip()
-            parse_stop_hotkey(hotkey)
-            parse_stop_hotkey(self.start_key.get())
-            if hotkeys_conflict(self.start_key.get(),hotkey):
-                messagebox.showerror(tr(lang,'error'),tr(lang,'shortcut_conflict'),parent=self.root)
-                return
-        except ValueError:
-            messagebox.showerror(tr(lang,'error'),tr(lang,'invalid_settings'),parent=self.root)
+            info = self._launch(self._start_snapshot,'button')
+        except ValueError as exc:
+            messagebox.showerror(tr(self.language_code(),'error'),str(exc),parent=self.root)
             return
+        if info:
+            self._show_start(info)
+
+    def _launch(self,snapshot,source):
+        lang,language_name,target_text,start_key,stop_key,diagnostics = snapshot
+        try:
+            target = int(target_text)
+            if target < 0: raise ValueError()
+            parse_stop_hotkey(start_key)
+            parse_stop_hotkey(stop_key)
+        except ValueError:
+            raise ValueError(tr(lang,'invalid_settings')) from None
+        if hotkeys_conflict(start_key,stop_key):
+            raise ValueError(tr(lang,'shortcut_conflict'))
+        with self._launch_lock:
+            if self._closing or (self.worker and self.worker.is_alive()):
+                return None
+            self._run_id += 1
+            run_id = self._run_id
+            args = self.bot_args(lang)
+            args.target_catches, args.stop_hotkey = target,stop_key.strip()
+            args.start_source = source
+            if diagnostics:
+                args.debug_dir = str(self.diagnostic_base()/(time.strftime('%Y-%m-%d_%H-%M-%S')+f'-{time.time_ns()%1000000000:09d}'))
+            self.session_args = args
+            self.stop_event.clear()
+            info = (run_id,args,language_name,source)
+            self.messages.put((run_id,'starting',info))
+            startup_log(f'{APP_BUILD} launch run={run_id} source={source} start={start_key} stop={stop_key}')
+            self.worker = threading.Thread(target=self._run_bot,args=(args,run_id),name='fishing-bot',daemon=True)
+            try:
+                self.worker.start()
+            except Exception as exc:
+                startup_log(f'{APP_BUILD} cannot start worker: {exc}')
+                self.messages.put((run_id,'error',str(exc)))
+                self.messages.put((run_id,'done',None))
+            return info
+
+    def _show_start(self,info):
+        run_id,args,language_name,source = info
+        if self._display_run_id == run_id:
+            return
+        self._display_run_id = run_id
         self.counter.begin_run()
         self._refresh_count()
-        self.stop_event.clear()
         self.has_error = False
-        self.session_args = self.bot_args(lang)
-        self.session_args.target_catches = target
-        self.session_args.stop_hotkey = hotkey
         self._set_controls(True)
-        self._set_status(tr(lang,'connecting'),self.CYAN)
-        self._append_log(tr(lang,'started',language=self.game_language.get()))
-        if self.diagnostics.get():
-            directory = self.diagnostic_base()/(time.strftime('%Y-%m-%d_%H-%M-%S')+f'-{time.time_ns()%1000000000:09d}')
-            self.session_args.debug_dir = str(directory)
-            self._append_log(tr(lang,'diagnostic_path',path=directory))
-        self.worker = threading.Thread(target=self._run_bot,name='fishing-bot',daemon=True)
-        self.worker.start()
+        self._set_status(tr(args.language,'connecting'),self.CYAN)
+        self._append_log(tr(args.language,'started',language=language_name))
+        self._append_log(tr(args.language,'start_source',source=tr(args.language,'source_'+source),build=APP_BUILD))
+        if args.debug_dir:
+            self._append_log(tr(args.language,'diagnostic_path',path=args.debug_dir))
 
     def _set_controls(self,running):
         self._end_shortcut_capture()
@@ -416,12 +480,16 @@ class FishingApp:
         for widget in (self.target_entry,self.diagnostics_check):
             widget.configure(state='disabled' if running else 'normal')
 
-    def _run_bot(self):
+    def _run_bot(self,args,run_id):
         try:
-            run(self.session_args,stop_event=self.stop_event,status_callback=lambda value:self.messages.put(('log',value)),
-                progress_callback=lambda value:self.messages.put(('progress',value)))
-        except Exception as exc: self.messages.put(('error',str(exc)))
-        finally: self.messages.put(('done',None))
+            run(args,stop_event=self.stop_event,status_callback=lambda value:self.messages.put((run_id,'log',value)),
+                progress_callback=lambda value:self.messages.put((run_id,'progress',value)))
+        except Exception as exc:
+            startup_log(f'{APP_BUILD} run={run_id} failed: {exc}')
+            self.messages.put((run_id,'error',str(exc)))
+        finally:
+            self.messages.put((run_id,'done',None))
+            startup_log(f'{APP_BUILD} run={run_id} finished')
 
     def stop(self):
         if self.worker and self.worker.is_alive():
@@ -433,9 +501,22 @@ class FishingApp:
         self._poll_start_hotkey()
         try:
             while True:
-                kind,value = self.messages.get_nowait()
+                item = self.messages.get_nowait()
+                if len(item)==3:
+                    run_id,kind,value = item
+                    if run_id != self._run_id:
+                        continue
+                else:
+                    kind,value = item
                 lang = self.session_args.language
-                if kind=='progress':
+                if kind=='starting':
+                    self._show_start(value)
+                elif kind=='hotkey_status':
+                    key,registered,error = value
+                    self._append_log(tr(self.language_code(),'hotkey_ready' if registered else 'hotkey_unavailable',hotkey=key,error=error))
+                elif kind=='settings_error':
+                    messagebox.showerror(tr(lang,'error'),value,parent=self.root)
+                elif kind=='progress':
                     self.counter.update(value['catches'])
                     self._refresh_count()
                 elif kind=='log' and value:
@@ -455,6 +536,8 @@ class FishingApp:
 
     def close(self):
         self._closing = True
+        self._hotkey_enabled = False
+        self._hotkey.close()
         self.stop_event.set()
         self.root.after(150,self._finish_close)
 

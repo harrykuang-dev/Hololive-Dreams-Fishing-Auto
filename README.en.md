@@ -13,6 +13,8 @@ Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing
 The single EXE includes its runtime and icon assets. You do not need Python or additional files. A SHA-256 checksum file is also available; the source-code ZIP is not the runnable application.
 
 
+Start uses a Windows global hotkey on its own thread, so it can launch while the app window is in the background. Close old copies and check “Start shortcut ready”. Choose another key if registration fails; Windows reserves F12.
+
 ## Features
 
 - Recognizes bite prompts and tracks the fish and catch zone while reeling.

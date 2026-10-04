@@ -130,3 +130,38 @@ ZIP filename format and cleanup are removed from the help dialog. The first
 paragraph now introduces diagnostics under date-and-time titles, preserving the
 purpose and no-upload sentence. All six help translations were updated. The
 nine localization/layout tests passed; diagnostic saving behavior is unchanged.
+
+
+## Independent Windows global start (start-r2)
+
+The follow-up still failed in game: Stop worked while Start only showed a
+connecting state after switching to the assistant. The previous activation
+change did not establish or repair the underlying cause. Start was sampled
+by Tk after callbacks; Stop was sampled by the fishing worker. Replace the
+start path with RegisterHotKey on a dedicated thread and a windowless Windows
+message queue, using MOD_NOREPEAT. Rebinding unregisters the old hotkey, uses
+a fresh identity, and suppresses an already-held key until release. Capture
+and modal dialogs suspend registration; unavailable keys are reported.
+
+Only the GUI reads Tk settings, publishing an immutable snapshot. The listener
+launches the fishing worker directly from that snapshot and queues UI updates;
+it never calls Tk. A launch lock prevents duplicates, and run IDs discard old
+progress/done messages after a new run. The normal Start button uses the same
+launch path. Window lookup now uses correctly typed ctypes calls, releasing
+the GIL during native operations, and prefers the already-foreground game.
+
+The footer identifies start-r2. GUI logs show registered key, start source,
+and three initialization stages. A bounded 128 KiB startup.log plus one
+backup under LocalAppData/HololiveFishingAuto records these stages even when
+developer screenshots are off. It is local and is never uploaded.
+
+147 tests pass. Integration registers unusual Ctrl+Alt+Shift+F21/F22/F23 test
+combinations and posts WM_HOTKEY only to our own listener thread; no hardware
+key events or game input are sent. It proves launching and restarting without
+processing Tk events, duplicate prevention, old-run filtering, registration
+conflicts, rebinding and cleanup. Six language / four DPI layout checks pass.
+This does not prove the reported user's game has been fixed; a new live run
+with start-r2 is still needed.
+
+References: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey
+and https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-hotkey .

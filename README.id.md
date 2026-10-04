@@ -13,6 +13,8 @@ Buka [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing
 Satu EXE sudah berisi runtime dan aset ikon. Tidak perlu memasang Python atau menyalin file tambahan. File checksum SHA-256 juga tersedia; ZIP kode sumber bukan aplikasi siap jalan.
 
 
+Mulai memakai hotkey global Windows pada utas tersendiri, sehingga dapat dimulai saat jendela aplikasi di latar belakang. Tutup versi lama dan periksa pesan pintasan siap. Pilih tombol lain jika pendaftaran gagal; F12 dicadangkan Windows.
+
 ## Fitur
 
 - Mengenali tanda sambaran serta melacak ikan dan zona tangkapan saat menarik ikan.

@@ -23,6 +23,7 @@ import win32con
 import win32gui
 import win32ui
 from diagnostics import DiagnosticWriter, BoundedTrace
+from startup_trace import startup_log
 from bot_vision import Detection, analyze
 from bot_control import ReelTracker, ReelControl, Navigation, BiteGuard, CatchLedger, HoldRecovery
 from app_settings import parse_stop_hotkey, stop_hotkey_pressed
@@ -39,10 +40,31 @@ def enable_dpi_awareness() -> None:
             ctypes.windll.user32.SetProcessDPIAware()
 
 
+def find_game_window(title):
+    """Window lookup without holding Python's GIL during native calls."""
+    user = ctypes.windll.user32
+    foreground = user.GetForegroundWindow
+    foreground.argtypes = ()
+    foreground.restype = wintypes.HWND
+    text = user.GetWindowTextW
+    text.argtypes = (wintypes.HWND, wintypes.LPWSTR, ctypes.c_int)
+    text.restype = ctypes.c_int
+    current = foreground()
+    if current:
+        caption = ctypes.create_unicode_buffer(512)
+        text(current,caption,len(caption))
+        if caption.value == title:
+            return current
+    find = user.FindWindowW
+    find.argtypes = (wintypes.LPCWSTR, wintypes.LPCWSTR)
+    find.restype = wintypes.HWND
+    return find(None,title)
+
+
 class WindowCapture:
     def __init__(self, title: str) -> None:
         self.title = title
-        self.hwnd = win32gui.FindWindow(None, title)
+        self.hwnd = find_game_window(title)
         if not self.hwnd:
             raise RuntimeError(f"找不到視窗：{title!r}")
         self._dc = self._source = self._memory = self._bitmap = self._previous = None
@@ -264,13 +286,23 @@ def run(
         if sys.stdout is not None:
             print(message, flush=True)
 
+    def startup(key):
+        message = msg(key)
+        # Stage messages are GUI-only; retain legacy CLI callback ordering.
+        if getattr(args,'start_source',None):
+            startup_log(message)
+            emit(message)
+
+    startup('startup_find')
     window = WindowCapture(args.window_title)
+    startup('startup_activate')
     try:
         window.activate()
     except Exception:
         window.close()
         raise
     time.sleep(0.20)
+    startup('startup_prepare')
     mouse = MouseController(window)
     running = True
 

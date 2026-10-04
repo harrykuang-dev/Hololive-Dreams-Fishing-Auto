@@ -8,6 +8,15 @@ from app_locale import GAME_LANGUAGES, text
 from tkinter import ttk
 
 class LayoutTests(unittest.TestCase):
+    def setUp(self):
+        # Geometry tests never register or consume real keyboard shortcuts.
+        self.listener_patch=patch('gui.GlobalHotkey')
+        self.listener=self.listener_patch.start()
+        self.addCleanup(self.listener_patch.stop)
+        self.trace_patch=patch('gui.startup_log')
+        self.trace_patch.start()
+        self.addCleanup(self.trace_patch.stop)
+
     def test_buttons_match_and_controls_fit_at_multiple_dpis(self):
         for dpi in (96,120,144,192):
             root=tk.Tk()
@@ -111,23 +120,18 @@ class LayoutTests(unittest.TestCase):
             app._capture_shortcut(SimpleNamespace(keysym='q',state=0x20004,keycode=0x51))
             self.assertEqual(app.start_key.get(),'Ctrl+Alt+Q')
             self.assertEqual(app.start_shortcut_display.get(),'Ctrl+Alt+Q')
-            with patch('gui.win32api.GetAsyncKeyState',side_effect=lambda vk:0x8000 if vk in down else 0), patch.object(app,'start') as start:
-                app._poll_start_hotkey()
-                down.update((ord('Q'),0x11,0x12)); app._poll_start_hotkey()
-                start.assert_called_once()
-                app._poll_start_hotkey(); start.assert_called_once()
-                for guard in ('capture','running','modal','closing'):
-                    down.clear(); app._poll_start_hotkey()
+            with patch.object(app,'_launch') as launch:
+                app._hotkey_start(); launch.assert_called_once()
+                for guard in ('capture','modal','closing'):
                     app._shortcut_capturing=guard=='capture'
                     app._closing=guard=='closing'
-                    app.worker=SimpleNamespace(is_alive=lambda:guard=='running')
                     with patch.object(root,'grab_current',return_value=object() if guard=='modal' else None):
-                        down.update((ord('Q'),0x11,0x12)); app._poll_start_hotkey()
-                    app._shortcut_capturing=False; app._closing=False; app.worker=None
-                    app._poll_start_hotkey(); start.assert_called_once()
-                down.clear(); app._poll_start_hotkey()
-                down.update((ord('Q'),0x11,0x12)); app._poll_start_hotkey()
-                self.assertEqual(start.call_count,2)
+                        app._poll_start_hotkey()
+                        app._hotkey_start()
+                    launch.assert_called_once()
+                app._closing=False; app._shortcut_capturing=False
+                app._poll_start_hotkey(); app._hotkey_start()
+                self.assertEqual(launch.call_count,2)
             app._set_controls(True)
             self.assertTrue(app.start_shortcut_entry.instate(['disabled']))
             app._set_controls(False)

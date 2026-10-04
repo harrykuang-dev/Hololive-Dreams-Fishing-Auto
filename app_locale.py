@@ -284,6 +284,18 @@ for code, label, conflict in (
     TEXT[code].update(start_shortcut=label, shortcut_conflict=conflict)
 
 
+START_TEXT = {
+ 'zh-TW': ('啟動來源：{source}（{build}）','全域快捷鍵','程式按鈕','開始快捷鍵已就緒：{hotkey}','無法註冊開始快捷鍵 {hotkey}（{error}）；請關閉舊版或改用其他按鍵。','連接階段：尋找遊戲視窗','連接階段：已找到遊戲，確認前景','連接階段：準備釣魚控制'),
+ 'zh-CN': ('启动来源：{source}（{build}）','全局快捷键','程序按钮','开始快捷键已就绪：{hotkey}','无法注册开始快捷键 {hotkey}（{error}）；请关闭旧版或改用其他按键。','连接阶段：查找游戏窗口','连接阶段：已找到游戏，确认前台','连接阶段：准备钓鱼控制'),
+ 'en': ('Started via {source} ({build})','global shortcut','app button','Start shortcut ready: {hotkey}','Cannot register start shortcut {hotkey} ({error}); close old copies or choose another key.','Connecting: finding game window','Connecting: game found, checking foreground','Connecting: preparing fishing controls'),
+ 'ja': ('開始方法：{source}（{build}）','グローバルショートカット','アプリのボタン','開始ショートカット準備完了：{hotkey}','開始ショートカット {hotkey} を登録できません（{error}）。旧版を閉じるか別のキーを選んでください。','接続：ゲームウィンドウを検索中','接続：ゲームを検出、前面を確認中','接続：釣り操作を準備中'),
+ 'ko': ('시작 방식: {source} ({build})','전역 단축키','프로그램 버튼','시작 단축키 준비 완료: {hotkey}','시작 단축키 {hotkey} 등록 실패 ({error}). 이전 버전을 닫거나 다른 키를 선택하세요.','연결: 게임 창 찾는 중','연결: 게임 확인, 전경 확인 중','연결: 낚시 제어 준비 중'),
+ 'id': ('Dimulai melalui {source} ({build})','pintasan global','tombol aplikasi','Pintasan mulai siap: {hotkey}','Tidak dapat mendaftarkan pintasan {hotkey} ({error}); tutup versi lama atau pilih tombol lain.','Menghubungkan: mencari jendela game','Menghubungkan: game ditemukan, memeriksa fokus','Menghubungkan: menyiapkan kontrol memancing'),
+}
+for code, values in START_TEXT.items():
+ TEXT[code].update(zip(('start_source','source_hotkey','source_button','hotkey_ready','hotkey_unavailable','startup_find','startup_activate','startup_prepare'),values))
+
+
 def text(locale: str, key: str, **values) -> str:
     """Return fully localized text; CLI 'auto' keeps the previous TW default."""
     entry = TEXT["zh-TW" if locale == "auto" else locale][key]
