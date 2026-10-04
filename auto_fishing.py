@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import ctypes
+from ctypes import wintypes
 import signal
 import sys
 import threading
@@ -49,16 +50,24 @@ class WindowCapture:
         self._capture_rect = None
 
     def activate(self) -> None:
-        win32gui.ShowWindow(self.hwnd, win32con.SW_RESTORE)
-        try:
-            # A brief Alt press allows SetForegroundWindow under Windows'
-            # foreground-lock rules without opening any system UI.
-            win32api.keybd_event(win32con.VK_MENU, 0, 0, 0)
-            win32gui.SetForegroundWindow(self.hwnd)
-        finally:
-            win32api.keybd_event(
-                win32con.VK_MENU, 0, win32con.KEYEVENTF_KEYUP, 0
-            )
+        # A global shortcut is normally pressed with the game already in
+        # front. Do not restore its window or inject Alt in that case.
+        if win32gui.GetForegroundWindow() == self.hwnd:
+            return
+        user32 = ctypes.windll.user32
+        if win32gui.IsIconic(self.hwnd):
+            show = user32.ShowWindowAsync
+            show.argtypes = (wintypes.HWND, ctypes.c_int)
+            show.restype = wintypes.BOOL
+            if not show(self.hwnd, win32con.SW_RESTORE):
+                raise RuntimeError("無法還原遊戲視窗，請手動切回遊戲後重新開始。")
+        # ctypes releases the GIL while Windows processes activation, so
+        # Tk's event loop and Stop remain responsive. Never synthesize Alt.
+        foreground = user32.SetForegroundWindow
+        foreground.argtypes = (wintypes.HWND,)
+        foreground.restype = wintypes.BOOL
+        if not foreground(self.hwnd):
+            raise RuntimeError("無法切換到遊戲，請手動切回遊戲後按開始快捷鍵。")
 
     def client_rect(self) -> tuple[int, int, int, int]:
         left, top, right, bottom = win32gui.GetClientRect(self.hwnd)
@@ -256,7 +265,11 @@ def run(
             print(message, flush=True)
 
     window = WindowCapture(args.window_title)
-    window.activate()
+    try:
+        window.activate()
+    except Exception:
+        window.close()
+        raise
     time.sleep(0.20)
     mouse = MouseController(window)
     running = True
