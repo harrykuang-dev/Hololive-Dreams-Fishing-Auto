@@ -1,0 +1,688 @@
+{
+  "source": "https://github.com/HolodoriDB/holodori-db-eng-diff/blob/ffc3155067cda6679eaea246eed862e09c9af673/Character.json",
+  "note": "Published extracted Character master table, cross-checked against JP (62 entries, all five colour fields equal). Local master cache is encrypted. The control matrix uses color4: local fishing prefab CharacterColorSetter _colorType=3 and default ExecuteColorSetter RGB 3D51FF match Tokino Sora color4. This mapping is inferred from static resources, not live instrumentation. Offline recoloured geometry fixtures, not per-character live screenshots; language checks select recognition settings, not real multilingual glyph rendering.",
+  "characters": [
+    {
+      "id": "chr-04004",
+      "name": "Gawr Gura",
+      "colors": [
+        "5588FF",
+        "8AC7ED",
+        "EF4D55",
+        "2E63CB",
+        "487DDB"
+      ]
+    },
+    {
+      "id": "chr-00009",
+      "name": "Murasaki Shion",
+      "colors": [
+        "BF57ED",
+        "716EFF",
+        "BFDD00",
+        "8727B1",
+        "6342C5"
+      ]
+    },
+    {
+      "id": "chr-04005",
+      "name": "Watson Amelia",
+      "colors": [
+        "F8DB92",
+        "7B4439",
+        "CBB097",
+        "E6B63F",
+        "FFF000"
+      ]
+    },
+    {
+      "id": "chr-04007",
+      "name": "IRyS",
+      "colors": [
+        "DF185D",
+        "60CED0",
+        "8E00AD",
+        "AB003B",
+        "EA51AB"
+      ]
+    },
+    {
+      "id": "chr-04009",
+      "name": "Ceres Fauna",
+      "colors": [
+        "B3DD8D",
+        "50D0B3",
+        "FE9591",
+        "79B257",
+        "55B29F"
+      ]
+    },
+    {
+      "id": "chr-04010",
+      "name": "Ouro Kronii",
+      "colors": [
+        "2221AA",
+        "DCB33E",
+        "8BD2F8",
+        "29297C",
+        "487DDB"
+      ]
+    },
+    {
+      "id": "chr-04011",
+      "name": "Nanashi Mumei",
+      "colors": [
+        "CCA495",
+        "41312D",
+        "44BBBB",
+        "906F62",
+        "8ECDD8"
+      ]
+    },
+    {
+      "id": "chr-04012",
+      "name": "Hakos Baelz",
+      "colors": [
+        "EE2222",
+        "48D5C8",
+        "FFBD15",
+        "E00000",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-04013",
+      "name": "Shiori Novella",
+      "colors": [
+        "C288F7",
+        "44445D",
+        "633CFF",
+        "9A43E9",
+        "FFFFFF"
+      ]
+    },
+    {
+      "id": "chr-04014",
+      "name": "Koseki Bijou",
+      "colors": [
+        "8674FF",
+        "FFA7CA",
+        "76D6D1",
+        "5137FF",
+        "6342C5"
+      ]
+    },
+    {
+      "id": "chr-06005",
+      "name": "Todoroki Hajime",
+      "colors": [
+        "A4AAFF",
+        "DEC2A7",
+        "84D3FF",
+        "6D77FF",
+        "6342C5"
+      ]
+    },
+    {
+      "id": "chr-04015",
+      "name": "Nerissa Ravencroft",
+      "colors": [
+        "3950EE",
+        "3F3D53",
+        "A5A5AC",
+        "152CC5",
+        "487DDB"
+      ]
+    },
+    {
+      "id": "chr-04016",
+      "name": "Fuwawa Abyssgard",
+      "colors": [
+        "80C2F8",
+        "F79BC2",
+        "AA87F5",
+        "33A1F0",
+        "8ECDD8"
+      ]
+    },
+    {
+      "id": "chr-04017",
+      "name": "Mococo Abyssgard",
+      "colors": [
+        "F79BC2",
+        "80C2F8",
+        "AA87F5",
+        "F168A1",
+        "FFBDE1"
+      ]
+    },
+    {
+      "id": "chr-06001",
+      "name": "Hiodoshi Ao",
+      "colors": [
+        "204596",
+        "88D3FD",
+        "3272FF",
+        "1E3566",
+        "487DDB"
+      ]
+    },
+    {
+      "id": "chr-06002",
+      "name": "Otonose Kanade",
+      "colors": [
+        "FFD380",
+        "FC8275",
+        "A1705C",
+        "FFBA35",
+        "FFF000"
+      ]
+    },
+    {
+      "id": "chr-06003",
+      "name": "Ichijou Ririka",
+      "colors": [
+        "FF77A9",
+        "9D8DFF",
+        "FFB6C8",
+        "F2558F",
+        "EA51AB"
+      ]
+    },
+    {
+      "id": "chr-06004",
+      "name": "Juufuutei Raden",
+      "colors": [
+        "357B6C",
+        "D7845A",
+        "A32220",
+        "144F41",
+        "018D39"
+      ]
+    },
+    {
+      "id": "chr-00001",
+      "name": "Tokino Sora",
+      "colors": [
+        "6878FF",
+        "FD368A",
+        "FFC942",
+        "3D51FF",
+        "487DDB"
+      ]
+    },
+    {
+      "id": "chr-00002",
+      "name": "Robocosan",
+      "colors": [
+        "FF6187",
+        "FD91B7",
+        "9355D6",
+        "EF3964",
+        "EA51AB"
+      ]
+    },
+    {
+      "id": "chr-00004",
+      "name": "Aki Rosenthal",
+      "colors": [
+        "ABE64D",
+        "FF4991",
+        "5E82FF",
+        "8BE100",
+        "55B29F"
+      ]
+    },
+    {
+      "id": "chr-00005",
+      "name": "Akai Haato",
+      "colors": [
+        "E5395B",
+        "0046B3",
+        "FFC85D",
+        "E70D38",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-00006",
+      "name": "Shirakami Fubuki",
+      "colors": [
+        "93D5F2",
+        "65637F",
+        "6B85ED",
+        "1EB4F5",
+        "FFFFFF"
+      ]
+    },
+    {
+      "id": "chr-00007",
+      "name": "Natsuiro Matsuri",
+      "colors": [
+        "FFCB30",
+        "8DD600",
+        "FF7D31",
+        "FFA600",
+        "FFA401"
+      ]
+    },
+    {
+      "id": "chr-00010",
+      "name": "Nakiri Ayame",
+      "colors": [
+        "DD305B",
+        "8A6F72",
+        "E8B532",
+        "C51743",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-00013",
+      "name": "AZKi",
+      "colors": [
+        "F081A3",
+        "634C59",
+        "87D996",
+        "FA598A",
+        "EA51AB"
+      ]
+    },
+    {
+      "id": "chr-00018",
+      "name": "Hoshimachi Suisei",
+      "colors": [
+        "75C0FF",
+        "2B2D80",
+        "DBBA67",
+        "269BFF",
+        "487DDB"
+      ]
+    },
+    {
+      "id": "chr-00019",
+      "name": "Usada Pekora",
+      "colors": [
+        "57A9FF",
+        "97DAEF",
+        "FFC32A",
+        "3E8EFF",
+        "8ECDD8"
+      ]
+    },
+    {
+      "id": "chr-00021",
+      "name": "Shiranui Flare",
+      "colors": [
+        "FFAB2D",
+        "4AB0E9",
+        "FF4D00",
+        "FF8B10",
+        "FFA401"
+      ]
+    },
+    {
+      "id": "chr-00022",
+      "name": "Shirogane Noel",
+      "colors": [
+        "A5B5B7",
+        "4F6E8F",
+        "66E6A9",
+        "363F3C",
+        "FFFFFF"
+      ]
+    },
+    {
+      "id": "chr-00023",
+      "name": "Houshou Marine",
+      "colors": [
+        "C2153B",
+        "453748",
+        "EAB759",
+        "950025",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-00026",
+      "name": "Tsunomaki Watame",
+      "colors": [
+        "E2D065",
+        "FF8F96",
+        "D1A287",
+        "E5C401",
+        "FFF000"
+      ]
+    },
+    {
+      "id": "chr-00027",
+      "name": "Tokoyami Towa",
+      "colors": [
+        "B77FFF",
+        "FC96DC",
+        "B0E22C",
+        "9E59F7",
+        "B16FD9"
+      ]
+    },
+    {
+      "id": "chr-00028",
+      "name": "Himemori Luna",
+      "colors": [
+        "FF93D0",
+        "99C6FF",
+        "A595FF",
+        "F16BB7",
+        "FFBDE1"
+      ]
+    },
+    {
+      "id": "chr-00030",
+      "name": "Yukihana Lamy",
+      "colors": [
+        "49AAFF",
+        "5CCEFF",
+        "FF8CAE",
+        "1C96FF",
+        "8ECDD8"
+      ]
+    },
+    {
+      "id": "chr-00031",
+      "name": "Momosuzu Nene",
+      "colors": [
+        "FFC633",
+        "FF852D",
+        "FF8CAE",
+        "FFAE00",
+        "FFA401"
+      ]
+    },
+    {
+      "id": "chr-00032",
+      "name": "Shishiro Botan",
+      "colors": [
+        "757575",
+        "91C1B1",
+        "5FCFA6",
+        "5F5F5F",
+        "FFFFFF"
+      ]
+    },
+    {
+      "id": "chr-00034",
+      "name": "Omaru Polka",
+      "colors": [
+        "ED0043",
+        "0083EB",
+        "FFCA0F",
+        "D4003C",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-00035",
+      "name": "La+ Darknesss",
+      "colors": [
+        "9464D2",
+        "493A58",
+        "B8E600",
+        "7F3DD4",
+        "6342C5"
+      ]
+    },
+    {
+      "id": "chr-00036",
+      "name": "Takane Lui",
+      "colors": [
+        "831550",
+        "41282E",
+        "ED9492",
+        "71003D",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-00037",
+      "name": "Hakui Koyori",
+      "colors": [
+        "FF95C8",
+        "52DFCE",
+        "9D6FFF",
+        "F461A8",
+        "FFBDE1"
+      ]
+    },
+    {
+      "id": "chr-00038",
+      "name": "Sakamata Chloe",
+      "colors": [
+        "BC0200",
+        "2C2B2B",
+        "A8A5A4",
+        "B22F2D",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-00039",
+      "name": "Kazama Iroha",
+      "colors": [
+        "5ECFC8",
+        "D5C293",
+        "009BCF",
+        "00C8BE",
+        "55B29F"
+      ]
+    },
+    {
+      "id": "chr-03001",
+      "name": "Ayunda Risu",
+      "colors": [
+        "FFAAAA",
+        "9F7060",
+        "FFE085",
+        "FF7B98",
+        "FFBDE1"
+      ]
+    },
+    {
+      "id": "chr-03002",
+      "name": "Moona Hoshinova",
+      "colors": [
+        "AA83FF",
+        "FAD443",
+        "78DAE1",
+        "8454EA",
+        "6342C5"
+      ]
+    },
+    {
+      "id": "chr-00011",
+      "name": "Yuzuki Choco",
+      "colors": [
+        "FF5487",
+        "FF85BC",
+        "9956EF",
+        "E72767",
+        "EA51AB"
+      ]
+    },
+    {
+      "id": "chr-00012",
+      "name": "Oozora Subaru",
+      "colors": [
+        "E5CE00",
+        "5CD0DC",
+        "A3CC00",
+        "DEC000",
+        "FFF000"
+      ]
+    },
+    {
+      "id": "chr-00016",
+      "name": "Nekomata Okayu",
+      "colors": [
+        "D866ED",
+        "9A70F3",
+        "68C8CD",
+        "C843E1",
+        "6342C5"
+      ]
+    },
+    {
+      "id": "chr-00017",
+      "name": "Inugami Korone",
+      "colors": [
+        "FFCD28",
+        "FF637C",
+        "4BBED1",
+        "FFBB00",
+        "FFF000"
+      ]
+    },
+    {
+      "id": "chr-00024",
+      "name": "Amane Kanata",
+      "colors": [
+        "8CE6F3",
+        "2566E9",
+        "DAC67C",
+        "2BD2EA",
+        "8ECDD8"
+      ]
+    },
+    {
+      "id": "chr-03003",
+      "name": "Airani Iofifteen",
+      "colors": [
+        "9CDF36",
+        "FDA2BB",
+        "61D7E4",
+        "88D414",
+        "018D39"
+      ]
+    },
+    {
+      "id": "chr-03004",
+      "name": "Kureiji Ollie",
+      "colors": [
+        "C40041",
+        "394452",
+        "FF85AB",
+        "A10036",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-03005",
+      "name": "Anya Melfissa",
+      "colors": [
+        "F3BF41",
+        "B3906F",
+        "7E5B5A",
+        "FFB400",
+        "FFF000"
+      ]
+    },
+    {
+      "id": "chr-03009",
+      "name": "Kobo Kanaeru",
+      "colors": [
+        "50CFE1",
+        "63668E",
+        "FF5559",
+        "00C0DC",
+        "8ECDD8"
+      ]
+    },
+    {
+      "id": "chr-00014",
+      "name": "Ookami Mio",
+      "colors": [
+        "DB3131",
+        "575769",
+        "FFC232",
+        "BD1616",
+        "018D39"
+      ]
+    },
+    {
+      "id": "chr-00015",
+      "name": "Sakura Miko",
+      "colors": [
+        "FF909E",
+        "DD3654",
+        "FFD64F",
+        "FF5B70",
+        "FFBDE1"
+      ]
+    },
+    {
+      "id": "chr-03006",
+      "name": "Pavolia Reine",
+      "colors": [
+        "004DC2",
+        "5AC6B6",
+        "B47BE0",
+        "003E9D",
+        "487DDB"
+      ]
+    },
+    {
+      "id": "chr-03007",
+      "name": "Vestia Zeta",
+      "colors": [
+        "9290A1",
+        "7E95ED",
+        "525C86",
+        "363449",
+        "FFFFFF"
+      ]
+    },
+    {
+      "id": "chr-03008",
+      "name": "Kaela Kovalskia",
+      "colors": [
+        "FC4045",
+        "54291A",
+        "FFC942",
+        "AB0B0F",
+        "FE0000"
+      ]
+    },
+    {
+      "id": "chr-04001",
+      "name": "Mori Calliope",
+      "colors": [
+        "E01C61",
+        "FF8EB8",
+        "4C3E46",
+        "AB003C",
+        "FFBDE1"
+      ]
+    },
+    {
+      "id": "chr-04002",
+      "name": "Takanashi Kiara",
+      "colors": [
+        "FF792E",
+        "38D2A8",
+        "273DCC",
+        "FF5723",
+        "FFA401"
+      ]
+    },
+    {
+      "id": "chr-04003",
+      "name": "Ninomae Ina'nis",
+      "colors": [
+        "5D4E83",
+        "FF8D35",
+        "C884CE",
+        "3C3157",
+        "B16FD9"
+      ]
+    }
+  ]
+}

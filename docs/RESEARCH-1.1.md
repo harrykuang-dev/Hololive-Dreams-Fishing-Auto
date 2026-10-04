@@ -69,14 +69,22 @@ stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
 - Synthetic 4K noise respects the image-byte limit; deterministic slow-encoder,
   bounded queue, retention, archive exclusions, writer error and CSV rotation
   tests cover diagnostics under load/failure.
-- All 130 unit tests passed, including UI layout, localization, input safety,
+- All 132 unit tests passed, including UI layout, localization, input safety,
   palette/shape positives and negatives, and bounded asynchronous diagnostics.
 - Replayed 159 historical screenshots from nine available diagnostic folders;
   scene/TAP/catch classifications match stable 1.0 on all of these. Candidate
-  median recognition time was 14.9ms on this machine. These cover TAP/reel,
+  classification stayed unchanged after the character-palette changes. These cover TAP/reel,
   result, material overlay, encyclopedia and item detail. They do not include
   every user's reported failing frame. No private diagnostic screenshots are
   added to Git or release packages.
+- Extended actual-palette checks: 62 published Character master entries,
+  all five RGB fields cross-checked against JP, and local CharacterColorSetter
+  references inspected. The inferred control field (color4) passes 6,696
+  offline cases covering six fixture layouts, six language settings and nine
+  scenes. Neutral/dark X, grey rewards and small-button antialiasing were fixed.
+  Full field provenance, inference limits and per-character results are in
+  [CHARACTER-PALETTES-1.1.md](CHARACTER-PALETTES-1.1.md). These are recoloured
+  geometry fixtures, not 62 live game screenshots or multilingual glyph captures.
 
 ## Remaining verification and excluded scope
 

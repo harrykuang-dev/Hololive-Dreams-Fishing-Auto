@@ -35,7 +35,7 @@ def box(c):
     return c['x'], c['y'], c['w'], c['h']
 
 
-def close_buttons(cyan, w, h):
+def close_buttons(cyan, w, h, minimum_circularity=.68):
     """Require a round ring AND a cyan X, not merely a cyan scenery blob."""
     # Cyan scenery can join the outer ring. Its white circular interior is
     # still a nested contour, so external contours alone miss a real X.
@@ -48,15 +48,31 @@ def close_buttons(cyan, w, h):
                 and .8 < cw/ch < 1.25):
             continue
         perimeter = cv2.arcLength(contour, True)
-        if 4*np.pi*cv2.contourArea(contour)/max(perimeter**2, 1) < .68:
+        if 4*np.pi*cv2.contourArea(contour)/max(perimeter**2, 1) < minimum_circularity:
             continue
         patch = cyan[y:y+ch, x:x+cw]
         # Include enough white corners for both outer and inner ring bounds;
         # too small a crop makes a thick X look like a filled cyan square.
-        inner = cv2.resize(patch[int(ch*.22):int(ch*.78), int(cw*.22):int(cw*.78)], (21,21)) > 128
+        inner_patch = patch[int(ch*.22):int(ch*.78), int(cw*.22):int(cw*.78)]
+        # Dark colours lose antialiased edge pixels after downsampling. Fit
+        # the actual central mark before checking its two diagonals; fitting
+        # the whole circular hole unfairly penalizes a thinner dark X.
+        marks = [c for c in components(inner_patch) if c['w'] > .24*cw and c['h'] > .24*ch
+                 and abs(c['cx']-inner_patch.shape[1]/2) < .12*cw
+                 and abs(c['cy']-inner_patch.shape[0]/2) < .12*ch]
+        if not marks:
+            continue
+        mark = max(marks,key=lambda c:c['area'])
+        mx,my,mw,mh = box(mark)
+        if not .75 < mw/mh < 1.3 or mark['area']/(mw*mh) >= .90:
+            continue
         yy, xx = np.indices((21,21))
         diagonal = (abs(xx-yy)<3) | (abs(xx+yy-20)<3)
-        if inner[diagonal].mean() > .60 and inner[~diagonal].mean() < .58:
+        checks = (inner_patch, inner_patch[my:my+mh,mx:mx+mw])
+        diagonal_a,diagonal_b = abs(xx-yy)<3,abs(xx+yy-20)<3
+        if any(min((inner := cv2.resize(candidate,(21,21)) > 128)[diagonal_a].mean(),inner[diagonal_b].mean()) > .45
+               and inner[diagonal].mean() > .60
+               and inner[~diagonal].mean() < .58 for candidate in checks):
             found.append((x+cw/2, y+ch/2))
     return found
 
@@ -109,7 +125,12 @@ def reward_strip(hsv, w, h):
     diff = abs(roi.astype(np.float32)-reference[:, None, :])
     hue_diff = np.minimum(diff[:, :, 0], 180-diff[:, :, 0])
     same = (hue_diff < 8) & (diff[:, :, 1] < 35) & (diff[:, :, 2] < 35)
-    rows = (same.mean(axis=1) > .84) & (reference[:, 1] > 25) & (reference[:, 2] > 55)
+    # Botan uses an achromatic theme. A neutral strip must differ from the
+    # outer screen edges; uniform grey scenery must not become an overlay.
+    outer = np.median(np.concatenate((hsv[:max(1,int(.08*h)), :max(1,int(.08*w))],
+                                     hsv[int(.92*h):, :max(1,int(.08*w))]),axis=0),axis=(0,1))
+    neutral = (reference[:, 1] <= 25) & (reference[:, 2] < 190) & (abs(reference[:,2]-outer[2]) > 30)
+    rows = (same.mean(axis=1) > .84) & ((reference[:, 1] > 25) | neutral) & (reference[:, 2] > 55)
     # A continuous strip, rather than unrelated patches across many rows.
     runs = np.split(np.flatnonzero(rows), np.flatnonzero(np.diff(np.flatnonzero(rows)) > 1)+1)
     return any(len(run) > .15*h for run in runs)
@@ -282,12 +303,19 @@ def _analyze(frame, language='auto'):
     # plus the modal's paper layout still confirms an actual close action.
     close_masks = []
     cx,cy = int(.55*w),int(.015*h)
-    for lo,hi in ((84,135),(0,20),(21,44),(45,83),(136,179)):
+    for lo,hi in ((79,140),(0,25),(16,49),(40,88),(131,179)):
         mask = np.zeros((h,w),np.uint8)
         mask[cy:int(.55*h),cx:int(.99*w)] = cv2.inRange(
             hsv[cy:int(.55*h),cx:int(.99*w)],np.array((lo,25,55)),np.array((hi,255,255)))
         close_masks.append(mask)
+    neutral_close = np.zeros((h,w),np.uint8)
+    neutral_close[cy:int(.55*h),cx:int(.99*w)] = cv2.inRange(
+        hsv[cy:int(.55*h),cx:int(.99*w)],np.array((0,0,35)),np.array((179,24,190)))
     closes = [point for mask in close_masks for point in close_buttons(mask,w,h)]
+    # Achromatic antialiasing can connect the circle to a paper-card edge,
+    # roughening its contour. The fitted central X and modal paper layout
+    # remain mandatory, including for this local grey-only candidate mask.
+    closes.extend(close_buttons(neutral_close,w,h,minimum_circularity=.50))
     cream = cv2.inRange(hsv,np.array((0,0,215)),np.array((180,65,255)))
     if closes:
         point = max(closes,key=lambda p:p[0])
@@ -318,10 +346,20 @@ def _analyze(frame, language='auto'):
     bx,by = int(.55*w),int(.82*h)
     themed_button[by:int(.985*h),bx:int(.98*w)] = cv2.inRange(
         hsv[by:int(.985*h),bx:int(.98*w)],np.array((0,25,55)),np.array((179,255,255)))
+    # At small window sizes a half-white border can keep enough saturation
+    # to join a dark button to the surrounding panel. Separate that halo;
+    # verification still requires the brighter white borders and glyphs.
+    pale_edge = cv2.inRange(hsv,np.array((0,0,140)),np.array((179,65,255)))
+    themed_button[pale_edge>0] = 0
     button = next((point for mask in ui_masks
                    if (point := bottom_action_button(mask,button_white,w,h))),None)
     if button is None:
         button = bottom_action_button(themed_button,button_white,w,h)
+    if button is None:
+        neutral_button = np.zeros((h,w),np.uint8)
+        neutral_button[by:int(.985*h),bx:int(.98*w)] = cv2.inRange(
+            hsv[by:int(.985*h),bx:int(.98*w)],np.array((0,0,35)),np.array((179,24,190)))
+        button = bottom_action_button(neutral_button,button_white,w,h)
     # Both Chinese editions retain the illustrated GET badge. The separate
     # language setting selects UI wording; recognition relies on stable art.
     d.catch_result = catch_result_card(hsv,cream,w,h)
