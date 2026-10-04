@@ -29,14 +29,52 @@ class BaitControlTests(unittest.TestCase):
         self.assertEqual(c.update(o,.7).action,(100,450))
         self.assertTrue(c.latched)
 
-    def test_dim_button_holds_without_clicking_continue(self):
+    def test_unverified_change_button_holds_without_clicking_continue(self):
         c = BaitSwitcher(True)
-        o = replace(self.depleted,exhausted=False)
+        o = replace(self.depleted,exhausted=False,change_point=None)
         for t in (0,.3,1.,2.,7.):
             d = c.update(o,t)
             self.assertTrue(d.managed)
             self.assertIsNone(d.action)
         self.assertTrue(c.update(o,8.1).failed)
+
+    def test_persistently_dim_result_opens_bait_without_red_warning(self):
+        c = BaitSwitcher(True)
+        o = replace(self.depleted, exhausted=False)
+        for t in (0,.4,1.,1.49):
+            self.assertIsNone(c.update(o,t).action)
+        self.assertEqual(c.update(o,1.51).action,(100,450))
+        self.assertTrue(c.latched)
+        self.assertTrue(c.update(self.healthy,1.6).managed)
+        self.assertEqual(c.phase,'opening')
+
+    def test_continue_probe_is_once_then_warning_can_blink(self):
+        c = BaitSwitcher(True)
+        o = replace(self.depleted, exhausted=False, continue_point=(748,463))
+        self.assertIsNone(c.update(o,0).action)
+        self.assertEqual(c.update(o,.3).action,(748,463))
+        self.assertIsNone(c.update(o,.5).action)
+        self.assertIsNone(c.update(replace(o,exhausted=True),.7).action)
+        self.assertTrue(c.update(self.blank,1.).managed)
+        self.assertEqual(c.update(o,1.51).action,(100,450))
+        self.assertTrue(c.latched)
+
+    def test_existing_continue_click_counts_as_probe(self):
+        c = BaitSwitcher(True)
+        o = replace(self.depleted, exhausted=False, continue_point=(748,463))
+        c.update(o,0,1)
+        self.assertIsNone(c.update(o,.3).action)
+        self.assertEqual(c.update(o,1.51).action,(100,450))
+
+    def test_interrupted_dim_frames_do_not_establish_depletion(self):
+        c = BaitSwitcher(True)
+        o = replace(self.depleted, exhausted=False)
+        c.update(o,0)
+        c.update(o,1.)
+        c.update(self.healthy,1.1)
+        c.update(o,1.4)
+        self.assertIsNone(c.update(o,2.).action)
+        self.assertFalse(c.latched)
 
     def test_transient_dim_recovers_only_after_quiet_interval(self):
         c = BaitSwitcher(True)

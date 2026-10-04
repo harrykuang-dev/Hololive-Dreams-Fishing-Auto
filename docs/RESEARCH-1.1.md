@@ -69,7 +69,7 @@ stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
 - Synthetic 4K noise respects the image-byte limit; deterministic slow-encoder,
   bounded queue, retention, archive exclusions, writer error and CSV rotation
   tests cover diagnostics under load/failure.
-- All 148 unit tests passed, including UI layout, localization, input safety,
+- All 152 unit tests passed, including UI layout, localization, input safety,
   palette/shape positives and negatives, and bounded asynchronous diagnostics.
 - Replayed 159 historical screenshots from nine available diagnostic folders;
   scene/TAP/catch classifications match stable 1.0 on all of these. Candidate
@@ -105,9 +105,12 @@ stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
 
 User-requested, default-off GUI checkbox and CLI `--auto-bait`. A confirmed
 fish result plus red triangular warning latches recovery immediately. Dim
-Continue glyphs hold navigation while waiting for warning evidence; two
+Continue glyphs trigger one settled probe click (a prior Continue click counts),
+then hold navigation while waiting for warning evidence; two
 unsuccessful Continue clicks trigger a quiet inspection and bounded stop.
-Blinking or temporarily absent warnings cannot reset the latch. The same
+A verified result, disabled Continue and Change Bait pill held for 1.5 seconds
+also latch recovery even when no red warning is captured. Blinking or
+temporarily absent warnings cannot reset the latch. The same
 controller blocks generic dialog-X and TAP actions until recovery completes.
 
 Recovery waits 0.65 seconds, detects the Change Bait pill, opens the dialog,
@@ -132,3 +135,19 @@ See `tests/test_bait.py` for blinking/absent warnings, zero vs infinity,
 wrong selection, bounded retries, timeouts, tint fixtures and runtime priority.
 No automated game input was sent during this verification. A manual recording
 cannot validate the game's response to hypothetical clicks.
+
+### Live diagnostic correction: missing warning before Continue
+
+The supplied session `20261004-135949-109187900` reached `bait_inspect`
+and timed out after 8 seconds. Three diagnostic result images show disabled
+Continue and a valid Change Bait pill, but no red triangle. The user clarified
+that clicking Continue triggers the warning. The original controller had
+blocked Continue while requiring that warning, preventing its own evidence.
+
+The corrected controller issues at most one Continue probe after 0.25 seconds
+of inspection, then pauses. A Continue already issued by navigation counts
+as the probe. The red-warning latch remains; persistent disabled-result
+geometry now also allows recovery after 1.5 seconds. Replaying the actual
+failed image at 10 Hz predicts one probe at 0.3 seconds and Change Bait at
+1.9 seconds, with no repeated Continue clicks. This is offline verification,
+not evidence that this corrected EXE has yet completed a live bait change.

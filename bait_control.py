@@ -16,14 +16,17 @@ class BaitSwitcher:
         self.phase = 'idle'
         self.since = 0.
         self.stable_since = None
+        self.disabled_since = None
         self.last_click = -100.
         self.attempts = 0
+        self.probed = False
         self.retry_suspected = False
         self.latched = False
 
     def enter(self, phase, now):
         self.phase, self.since = phase, now
         self.stable_since = None
+        self.disabled_since = None
         self.attempts = 0
 
     def stable(self, condition, now, duration=.5):
@@ -39,6 +42,7 @@ class BaitSwitcher:
             return BaitDecision()
         if self.phase == 'idle':
             if o.result and (o.exhausted or o.dim_continue or continue_attempts >= 2):
+                self.probed = continue_attempts > 0
                 self.retry_suspected = continue_attempts >= 2
                 self.latched = o.exhausted
                 self.enter('inspect', now)
@@ -53,6 +57,24 @@ class BaitSwitcher:
         if o.exhausted:
             self.latched = True
         if self.phase == 'inspect':
+            # The warning is triggered by Continue. Probe once, then hold all
+            # navigation while it settles. A prior navigation click counts.
+            if not self.latched and not self.probed and o.result and o.dim_continue and o.continue_point and now-self.since >= .25:
+                self.probed = True
+                self.last_click = now
+                self.disabled_since = None
+                decision.action = o.continue_point
+                return decision
+            # Some depleted results have no red warning at all. A verified
+            # result with a persistently disabled Continue and Change Bait
+            # establishes recovery, while a brief fade only pauses input.
+            if o.result and o.dim_continue and o.change_point:
+                if self.disabled_since is None:
+                    self.disabled_since = now
+                if now-self.disabled_since >= 1.5:
+                    self.latched = True
+            else:
+                self.disabled_since = None
             if not self.latched and self.stable(not o.result or not o.dim_continue, now, 1.5):
                 # Repeated Continue clicks which did not change the scene must
                 # stop, even if animation hid both warning and dim glyphs.
