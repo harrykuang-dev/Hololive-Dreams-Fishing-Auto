@@ -52,7 +52,7 @@ JPEG disimpan di latar belakang, maksimum 192 KiB per gambar. Sebanyak 64 gambar
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
 ```
 
-Lokasi mengikuti akun Windows Anda. Setiap sesi membuat folder bernama waktu. Sertakan versi aplikasi, bahasa / karakter game, resolusi, skala tampilan Windows, deskripsi masalah, dan `diagnostics.zip` yang dibuat otomatis setelah berhenti. Periksa tangkapan layar sebelum membagikannya agar tidak ada informasi yang tidak ingin dipublikasikan.
+Lokasi mengikuti akun Windows Anda. Setiap sesi membuat folder bernama waktu. Sertakan versi aplikasi, bahasa / karakter game, resolusi, skala tampilan Windows, deskripsi masalah, dan `diagnostics-YYYY-MM-DD_HH-MM-SS.zip` yang dibuat otomatis setelah berhenti. Periksa tangkapan layar sebelum membagikannya agar tidak ada informasi yang tidak ingin dipublikasikan.
 
 ## Kode sumber dan lisensi
 

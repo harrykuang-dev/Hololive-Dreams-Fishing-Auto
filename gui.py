@@ -367,7 +367,7 @@ class FishingApp:
         self._set_status(tr(lang,'connecting'),self.CYAN)
         self._append_log(tr(lang,'started',language=self.game_language.get()))
         if self.diagnostics.get():
-            directory = self.diagnostic_base()/(time.strftime('%Y%m%d-%H%M%S')+f'-{time.time_ns()%1000000000:09d}')
+            directory = self.diagnostic_base()/(time.strftime('%Y-%m-%d_%H-%M-%S')+f'-{time.time_ns()%1000000000:09d}')
             self.session_args.debug_dir = str(directory)
             self._append_log(tr(lang,'diagnostic_path',path=directory))
         self.worker = threading.Thread(target=self._run_bot,name='fishing-bot',daemon=True)

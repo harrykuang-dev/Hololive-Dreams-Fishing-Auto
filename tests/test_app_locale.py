@@ -43,7 +43,7 @@ class LocaleTests(unittest.TestCase):
                     '每次運行會建立以時間命名的資料夾。如遇異常，可透過下方項目地址聯繫作者，並提供問題描述及診斷資料。開啟開發者模式會增加效能負擔。')
         actual = text('zh-TW','developer_help',path='FOLDER')
         self.assertTrue(actual.startswith(expected))
-        self.assertIn('diagnostics.zip',actual)
+        self.assertIn('diagnostics-YYYY-MM-DD_HH-MM-SS.zip',actual)
 
 
 if __name__ == "__main__":

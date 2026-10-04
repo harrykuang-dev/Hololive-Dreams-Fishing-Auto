@@ -52,7 +52,7 @@ Windows 版《hololive Dreams》的自动钓鱼助手。通过游戏画面识别
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
 ```
 
-路径随当前 Windows 账号变化；每次运行会创建以时间命名的文件夹。请提供软件版本、游戏语言／角色、分辨率、Windows 显示缩放、问题描述，以及停止后自动生成的 `diagnostics.zip`。分享前请检查截图中是否有不想公开的内容。
+路径随当前 Windows 账号变化；每次运行会创建以时间命名的文件夹。请提供软件版本、游戏语言／角色、分辨率、Windows 显示缩放、问题描述，以及停止后自动生成的 `diagnostics-YYYY-MM-DD_HH-MM-SS.zip`。分享前请检查截图中是否有不想公开的内容。
 
 ## 源码与许可
 

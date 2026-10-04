@@ -52,7 +52,7 @@ JPEG screenshots are saved in the background, up to 192 KiB each. The latest 64 
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
 ```
 
-The path follows your Windows account. Each run creates a timestamp-named folder. Include the app version, game language / character, resolution, Windows display scaling, a description, and the automatically generated `diagnostics.zip` after stopping. Review screenshots for information you do not want to share before submitting them.
+The path follows your Windows account. Each run creates a timestamp-named folder. Include the app version, game language / character, resolution, Windows display scaling, a description, and the automatically generated `diagnostics-YYYY-MM-DD_HH-MM-SS.zip` after stopping. Review screenshots for information you do not want to share before submitting them.
 
 ## Source and license
 

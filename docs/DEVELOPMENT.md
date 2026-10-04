@@ -85,3 +85,9 @@ Historical verification notes remain under `docs/`; the README introduces the ap
 
 Based on stable tag `v1.0` (`b95229a`); includes the beta preparation-screen guard.
 See [1.1 research and validation](RESEARCH-1.1.md). This branch is an unpublished development candidate.
+
+
+Successful diagnostic shutdown leaves a dated ZIP only. Session folders use
+`YYYY-MM-DD_HH-MM-SS` and ZIP filenames include shutdown time. Packed originals
+are removed only after archive verification; packing failures retain originals.
+Explicit recordings and unrelated files remain separate.

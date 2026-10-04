@@ -69,7 +69,7 @@ stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
 - Synthetic 4K noise respects the image-byte limit; deterministic slow-encoder,
   bounded queue, retention, archive exclusions, writer error and CSV rotation
   tests cover diagnostics under load/failure.
-- All 160 unit tests passed, including UI layout, localization, input safety,
+- All 163 unit tests passed, including UI layout, localization, input safety,
   palette/shape positives and negatives, and bounded asynchronous diagnostics.
 - Replayed 159 historical screenshots from nine available diagnostic folders;
   scene/TAP/catch classifications match stable 1.0 on all of these. Candidate
@@ -207,3 +207,25 @@ scrolling, selecting after the scroll budget and wheel focus/occlusion guards.
 All 160 tests and the 2,232 actual-frame tint/size/language-setting cases pass.
 No real game input was sent during this development; this correction still
 requires a new live check.
+
+## ZIP-only diagnostics with dated names
+
+Per user request, successful shutdown now retains only the verified diagnostic
+ZIP, removing its byte-identical JPEG, trace and manifest originals. Session
+folders use `YYYY-MM-DD_HH-MM-SS` plus a collision suffix; ZIP files use
+`diagnostics-YYYY-MM-DD_HH-MM-SS.zip`, with the shutdown timestamp. Extracting
+by ZIP filename therefore also produces a dated folder. The GUI help in all
+six languages describes ZIP-only retention and preserving originals on failure.
+
+The archive is written to a temporary file and CRC-validated before atomic
+publication. Original contents are also compared before any cleanup; changed
+originals prevent cleanup. Optional video and unrelated files are not packaged
+or deleted. Failed encoding/packing retains available originals. Repeated
+close returns the same complete ZIP without overwriting it with an empty one.
+Input remains released before archiving and cleanup.
+
+The four supplied completed sessions with existing ZIPs were checked and
+188 byte-identical originals removed, preserving their archives. Older
+unarchived folders were not deleted. Tests cover ZIP-only retention, dated
+names, unrelated/video preservation, write failures, changed-original safety,
+repeated close and runtime shutdown ordering.

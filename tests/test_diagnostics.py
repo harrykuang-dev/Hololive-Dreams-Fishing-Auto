@@ -9,7 +9,7 @@ import zipfile
 import cv2
 import numpy as np
 
-from diagnostics import BoundedTrace, DiagnosticWriter, IMAGE_LIMIT, compact_jpeg
+from diagnostics import BoundedTrace, DiagnosticWriter, IMAGE_LIMIT, compact_jpeg, cleanup_archived_files
 
 
 class DiagnosticsTests(unittest.TestCase):
@@ -62,7 +62,9 @@ class DiagnosticsTests(unittest.TestCase):
             trace.write('0,tap\n')
             trace.close()
             archive = writer.close()
-            self.assertLessEqual(len(list(Path(folder).glob('*.jpg'))),4)
+            self.assertEqual(len(list(Path(folder).glob('*.jpg'))),0)
+            self.assertEqual(set(p.name for p in Path(folder).iterdir()),{archive.name,'game.mp4','unrelated.txt'})
+            self.assertRegex(archive.name,r'^diagnostics-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.zip$')
             with zipfile.ZipFile(archive) as z:
                 self.assertNotIn('game.mp4',z.namelist())
                 self.assertNotIn('unrelated.txt',z.namelist())
@@ -79,6 +81,39 @@ class DiagnosticsTests(unittest.TestCase):
             self.assertFalse(writer._thread.is_alive())
             with zipfile.ZipFile(archive) as z:
                 self.assertEqual(json.loads(z.read('diagnostics.json'))['error'],'disk test')
+
+    def test_archive_write_failure_keeps_original_diagnostics(self):
+        with tempfile.TemporaryDirectory() as folder:
+            writer=DiagnosticWriter(folder)
+            Path(folder,'trace.csv').write_text('important trace',encoding='utf-8')
+            with patch('diagnostics.zipfile.ZipFile',side_effect=OSError('archive failed')):
+                with self.assertRaisesRegex(OSError,'archive failed'):
+                    writer.close()
+            self.assertEqual(Path(folder,'trace.csv').read_text(),'important trace')
+            self.assertTrue(Path(folder,'diagnostics.json').is_file())
+
+    def test_changed_original_prevents_any_cleanup(self):
+        with tempfile.TemporaryDirectory() as folder:
+            a=Path(folder,'diagnostics.zip')
+            with zipfile.ZipFile(a,'w') as z:
+                z.writestr('latest.jpg',b'original')
+                z.writestr('trace.csv',b'old')
+            Path(folder,'latest.jpg').write_bytes(b'original')
+            Path(folder,'trace.csv').write_bytes(b'changed')
+            with self.assertRaisesRegex(OSError,'differs'):
+                cleanup_archived_files(a)
+            self.assertTrue(Path(folder,'latest.jpg').exists())
+            self.assertEqual(Path(folder,'trace.csv').read_bytes(),b'changed')
+
+    def test_close_twice_preserves_the_complete_archive(self):
+        with tempfile.TemporaryDirectory() as folder:
+            writer=DiagnosticWriter(folder)
+            Path(folder,'trace.csv').write_text('trace',encoding='utf-8')
+            archive=writer.close()
+            payload=archive.read_bytes()
+            self.assertEqual(writer.close(),archive)
+            self.assertEqual(archive.read_bytes(),payload)
+            self.assertEqual(list(Path(folder).iterdir()),[archive])
 
     def test_trace_rotation_keeps_header_and_only_two_recent_segments(self):
         with tempfile.TemporaryDirectory() as folder, patch('diagnostics.TRACE_LIMIT',40):
@@ -122,7 +157,7 @@ class DiagnosticsTests(unittest.TestCase):
                     return original_close(writer,*values,**kwargs)
                 with patch('auto_fishing.DiagnosticWriter.close',autospec=True,side_effect=close_after_input):
                     self.assertEqual(auto_fishing.run(args),0)
-            with zipfile.ZipFile(Path(folder,'diagnostics.zip')) as z:
+            with zipfile.ZipFile(next(Path(folder).glob('diagnostics-*.zip'))) as z:
                 self.assertIn('catch_000001.jpg',z.namelist())
                 self.assertIn('input_down_count',z.read('trace.csv').decode('utf-8'))
                 self.assertFalse(any(name.endswith('.png') for name in z.namelist()))

@@ -52,7 +52,7 @@ Windows 版《hololive Dreams》的自動釣魚助手。透過遊戲畫面辨識
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
 ```
 
-路徑由目前 Windows 帳戶決定；每次運行建立時間命名的資料夾。請提供軟件版本、遊戲語言／角色、解析度、Windows 顯示縮放、問題描述，以及停止後自動產生的 `diagnostics.zip`。分享前請先檢查截圖是否含有不想公開的內容。
+路徑由目前 Windows 帳戶決定；每次運行建立時間命名的資料夾。請提供軟件版本、遊戲語言／角色、解析度、Windows 顯示縮放、問題描述，以及停止後自動產生的 `diagnostics-YYYY-MM-DD_HH-MM-SS.zip`。分享前請先檢查截圖是否含有不想公開的內容。
 
 ## 原始碼與授權
 

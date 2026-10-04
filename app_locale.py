@@ -291,6 +291,10 @@ for code, label, working, failed in (
     TEXT[code].update(auto_bait=label, bait_working=working, bait_failed=failed)
 
 
+for code, detail in {'zh-TW': '打包驗證成功後會刪除已打包的原始檔，只保留 ZIP；失敗時保留原始檔。資料夾及 ZIP 名稱包含日期時間。', 'zh-CN': '打包验证成功后删除已打包的原始文件，仅保留 ZIP；失败时保留原始文件。文件夹及 ZIP 名称包含日期时间。', 'en': 'After the ZIP is verified, its original files are removed. Originals remain if packing fails. Folder and ZIP names include the date and time.', 'ja': 'ZIP の検証成功後、元の診断ファイルを削除し ZIP のみ残します。失敗時は元のファイルを保持します。フォルダーと ZIP の名前には日時が入ります。', 'ko': 'ZIP 검증 후 원본 진단 파일을 삭제하고 ZIP만 보관합니다. 실패 시 원본을 유지합니다. 폴더와 ZIP 이름에 날짜와 시간이 포함됩니다.', 'id': 'Setelah ZIP diverifikasi, berkas asal dihapus. Jika pengarsipan gagal, berkas asal tetap disimpan. Nama folder dan ZIP memuat tanggal dan waktu.'}.items():
+    TEXT[code]['developer_help'] = TEXT[code]['developer_help'].replace('diagnostics.zip','diagnostics-YYYY-MM-DD_HH-MM-SS.zip')+'\n\n'+detail
+
+
 def text(locale: str, key: str, **values) -> str:
     """Return fully localized text; CLI 'auto' keeps the previous TW default."""
     entry = TEXT["zh-TW" if locale == "auto" else locale][key]

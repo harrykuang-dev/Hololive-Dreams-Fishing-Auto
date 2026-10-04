@@ -36,6 +36,36 @@ def compact_jpeg(frame):
     return encoded.tobytes(), small.shape[:2], 50
 
 
+def cleanup_archived_files(archive_path):
+    """Delete only byte-identical diagnostic originals after ZIP validation.
+
+    Changed files, unrelated files and optional recordings remain untouched.
+    Validate every original before deleting any, including historical sessions.
+    """
+    archive_path = Path(archive_path).resolve()
+    directory = archive_path.parent
+    originals = []
+    with zipfile.ZipFile(archive_path) as archive:
+        if archive.testzip() is not None:
+            raise OSError('Diagnostic ZIP failed CRC validation; originals retained')
+        names = archive.namelist()
+        if len(names) != len(set(names)):
+            raise OSError('Duplicate ZIP entries; originals retained')
+        for name in names:
+            if Path(name).name != name or not (name.endswith('.jpg') or name in ('trace.csv','trace.previous.csv','diagnostics.json')):
+                continue
+            path = directory/name
+            if path.is_symlink() or path.resolve().parent != directory:
+                raise OSError('Unexpected diagnostic path; originals retained')
+            if path.is_file():
+                if path.read_bytes() != archive.read(name):
+                    raise OSError('Diagnostic original differs from ZIP; originals retained')
+                originals.append(path)
+    for path in originals:
+        path.unlink()
+    return len(originals)
+
+
 class DiagnosticWriter:
     """At most three pending frames; coalesce latest and discard old evidence.
 
@@ -57,6 +87,7 @@ class DiagnosticWriter:
         self.max_write_ms = 0.
         self.error = None
         self.runtime_error = None
+        self.archive = None
         self._thread = threading.Thread(target=self._work, name='diagnostic-writer', daemon=True)
         self._thread.start()
 
@@ -108,6 +139,8 @@ class DiagnosticWriter:
                 self._jobs.clear()
 
     def close(self, timeout=5.):
+        if self.archive is not None:
+            return self.archive
         with self._condition:
             self._closing = True
             self._condition.notify()
@@ -123,7 +156,7 @@ class DiagnosticWriter:
             'runtime_error': self.runtime_error,
             'coordinates': 'trace and annotations refer to original client pixels before JPEG resize',
             'retention': 'last 64 event images plus latest; last two 4 MiB trace segments',
-            'video': 'game.mp4 is optional and excluded from diagnostics.zip',
+            'video': 'game.mp4 is optional and excluded from the diagnostic ZIP',
             'live_success_claim': False,
         }
         (self.directory/'diagnostics.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -131,13 +164,24 @@ class DiagnosticWriter:
         paths = [*self._retained, self.directory/'latest.jpg',
                  self.directory/'trace.previous.csv', self.directory/'trace.csv',
                  self.directory/'diagnostics.json']
-        temporary = self.directory/'diagnostics.zip.tmp'
+        paths = list(dict.fromkeys(paths))
+        output = self.directory/('diagnostics-'+time.strftime('%Y-%m-%d_%H-%M-%S')+'.zip')
+        temporary = output.with_suffix('.zip.tmp')
         with zipfile.ZipFile(temporary, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
             for path in paths:
                 if path.is_file():
                     archive.write(path, path.name)
-        output = self.directory/'diagnostics.zip'
+        # Validate before atomic publication, then remove the packed originals.
+        with zipfile.ZipFile(temporary) as archive:
+            if archive.testzip() is not None:
+                raise OSError('Diagnostic ZIP failed CRC validation; originals retained')
         temporary.replace(output)
+        self.archive = output
+        if not self.error:
+            try:
+                cleanup_archived_files(output)
+            except OSError as exc:
+                self.error = str(exc)
         return output
 
 
