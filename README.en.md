@@ -12,8 +12,10 @@ Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing
 
 The single EXE includes its runtime and icon assets. You do not need Python or additional files. A SHA-256 checksum file is also available; the source-code ZIP is not the runnable application.
 
+
 ## Features
 
+- The 1.1 development build adds an optional “Use unlimited dough bait when depleted” switch, off by default. It pauses Continue, confirms depletion, selects dough bait marked ∞ and confirms the change. If verification fails, it stops; select bait manually and restart.
 - Recognizes bite prompts and tracks the fish and catch zone while reeling.
 - Handles Continue / Next buttons and collection or item pop-ups to resume fishing.
 - Six interface languages: 繁體中文, 简体中文, English, 日本語, 한국어, and Indonesian. This setting changes the assistant, not the game.

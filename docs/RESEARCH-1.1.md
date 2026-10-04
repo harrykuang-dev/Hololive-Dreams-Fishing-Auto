@@ -69,7 +69,7 @@ stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
 - Synthetic 4K noise respects the image-byte limit; deterministic slow-encoder,
   bounded queue, retention, archive exclusions, writer error and CSV rotation
   tests cover diagnostics under load/failure.
-- All 132 unit tests passed, including UI layout, localization, input safety,
+- All 148 unit tests passed, including UI layout, localization, input safety,
   palette/shape positives and negatives, and bounded asynchronous diagnostics.
 - Replayed 159 historical screenshots from nine available diagnostic folders;
   scene/TAP/catch classifications match stable 1.0 on all of these. Candidate
@@ -97,6 +97,38 @@ stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
   No reeling physics/controller constants were retuned from incomplete reports.
   Diagnose with the compact ZIP and the newly added input/timing fields.
 - The user explicitly excluded day-change/login-bonus return from 1.1.
-  Automatic bait switching is also outside this version's requested scope.
+  Bait switching was subsequently authorized and is described below.
 - No new live fishing success claim: the game's window was no longer available
   when live verification was attempted. Release and issue status are unchanged.
+
+## Optional depleted-bait recovery
+
+User-requested, default-off GUI checkbox and CLI `--auto-bait`. A confirmed
+fish result plus red triangular warning latches recovery immediately. Dim
+Continue glyphs hold navigation while waiting for warning evidence; two
+unsuccessful Continue clicks trigger a quiet inspection and bounded stop.
+Blinking or temporarily absent warnings cannot reset the latch. The same
+controller blocks generic dialog-X and TAP actions until recovery completes.
+
+Recovery waits 0.65 seconds, detects the Change Bait pill, opens the dialog,
+verifies the first dough icon and infinity quantity, selects that cell, then
+requires 0.5 seconds of matching selection corners and dough preview before
+confirming. Returning requires an enabled Continue and no warning for 0.65
+seconds. Each stage has an 8-second timeout, at most three actions spaced
+1.2 seconds apart. Uncertain frames cause a pause or stop rather than more
+Continue clicks. One-shot mode does not switch bait. Catch-target completion
+and existing stop/focus/input checks retain priority.
+
+The user's manual video provides actual exhaustion, empty-current-bait,
+selected-infinite-bait and returned-result frames. The extracted result prefab
+has park-character tint on the Change Bait icon/text/outline. The selection
+prefab uses separate tint setters; in the recording its header is blue while
+the park theme is purple. Recognition ignores localized wording and does not
+require either theme hue. Six assistant language settings and 62 published
+main tints are checked offline; recolouring does not reproduce live character
+screens or actual localized game glyphs. No recording is included in Git.
+
+See `tests/test_bait.py` for blinking/absent warnings, zero vs infinity,
+wrong selection, bounded retries, timeouts, tint fixtures and runtime priority.
+No automated game input was sent during this verification. A manual recording
+cannot validate the game's response to hypothetical clicks.

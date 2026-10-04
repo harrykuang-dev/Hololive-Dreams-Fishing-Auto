@@ -280,6 +280,17 @@ for code, archive, error, help_text in (
     TEXT[code]['developer_help'] += '\n\n'+help_text
 
 
+for code, label, working, failed in (
+    ('zh-TW','魚餌耗盡時切換無限練餌','正在確認魚餌並切換無限練餌','無法確認換餌畫面，已停止。請手動選擇練餌後重新啟動。'),
+    ('zh-CN','鱼饵耗尽时切换无限练饵','正在确认鱼饵并切换无限练饵','无法确认换饵画面，已停止。请手动选择练饵后重新启动。'),
+    ('en','Use unlimited dough bait when depleted','Checking bait and switching to unlimited dough','Bait change could not be confirmed; stopped. Select dough bait manually, then restart.'),
+    ('ja','餌切れ時に無限の練り餌へ切り替える','餌を確認し、無限の練り餌へ切り替え中','餌の切り替えを確認できないため停止しました。練り餌を手動で選び、再開してください。'),
+    ('ko','미끼 소진 시 무제한 반죽 미끼로 전환','미끼 확인 및 무제한 반죽 미끼로 전환 중','미끼 변경을 확인할 수 없어 정지했습니다. 반죽 미끼를 직접 선택한 후 다시 시작하세요.'),
+    ('id','Gunakan umpan adonan tak terbatas saat habis','Memeriksa umpan dan mengganti ke adonan tak terbatas','Pergantian umpan tidak dapat dikonfirmasi; dihentikan. Pilih umpan adonan secara manual, lalu mulai lagi.'),
+):
+    TEXT[code].update(auto_bait=label, bait_working=working, bait_failed=failed)
+
+
 def text(locale: str, key: str, **values) -> str:
     """Return fully localized text; CLI 'auto' keeps the previous TW default."""
     entry = TEXT["zh-TW" if locale == "auto" else locale][key]

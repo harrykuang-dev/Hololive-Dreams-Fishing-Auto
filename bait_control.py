@@ -1,0 +1,89 @@
+"""Latched, bounded bait recovery. An absent warning never clears the latch."""
+from dataclasses import dataclass
+
+
+@dataclass
+class BaitDecision:
+    managed: bool = False
+    action: tuple | None = None
+    failed: bool = False
+    phase: str = ''
+
+
+class BaitSwitcher:
+    def __init__(self, enabled=False):
+        self.enabled = enabled
+        self.phase = 'idle'
+        self.since = 0.
+        self.stable_since = None
+        self.last_click = -100.
+        self.attempts = 0
+        self.retry_suspected = False
+        self.latched = False
+
+    def enter(self, phase, now):
+        self.phase, self.since = phase, now
+        self.stable_since = None
+        self.attempts = 0
+
+    def stable(self, condition, now, duration=.5):
+        if not condition:
+            self.stable_since = None
+            return False
+        if self.stable_since is None:
+            self.stable_since = now
+        return now-self.stable_since >= duration
+
+    def update(self, o, now, continue_attempts=0):
+        if not self.enabled:
+            return BaitDecision()
+        if self.phase == 'idle':
+            if o.result and (o.exhausted or o.dim_continue or continue_attempts >= 2):
+                self.retry_suspected = continue_attempts >= 2
+                self.latched = o.exhausted
+                self.enter('inspect', now)
+            else:
+                return BaitDecision()
+        if self.phase == 'failed':
+            return BaitDecision(True, failed=True, phase=self.phase)
+        if now-self.since > 8.:
+            self.enter('failed', now)
+            return BaitDecision(True, failed=True, phase=self.phase)
+        decision = BaitDecision(True, phase=self.phase)
+        if o.exhausted:
+            self.latched = True
+        if self.phase == 'inspect':
+            if not self.latched and self.stable(not o.result or not o.dim_continue, now, 1.5):
+                # Repeated Continue clicks which did not change the scene must
+                # stop, even if animation hid both warning and dim glyphs.
+                if self.retry_suspected and o.result:
+                    self.enter('failed', now)
+                    return BaitDecision(True, failed=True, phase='failed')
+                self.enter('idle', now)
+                return decision
+            if self.latched and now-self.since >= .65 and o.result and o.change_point:
+                self.enter('opening', now)
+        elif self.phase == 'opening' and o.dialog:
+            self.enter('selecting', now)
+        elif self.phase == 'selecting' and self.stable(o.dialog and o.selected_infinite, now):
+            self.enter('confirming', now)
+        elif self.phase == 'confirming' and not o.dialog:
+            self.enter('returning', now)
+        elif self.phase == 'returning':
+            if self.stable(o.result and not o.exhausted and not o.dim_continue, now, .65):
+                self.latched = False
+                self.enter('idle', now)
+            return decision
+        decision.phase = self.phase
+        point = None
+        if self.phase == 'opening' and o.result:
+            point = o.change_point
+        elif self.phase == 'selecting' and o.dialog and not o.selected_infinite:
+            point = o.infinite_point
+        elif self.phase == 'confirming' and o.dialog and o.selected_infinite:
+            point = o.confirm_point
+        if point and now-self.last_click >= 1.2 and self.attempts < 3:
+            decision.action = point
+            self.last_click = now
+            self.attempts += 1
+        return decision

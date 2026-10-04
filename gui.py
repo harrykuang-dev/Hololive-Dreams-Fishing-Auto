@@ -65,6 +65,7 @@ class FishingApp:
         self._shortcut_capturing = False
         self._developer_help_dialog = None
         self.diagnostics = tk.BooleanVar(value=False)
+        self.auto_bait = tk.BooleanVar(value=False)
         self.session_args = self.bot_args('zh-TW')
         self._build()
         self._apply_language()
@@ -177,6 +178,8 @@ class FishingApp:
         self.shortcut_entry.bind('<Button-1>',self._begin_shortcut_capture)
         self.shortcut_entry.bind('<FocusOut>',self._end_shortcut_capture)
         self.shortcut_entry.bind('<KeyPress>',self._capture_shortcut)
+        self.auto_bait_check = ttk.Checkbutton(form, variable=self.auto_bait)
+        self.auto_bait_check.grid(row=4, column=0, columnspan=2, sticky='w', pady=self.py(6))
         controls = ttk.Frame(main)
         controls.grid(row=5,column=0,sticky='ew',pady=(self.py(16),self.py(14)))
         controls.columnconfigure((0,1),weight=1,uniform='actions')
@@ -255,7 +258,7 @@ class FishingApp:
         self.root.title(f'Hololive Dreams — {tr(lang,"subtitle")} v{APP_VERSION}')
         for widget,key in ((self.subtitle,'subtitle'),(self.instructions,'instructions'),(self.language_label,'game_language'),
                            (self.target_label,'target_count'),(self.target_hint,'target_hint'),(self.shortcut_label,'stop_shortcut'),
-                           (self.start_button,'start'),(self.stop_button,'stop'),(self.diagnostics_check,'developer_mode'),(self.log_title,'log')):
+                           (self.start_button,'start'),(self.stop_button,'stop'),(self.auto_bait_check,'auto_bait'),(self.diagnostics_check,'developer_mode'),(self.log_title,'log')):
             widget.configure(text=tr(lang,key))
         self.footer.configure(text=f'v{APP_VERSION}')
         self._refresh_count()
@@ -268,7 +271,7 @@ class FishingApp:
     @staticmethod
     def bot_args(language='auto'):
         return argparse.Namespace(window_title='hololive-Dreams',language=language,fps=40.,lead=.20,deadband=.018,
-            pulse_hz=7.,once=False,target_streak=0,target_catches=0,stop_hotkey='F9',max_seconds=0.,debug_dir=None,record=False)
+            pulse_hz=7.,once=False,target_streak=0,target_catches=0,stop_hotkey='F9',max_seconds=0.,debug_dir=None,record=False,auto_bait=False)
 
     @staticmethod
     def diagnostic_base():
@@ -359,6 +362,7 @@ class FishingApp:
         self.session_args = self.bot_args(lang)
         self.session_args.target_catches = target
         self.session_args.stop_hotkey = hotkey
+        self.session_args.auto_bait = self.auto_bait.get()
         self._set_controls(True)
         self._set_status(tr(lang,'connecting'),self.CYAN)
         self._append_log(tr(lang,'started',language=self.game_language.get()))
@@ -375,7 +379,7 @@ class FishingApp:
         self.stop_button.configure(state='normal' if running else 'disabled')
         self.language_choice.configure(state='disabled' if running else 'readonly')
         self.shortcut_entry.configure(state='disabled' if running else 'readonly')
-        for widget in (self.target_entry,self.diagnostics_check):
+        for widget in (self.target_entry,self.diagnostics_check,self.auto_bait_check):
             widget.configure(state='disabled' if running else 'normal')
 
     def _run_bot(self):
