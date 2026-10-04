@@ -69,7 +69,7 @@ stable `v1.0`, commit `b95229a`. This is an unpublished `1.1-dev` candidate.
 - Synthetic 4K noise respects the image-byte limit; deterministic slow-encoder,
   bounded queue, retention, archive exclusions, writer error and CSV rotation
   tests cover diagnostics under load/failure.
-- All 156 unit tests passed, including UI layout, localization, input safety,
+- All 160 unit tests passed, including UI layout, localization, input safety,
   palette/shape positives and negatives, and bounded asynchronous diagnostics.
 - Replayed 159 historical screenshots from nine available diagnostic folders;
   scene/TAP/catch classifications match stable 1.0 on all of these. Candidate
@@ -176,3 +176,34 @@ Settling is bounded at 8s. The one-probe and persistent-grey fallback then run
 as before. A simulated 10Hz timeline from this session's actual early card and
 later ready-button images first probes at 2.0s and opens Change Bait at 3.6s,
 instead of clicking at 0.24s. The updated timing itself is not yet live-tested.
+
+### Live follow-up: restored scroll position clips the first bait
+
+Session `20261004-142121-353276100` completed normal fishing for more than
+six minutes, then entered inspect 367.4449s and opening 368.1060s. The change
+click at 371.1208s opened the correct dialog. Both later diagnostic images show
+a restored lower list position, selected fried chicken at zero, and the first
+infinite dough bait partially clipped under the header. The fixed first-cell
+coordinates and required full dough icon prevented recognizing the open dialog;
+the controller timed out in opening. No selection or confirmation was issued.
+
+Quantity pills are now searched throughout the first-column viewport. The
+infinity marker must have white quantity surroundings and visible orange dough
+art above it; the click point comes from that visible artwork. The selection
+focus checks move with the infinity quantity; the bottom corners remain usable
+when the header clips the top corners. A confirmed header, preview panel and
+at least three quantity pills also establish a bait list when infinity is off
+screen. In that case only a bounded upward wheel operation is allowed in the
+list viewport, then the same infinity/selection proof is required. Scroll and
+selection have separate three-attempt budgets, shared 1.2s spacing and the
+existing 8s stage timeout. Wheel input retains client, occlusion and foreground
+checks and is recorded as `scroll_up` in the trace.
+
+Both actual failed dialog images now return dialog=True, selected=False and
+a visible first-bait target around (315,183) in the saved 1280x720 image;
+opening advances to selecting and requests that target. Synthetic tests cover
+partially clipped selected bait, a completely hidden first cell, bounded
+scrolling, selecting after the scroll budget and wheel focus/occlusion guards.
+All 160 tests and the 2,232 actual-frame tint/size/language-setting cases pass.
+No real game input was sent during this development; this correction still
+requires a new live check.

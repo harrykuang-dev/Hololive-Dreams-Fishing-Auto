@@ -8,6 +8,7 @@ class BaitDecision:
     action: tuple | None = None
     failed: bool = False
     phase: str = ''
+    scroll: bool = False
 
 
 class BaitSwitcher:
@@ -25,6 +26,7 @@ class BaitSwitcher:
         self.disabled_since = None
         self.last_click = -100.
         self.attempts = 0
+        self.scroll_attempts = 0
         self.probed = False
         self.retry_suspected = False
         self.latched = False
@@ -34,6 +36,7 @@ class BaitSwitcher:
         self.stable_since = None
         self.disabled_since = None
         self.attempts = 0
+        self.scroll_attempts = 0
 
     def stable(self, condition, now, duration=.5):
         if not condition:
@@ -133,11 +136,16 @@ class BaitSwitcher:
         if self.phase == 'opening' and o.result:
             point = o.change_point
         elif self.phase == 'selecting' and o.dialog and not o.selected_infinite:
-            point = o.infinite_point
+            point = o.infinite_point or o.scroll_point
+            decision.scroll = o.infinite_point is None and o.scroll_point is not None
         elif self.phase == 'confirming' and o.dialog and o.selected_infinite:
             point = o.confirm_point
-        if point and now-self.last_click >= 1.2 and self.attempts < 3:
+        attempts = self.scroll_attempts if decision.scroll else self.attempts
+        if point and now-self.last_click >= 1.2 and attempts < 3:
             decision.action = point
             self.last_click = now
-            self.attempts += 1
+            if decision.scroll:
+                self.scroll_attempts += 1
+            else:
+                self.attempts += 1
         return decision

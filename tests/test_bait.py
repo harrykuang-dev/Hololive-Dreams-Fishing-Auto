@@ -47,6 +47,24 @@ class BaitControlTests(unittest.TestCase):
         self.assertTrue(c.latched)
         self.assertEqual(c.update(self.healthy,2.3).action,(100,450))
 
+    def test_hidden_infinity_scrolls_only_confirmed_dialog_with_bounded_retries(self):
+        c = BaitSwitcher(True,result_settle=0,button_settle=0)
+        c.enter('selecting',0)
+        hidden = BaitObservation(dialog=True,scroll_point=(340,250),confirm_point=(798,463))
+        actions=[]
+        for i in range(81):
+            d=c.update(hidden,i*.1)
+            if d.action:
+                self.assertTrue(d.scroll)
+                actions.append(d.action)
+        self.assertEqual(actions,[(340,250)]*3)
+        visible=replace(hidden,infinite_point=(222,151),scroll_point=None)
+        d=c.update(visible,8.)
+        self.assertEqual(d.action,(222,151))
+        self.assertFalse(d.scroll)
+        c=BaitSwitcher(True);c.enter('selecting',0)
+        self.assertIsNone(c.update(BaitObservation(scroll_point=(340,250)),1.).action)
+
     def test_ready_old_result_does_not_fail_settle_timeout(self):
         c = BaitSwitcher(True)
         c.result_since = c.buttons_since = 0.
@@ -239,6 +257,29 @@ class BaitVisionTests(unittest.TestCase):
                 self.assertTrue(o.dialog,(character['name'],selected))
                 self.assertEqual(o.selected_infinite,selected,character['name'])
                 self.assertIsNotNone(o.confirm_point,character['name'])
+
+    def test_partially_clipped_first_cell_is_detected_and_selected(self):
+        f=self.dialog_frame(selected=True)
+        original=f.copy()
+        # Scroll only the list viewport; header and preview stay fixed.
+        f[114:425,154:470]=original[147:458,154:470]
+        o=observe_bait(f,Detection())
+        self.assertTrue(o.dialog)
+        self.assertTrue(o.selected_infinite)
+        self.assertLess(o.infinite_point[1],145)
+        self.assertGreater(o.infinite_point[1],114)
+
+    def test_fully_hidden_first_cell_requests_scroll_in_verified_bait_list(self):
+        f=self.dialog_frame()
+        cv2.rectangle(f,(153,112),(475,430),(220,220,220),-1)
+        for y in (245,360):
+            for x in (222,316,410):
+                cv2.ellipse(f,(x,y),(39,8),0,0,360,(255,255,255),-1)
+        o=observe_bait(f,Detection())
+        self.assertTrue(o.dialog)
+        self.assertIsNone(o.infinite_point)
+        self.assertIsNotNone(o.scroll_point)
+        self.assertFalse(o.selected_infinite)
 
     def test_quantity_zero_cannot_be_mistaken_for_infinity(self):
         self.assertFalse(observe_bait(self.dialog_frame(infinity=False),Detection()).dialog)

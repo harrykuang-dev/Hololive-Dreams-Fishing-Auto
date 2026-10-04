@@ -165,6 +165,12 @@ class MouseController:
         finally:
             self.release()
 
+    def scroll_up(self, point: tuple[float, float]) -> None:
+        self.release()
+        self._move_client(point)
+        if win32gui.GetForegroundWindow() == self.window.hwnd:
+            win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 960)
+
     def press(self, point: tuple[float, float]) -> None:
         if win32gui.GetForegroundWindow() != self.window.hwnd:
             self.release()
@@ -408,9 +414,13 @@ def run(
                     break
                 if isinstance(action,tuple) and not args.once:
                     state = msg('bait_working') if bait_decision.managed else labels.get(d.scene, msg('action'))
-                    emit(msg('click_action', scene=state, x=round(action[0]),
-                             y=round(action[1]), attempt=bait_switcher.attempts if bait_decision.managed else navigation.attempts))
-                    mouse.click(action)
+                    if bait_decision.scroll:
+                        control_mode = 'scroll_up'
+                        mouse.scroll_up(action)
+                    else:
+                        emit(msg('click_action', scene=state, x=round(action[0]),
+                                 y=round(action[1]), attempt=bait_switcher.attempts if bait_decision.managed else navigation.attempts))
+                        mouse.click(action)
                 elif bite and not bait_decision.managed:
                     state = msg('tap')
                     mouse.click_gameplay(width,height)

@@ -14,6 +14,7 @@ class BaitObservation:
     continue_visible: bool = False
     dialog: bool = False
     infinite_point: tuple | None = None
+    scroll_point: tuple | None = None
     selected_infinite: bool = False
     confirm_point: tuple | None = None
 
@@ -78,23 +79,49 @@ def observe_bait(frame, detection):
     # Its first dough icon and infinity quantity distinguish it from item detail.
     header = fraction(ink, (.20,.115,.75,.16)) > .80
     panel = fraction(white, (.58,.19,.78,.40)) > .60
-    dough = fraction(orange, (.21,.23,.285,.36)) > .25
-    infinity = False
-    p = patch(ink, (.22,.375,.29,.42))
-    contours, hierarchy = cv2.findContours(p, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    if hierarchy is not None:
-        for i,c in enumerate(contours):
-            _,_,cw,ch = cv2.boundingRect(c)
-            if .007*w < cw < .022*w and .004*h < ch < .017*h and 1.4 < cw/ch < 3.3 and .25 < cv2.contourArea(c)/max(cw*ch,1) < .85:
-                infinity = True
-    o.dialog = bool(header and panel and dough and infinity)
+    # Quantity pills and first-cell infinity move vertically when the list
+    # restores a previous scroll position. Search the visible viewport.
+    quantity_mask = cv2.inRange(hsv, (0,0,242), (179,40,255))
+    quantities = 0
+    for contour in cv2.findContours(patch(quantity_mask, (.18,.23,.51,.85)), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]:
+        _,_,cw,ch = cv2.boundingRect(contour)
+        if .065*w < cw < .115*w and .018*h < ch < .05*h and 3 < cw/ch < 8:
+            quantities += 1
+    infinite = None
+    roi = (.22,.23,.29,.85)
+    for contour in cv2.findContours(patch(ink, roi), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]:
+        x,y,cw,ch = cv2.boundingRect(contour)
+        if not (.007*w < cw < .022*w and .004*h < ch < .02*h and 1.4 < cw/ch < 3.3
+                and .25 < cv2.contourArea(contour)/max(cw*ch,1) < .85):
+            continue
+        cy = (round(roi[1]*h)+y+ch/2)/h
+        if fraction(white, (.20,cy-.014,.29,cy+.014)) < .65:
+            continue
+        # Require the orange dough artwork above this quantity, allowing
+        # the header to clip its upper half. Click its actual visible blob.
+        art_rect = (.21,max(.225,cy-.15),.285,cy-.025)
+        art = patch(orange,art_rect)
+        blobs = cv2.findContours(art,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[0]
+        blobs = [c for c in blobs if cv2.contourArea(c) > .0006*w*h]
+        if not blobs:
+            continue
+        bx,by,bw,bh = cv2.boundingRect(max(blobs,key=cv2.contourArea))
+        infinite = (cy, ((round(art_rect[0]*w)+bx+bw/2)/scale,
+                         (round(art_rect[1]*h)+by+bh/2)/scale))
+        break
+    o.dialog = bool(header and panel and (infinite or quantities >= 3))
     if o.dialog:
-        o.infinite_point = (.247*w0, .30*h0)
-        corners = ((.201,.227,.219,.252),(.272,.227,.293,.252),
-                   (.201,.34,.219,.38),(.272,.34,.293,.38))
-        selected = all(fraction(ink, r) > .18 for r in corners)
-        preview = fraction(orange, (.64,.245,.74,.40)) > .42
-        o.selected_infinite = bool(selected and preview)
+        if infinite:
+            cy,o.infinite_point = infinite
+            delta = cy-.397
+            # The bottom focus corners stay visible when the top is clipped.
+            corners = ((.201,.34+delta,.219,.38+delta),
+                       (.272,.34+delta,.293,.38+delta))
+            selected = all(fraction(ink, r) > .18 for r in corners)
+            preview = fraction(orange, (.64,.245,.74,.40)) > .42
+            o.selected_infinite = bool(selected and preview)
+        else:
+            o.scroll_point = (.38*w0,.50*h0)
         # An enabled themed confirm pill and its white border must both be visible.
         if fraction(ink, (.84,.90,.93,.94)) > .40:
             o.confirm_point = pill((.79,.865,.985,.98))
