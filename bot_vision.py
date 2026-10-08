@@ -382,11 +382,10 @@ def _analyze(frame, language='auto'):
         d.confidence = .95
         return d
 
-    if reward_visible:
-        d.scene = 'overlay_animation'
-        return d
-
-    if button:
+    # An unconfirmed strip may be a smooth water background. Keep ordinary
+    # background buttons blocked, but let an independently confirmed TAP
+    # prompt override it. Confirmed rewards and modal closes returned above.
+    if button and not reward_visible:
         d.action_button = button
         d.scene = 'action'
         d.confidence = .9
@@ -398,6 +397,8 @@ def _analyze(frame, language='auto'):
         d.tap,_ = tap_art_prompt(hsv,w,h)
     if d.tap:
         d.tap, d.scene, d.confidence = True,'tap',.95
+    elif reward_visible:
+        d.scene = 'overlay_animation'
     return d
 
 

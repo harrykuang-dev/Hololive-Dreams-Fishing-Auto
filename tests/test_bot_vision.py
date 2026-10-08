@@ -56,6 +56,33 @@ def bite_frame(text=True, bang=True, outline=True):
 
 
 class BiteVisionTests(unittest.TestCase):
+    def test_tap_over_smooth_dark_water_survives_strip_false_positive(self):
+        from bot_control import BiteGuard
+        from bot_vision import reward_strip
+        f = bite_frame()
+        f[~np.any(f,axis=2)] = color(110,145,80)
+        hsv=cv2.cvtColor(f,cv2.COLOR_BGR2HSV)
+        self.assertTrue(reward_strip(hsv,1000,600))
+        for language in ('zh-TW','zh-CN','en','ja','ko','id'):
+            guard=BiteGuard()
+            first=analyze(f,language)
+            second=analyze(f,language)
+            with self.subTest(language=language):
+                self.assertEqual(first.scene,'tap')
+                self.assertIsNone(first.action_button)
+                self.assertFalse(guard.update(first,0.))
+                self.assertTrue(guard.update(second,.06))
+
+    def test_confirmed_material_reward_keeps_priority_over_tap_art(self):
+        f = bite_frame()
+        f[~np.any(f,axis=2)] = color(110,145,80)
+        for letter,x in zip('GET',(430,473,516)):
+            cv2.putText(f,letter,(x,92),cv2.FONT_HERSHEY_SIMPLEX,1.5,(255,255,255),4)
+        d=analyze(f)
+        self.assertEqual(d.scene,'reward')
+        self.assertFalse(d.tap)
+        self.assertIsNotNone(d.action_button)
+
     def test_asset_shape_recovers_dim_badge_but_requires_outline_and_bang(self):
         from asset_vision import tap_templates
         template = cv2.resize(tap_templates(),(190,61),interpolation=cv2.INTER_AREA)
@@ -69,6 +96,10 @@ class BiteVisionTests(unittest.TestCase):
         cv2.rectangle(f,(496,389),(504,410),(245,245,245),-1)
         cv2.circle(f,(500,424),5,(245,245,245),-1)
         self.assertTrue(analyze(f).tap)
+        # The asset fallback must also survive an unconfirmed water strip.
+        water = f.copy()
+        water[~np.any(water,axis=2)] = color(100,145,80)
+        self.assertTrue(analyze(water).tap)
         no_bang = f.copy()
         no_bang[370:450,465:535] = color(155,60,120)
         self.assertFalse(analyze(no_bang).tap)
