@@ -4,38 +4,35 @@
 
 [繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
 
-Asisten memancing otomatis untuk **hololive Dreams** versi Windows. Aplikasi memakai pengenalan layar dan input mouse biasa untuk menangani sambaran, menarik ikan, hasil tangkapan, dan ronde berikutnya melalui antarmuka sederhana tanpa kalibrasi manual.
+Asisten memancing otomatis untuk **hololive Dreams** versi Windows. Aplikasi memakai pengenalan layar dan input mouse biasa untuk menangani sambaran, menarik ikan, hasil tangkapan, dan ronde berikutnya.
 
 ## Unduh
 
 Buka [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) dan unduh `Hololive-Dreams-Fishing-Auto-v1.1.1.exe` dari lampiran rilis.
 
-Satu EXE sudah berisi runtime dan aset ikon. Tidak perlu memasang Python atau menyalin file tambahan. File checksum SHA-256 juga tersedia; ZIP kode sumber bukan aplikasi siap jalan.
-
-
-Mulai memakai hotkey global Windows pada utas tersendiri, sehingga dapat dimulai saat jendela aplikasi di latar belakang. Tutup versi lama dan periksa pesan pintasan siap. Pilih tombol lain jika pendaftaran gagal; F12 dicadangkan Windows.
+Cukup jalankan satu file EXE ini.
 
 ## Fitur
 
-- Mengenali tanda sambaran serta melacak ikan dan zona tangkapan saat menarik ikan.
-- Menangani tombol Lanjut / Berikutnya serta menutup koleksi atau pop-up item untuk melanjutkan memancing.
-- Enam bahasa antarmuka: 繁體中文, 简体中文, English, 日本語, 한국어, dan Indonesian. Pilihan ini mengubah bahasa asisten, bukan bahasa game.
-- Penghitung tangkapan terkonfirmasi dan target opsional yang menghentikan asisten.
-- Setiap kali Mulai ditekan, hitungan kembali ke nol. Material dan hasil yang belum terkonfirmasi tidak dihitung; hitungan tidak disimpan.
-- Pintasan mulai bawaan F8 dan berhenti F9. Klik masing-masing kolom lalu tekan tombol atau kombinasi untuk mengubahnya. Pintasan yang bertabrakan ditolak; menahan tombol mulai hanya memulai sekali.
-- Antarmuka terang sederhana, penskalaan DPI tinggi, riwayat aktivitas, dan diagnostik lokal opsional melalui Mode pengembang.
+- Mengenali tanda sambaran, melacak ikan dan zona tangkapan, serta mengendalikan penarikan ikan.
+- Menangani tombol Lanjut / Berikutnya pada layar hasil serta menutup pop-up entri ensiklopedia baru dan item untuk melanjutkan memancing.
+- Enam bahasa: 繁體中文, 简体中文, English, 日本語, 한국어, dan Indonesian. Memilih bahasa akan mengubah antarmuka dan pesan asisten.
+- Menampilkan jumlah tangkapan pada sesi saat ini. Atur target tangkapan agar asisten berhenti setelah target tercapai.
+- Pintasan mulai bawaan adalah F8 dan berhenti F9. Klik masing-masing kolom pengaturan lalu tekan tombol atau kombinasi baru untuk mengubahnya. Kedua pintasan tidak boleh bertabrakan.
+- Riwayat aktivitas.
+- Diagnostik pengembang lokal opsional.
 
 ## Cara menggunakan
 
 1. Buka game, siapkan umpan, dan masuk ke layar memancing.
-2. Jalankan EXE dan pilih bahasa yang sama dengan game.
+2. Jalankan EXE dan pilih bahasa pada “Bahasa / Language”.
 3. Atur target tangkapan; `0` berarti tanpa batas. Untuk mengubah pintasan berhenti, klik kolomnya lalu tekan kombinasi yang diinginkan.
-4. Klik Mulai. Asisten mencoba mengaktifkan game; pertahankan game di depan dengan seluruh tampilannya terlihat selama berjalan.
-5. Berhenti dengan pintasan, tombol Berhenti, atau berpindah jendela. Mulai lagi akan mengatur hitungan ke nol dan menghitung target dari awal.
+4. Klik Mulai atau tekan pintasan mulai. Asisten mencoba mengaktifkan game; pertahankan game di depan dengan seluruh tampilannya terlihat selama berjalan.
+5. Berhenti dengan pintasan berhenti, tombol Berhenti, atau berpindah jendela. Memulai lagi akan mengatur hitungan ke nol dan menghitung target tangkapan dari awal.
 
 ## Persyaratan dan batasan
 
-Memerlukan Windows 10 / 11 x64 dan game versi Windows. Pertahankan area klien game pada 16:9; jangan minimalkan, tutupi, atau ubah ukuran jendela saat berjalan. Memancing di latar belakang, membeli umpan, berpindah peta, dan mengisi ulang sumber daya tidak didukung.
+Memerlukan Windows 10 / 11 x64 dan game versi Windows. Pertahankan area klien game pada 16:9; jangan minimalkan, tutupi, atau ubah ukuran jendela saat berjalan. Memancing di latar belakang dan melanjutkan memancing setelah pergantian hari pada pukul 05.00 JST tidak didukung. Asisten tidak otomatis membeli umpan, berpindah peta, atau mengisi ulang sumber daya game.
 
 Warna karakter, animasi, resolusi, kinerja, dan pembaruan game masih dapat memengaruhi pengenalan dan input; hentikan dan berikan data diagnostik jika terjadi masalah. Ini adalah alat tidak resmi yang tidak membaca atau mengubah memori proses, data simpanan, atau file game. Alat ini hanya ditujukan untuk pembelajaran pemrograman Python serta penelitian dan pertukaran pengetahuan tentang teknologi pengenalan gambar. Periksa sendiri aturan game mengenai penggunaan alat otomatisasi. Jangan gunakan alat ini untuk merusak ekosistem game atau untuk tujuan komersial maupun mencari keuntungan. Pengembang tidak bertanggung jawab atas masalah apa pun yang timbul akibat penggunaan alat ini.
 

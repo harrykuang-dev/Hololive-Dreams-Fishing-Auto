@@ -48,7 +48,7 @@ class ReadmeTests(unittest.TestCase):
         for name in GUIDES:
             content=(ROOT/name).read_text(encoding='utf-8')
             for term in ('Hololive-Dreams-Fishing-Auto-v1.1.1.exe','F9','`0`','16:9',
-                         '%LOCALAPPDATA%\\HololiveFishingAuto\\sessions\\','SHA-256'):
+                         '%LOCALAPPDATA%\\HololiveFishingAuto\\sessions\\'):
                 self.assertIn(term,content,(name,term))
 
     def test_all_guides_link_known_issues(self):
