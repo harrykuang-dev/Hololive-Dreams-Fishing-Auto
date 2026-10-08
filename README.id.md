@@ -8,7 +8,7 @@ Asisten memancing otomatis untuk **hololive Dreams** versi Windows. Aplikasi mem
 
 ## Unduh
 
-Buka [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) dan unduh `Hololive-Dreams-Fishing-Auto-v1.1.exe` dari lampiran rilis.
+Buka [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) dan unduh `Hololive-Dreams-Fishing-Auto-v1.1.1.exe` dari lampiran rilis.
 
 Satu EXE sudah berisi runtime dan aset ikon. Tidak perlu memasang Python atau menyalin file tambahan. File checksum SHA-256 juga tersedia; ZIP kode sumber bukan aplikasi siap jalan.
 

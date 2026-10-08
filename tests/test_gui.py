@@ -64,7 +64,7 @@ class GuiConfigurationTests(unittest.TestCase):
 
     def test_release_version_and_one_click_defaults(self):
         args = FishingApp.bot_args()
-        self.assertEqual(APP_VERSION, "1.1.1-dev")
+        self.assertEqual(APP_VERSION, "1.1.1")
         self.assertEqual(args.window_title, "hololive-Dreams")
         self.assertEqual(args.language, "auto")
         self.assertEqual(FishingApp.bot_args("zh-CN").language,"zh-CN")

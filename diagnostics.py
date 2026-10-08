@@ -149,7 +149,7 @@ class DiagnosticWriter:
             self.error = 'Diagnostic worker did not finish within 5 seconds; ZIP was not created'
             return None
         manifest = {
-            'format': 1, 'version': '1.1.1-dev', 'image_max_bytes': IMAGE_LIMIT,
+            'format': 1, 'version': '1.1.1', 'image_max_bytes': IMAGE_LIMIT,
             'image_max_width': 1280, 'retained_image_limit': IMAGE_COUNT,
             'images_written': self.written, 'queued_frames_dropped': self.dropped,
             'max_image_write_ms': round(self.max_write_ms, 2), 'error': self.error,

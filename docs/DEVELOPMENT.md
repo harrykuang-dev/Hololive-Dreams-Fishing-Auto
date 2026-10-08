@@ -25,7 +25,7 @@ With the build environment active:
 .\build.ps1
 ```
 
-Output: `dist\Hololive-Dreams-Fishing-Auto-v1.1.1-dev.exe`.
+Output: `dist\Hololive-Dreams-Fishing-Auto-v1.1.1.exe`.
 The EXE includes its runtime, icon assets and high-DPI manifest; users need only the EXE.
 
 If an older EXE is running, close it or choose a different output folder before building.
@@ -39,8 +39,8 @@ Run on Windows; GUI tests create temporary Tk windows but do not start fishing.
 python -m unittest discover -s tests -v
 python -m fishing_auto --help
 python tools/control_benchmark.py
-python tools/verify_icon.py dist/Hololive-Dreams-Fishing-Auto-v1.1.1-dev.exe
-Get-FileHash dist/Hololive-Dreams-Fishing-Auto-v1.1.1-dev.exe -Algorithm SHA256
+python tools/verify_icon.py dist/Hololive-Dreams-Fishing-Auto-v1.1.1.exe
+Get-FileHash dist/Hololive-Dreams-Fishing-Auto-v1.1.1.exe -Algorithm SHA256
 ```
 
 Tests cover recognition, input safety, continuation, counters, shortcuts, translations,
@@ -99,7 +99,7 @@ startup.log inside the dated diagnostic ZIP; verified packed originals are remov
 The earlier development build's two application-level startup journals are removed
 on launch. Diagnostic ZIPs remain available for users to report problems.
 
-The current local candidate is `1.1.1-dev` (`tap-priority-r1`), fixing a smooth
+Release `v1.1.1` fixes a smooth
 water strip that suppressed TAP recognition. Stable releases remain linked from
 the user guides. Private failure screenshots are replayed locally and are not
 included in the repository or release assets.
