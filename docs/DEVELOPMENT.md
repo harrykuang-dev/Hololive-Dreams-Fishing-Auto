@@ -1,8 +1,8 @@
-# 開發說明 / Development guide
+# Development guide / 開發說明
 
 [English](../README.md) · [繁體中文](../README.zh-TW.md) · [日本語](../README.ja.md) · [한국어](../README.ko.md) · [Indonesian](../README.id.md) · [简体中文](../README.zh-CN.md)
 
-## 環境 / Environment
+## Environment / 環境
 
 Windows 10 / 11 x64. The current release is built with Python 3.13 x64.
 Runtime and build dependencies are declared in `requirements.txt` and `requirements-build.txt`.
@@ -16,7 +16,7 @@ python -m venv .venv
 The GUI uses automatic screen recognition and does not require a legacy profile.
 Do not change reeling parameters solely on the basis of synthetic simulations.
 
-## 單檔建置 / Single-file build
+## Single-file build / 單檔建置
 
 With the build environment active:
 
@@ -31,7 +31,7 @@ The EXE includes its runtime, icon assets and high-DPI manifest; users need only
 If an older EXE is running, close it or choose a different output folder before building.
 Do not overwrite or terminate a running user's copy without checking.
 
-## 驗證 / Validation
+## Validation / 驗證
 
 Run on Windows; GUI tests create temporary Tk windows but do not start fishing.
 
@@ -47,7 +47,7 @@ Tests cover recognition, input safety, continuation, counters, shortcuts, transl
 layout scaling and icon packaging. Offline tests and synthetic benchmarks are not
 proof of in-game success rates.
 
-## 圖標 / Icon
+## Icon / 圖標
 
 The active asset is `assets/fish-clear.ico`; both the EXE and Tk windows must use it.
 Artwork and generation provenance are documented in [ICON.md](../assets/ICON.md).
@@ -59,7 +59,7 @@ python tools/preview_icon.py
 
 The preview is a diagnostic contact sheet, not a source asset.
 
-## 離線回放 / Offline replay
+## Offline replay / 離線回放
 
 ```powershell
 python tools/replay_recording.py "local-recording.mp4" sessions/replay --hz 10
@@ -68,13 +68,13 @@ python tools/replay_recording.py "local-recording.mp4" sessions/replay --hz 10
 Replay analyzes local videos without sending game input. For timestamped traces,
 preserve the original capture timestamps rather than inferring latency from nominal video FPS.
 
-## 隱私 / Privacy
+## Privacy / 隱私
 
 Never commit recordings, screenshots, session diagnostics, local calibration profiles,
 account information or credentials. These local outputs are excluded by `.gitignore`.
 The release asset must not contain user diagnostics.
 
-## 研究工具 / Research tools
+## Research tools / 研究工具
 
 The `fishing_auto` package also contains legacy capture, manual calibration and replay
 commands. Use `python -m fishing_auto --help` for their CLI entry point. They are not

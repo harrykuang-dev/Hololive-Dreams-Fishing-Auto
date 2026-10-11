@@ -32,6 +32,6 @@ TAP 咬鉤和拉扯期間使用遊戲客戶區內的現有滑鼠位置，必要�
 
 已完成 Windows 自動化測試、真實截圖與影片離線回放、角色配色和多語言素材檢查。這些驗證不代表所有角色、動畫或遊戲更新後的畫面均能正確辨識。
 
-使用說明：[繁體中文](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.zh-TW.md) · [简体中文](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.zh-CN.md) · [English](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.en.md) · [日本語](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.ja.md) · [한국어](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.ko.md) · [Indonesian](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.id.md)
+使用說明：[English](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.md) · [繁體中文](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.zh-TW.md) · [日本語](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.ja.md) · [한국어](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.ko.md) · [Indonesian](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.id.md) · [简体中文](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.zh-CN.md)
 
 [已知問題與臨時解決方案](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)

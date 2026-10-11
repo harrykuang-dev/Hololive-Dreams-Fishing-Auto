@@ -22,4 +22,4 @@ Download **`Hololive-Dreams-Fishing-Auto-v1.1.1.exe`** and close the older versi
 
 以上為離線驗證，仍需實機確認。若原場景仍有問題，請開啟開發者模式重現後，提供新的診斷 ZIP。
 
-[使用說明 / User guide](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.md) · [已知問題 / Known issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+[User guide / 使用說明](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.md) · [Known issues / 已知問題](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
