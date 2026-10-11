@@ -1,6 +1,6 @@
 # 開發說明 / Development guide
 
-[繁體中文](../README.md) · [简体中文](../README.zh-CN.md) · [English](../README.en.md) · [日本語](../README.ja.md) · [한국어](../README.ko.md) · [Indonesian](../README.id.md)
+[English](../README.md) · [繁體中文](../README.zh-TW.md) · [日本語](../README.ja.md) · [한국어](../README.ko.md) · [Indonesian](../README.id.md) · [简体中文](../README.zh-CN.md)
 
 ## 環境 / Environment
 

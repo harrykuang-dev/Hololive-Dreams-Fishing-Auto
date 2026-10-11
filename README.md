@@ -1,56 +1,57 @@
 # Hololive Dreams Auto Fishing
 
-[已知問題與臨時解決方案](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
+[Known issues and workarounds](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
 
-[English](README.en.md) · [繁體中文](README.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md) · [简体中文](README.zh-CN.md)
+[English](README.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md) · [简体中文](README.zh-CN.md)
 
-Windows 版《hololive Dreams》的自動釣魚助手。透過遊戲畫面辨識與一般滑鼠輸入，處理咬鉤、拉扯、魚獲結算和續局
-## 下載
+An auto-fishing assistant for the Windows version of **hololive Dreams**. It uses screen recognition and normal mouse input to handle bites, reeling, catch results, and the next round.
 
-前往 [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)，下載附件中的 `Hololive-Dreams-Fishing-Auto-v1.1.1.exe`。
+## Download
 
-只需執行這一個 EXE。
+Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) and download `Hololive-Dreams-Fishing-Auto-v1.1.1.exe` from the release assets.
 
-## 功能
+Simply run this single EXE.
 
-- 自動辨識咬鉤提示，追蹤魚與判定區間並控制拉扯。
-- 辨識結算畫面的「繼續／下一步」，關閉新圖鑑及物品彈窗，接續釣魚。
-- 支援六種語言：繁體中文、简体中文、English、日本語、한국어、Indonesian。選擇語言會切換助手介面及訊息。
-- 顯示本次釣獲數量，可設定目標數量，達到目標後停止。
-- 開始快捷鍵預設 F8，停止快捷鍵預設 F9；點擊各自的設定框後按下新按鍵或組合鍵即可自訂。兩者不能衝突。
-- 運行記錄
-- 可選的本機開發者診斷模式。
+## Features
 
-## 使用方法
+- Recognizes bite prompts, tracks the fish and catch zone, and controls reeling.
+- Handles Continue / Next buttons on result screens and closes new encyclopedia entries and item pop-ups to resume fishing.
+- Six languages: 繁體中文, 简体中文, English, 日本語, 한국어, and Indonesian. Selecting a language changes the assistant interface and messages.
+- Displays the catch count for the current run. Set a target count to stop when it is reached.
+- The Start shortcut defaults to F8 and Stop to F9. Click either setting field and press a new key or combination to customize it. The two shortcuts must not conflict.
+- Activity log.
+- Optional local developer diagnostics.
 
-1. 開啟遊戲，準備魚餌並進入釣魚畫面。
-2. 執行 EXE，在「語言 / Language」中選擇語言。
-3. 設定目標釣魚數量；`0` 表示不限。需要更換停止快捷鍵時，點擊快捷鍵框並按下要使用的按鍵。
-4. 點擊「開始釣魚」或點擊開始釣魚的快捷鍵。程式會嘗試切回遊戲；運行時請讓遊戲保持前景、完整可見。
-5. 按停止快捷鍵、點擊「停止」，或切換視窗即可停止。再次開始會歸零並重新計算釣魚數量目標。
+## Quick start
 
-## 使用條件與限制
+1. Open the game, prepare bait, and enter the fishing screen.
+2. Run the EXE and select a language under “Language”.
+3. Set a catch target; `0` means unlimited. To change the stop shortcut, click its field and press the desired key combination.
+4. Click Start or press the Start shortcut. The assistant attempts to activate the game; keep the game in the foreground and fully visible while it runs.
+5. Stop with the Stop shortcut, the Stop button, or by switching windows. Starting again resets the counter to zero and counts toward the catch target from the beginning.
 
-適用於 Windows 10／11 x64 及 Windows 版遊戲。遊戲客戶區需維持 16:9；運行時不要最小化、遮擋或改變視窗。不支援背景釣魚，不支援在5AM JST換日之後繼續釣魚，不會自動購買魚餌、切換地圖或補充遊戲資源。
+## Requirements and limitations
 
-辨識與操作仍可能受角色配色、動畫、解析度、效能及遊戲更新影響；遇到異常請停止並提供診斷。本工具不是官方軟件，不讀取或修改遊戲程序記憶體、存檔或遊戲檔案。本工具仅供 Python 编程学习、图像识别技术研究交流使用。請自行確認遊戲對自動化工具的使用規定，请勿用于破坏游戏生态或任何商业盈利场景，因使用本工具造成的任何问题开发者概不负责。
+Windows 10 / 11 x64 and the Windows game are required. Keep the game client area at 16:9; do not minimize, cover, or resize it during operation. Background fishing and resuming fishing after the daily reset at 5:00 AM JST are not supported. The assistant does not automatically purchase bait, change maps, or replenish game resources.
 
-## 異常回報與開發者模式
+Character colors, animations, resolution, performance, and game updates may still affect recognition and input; stop and provide diagnostics if something goes wrong. This is an unofficial tool. It does not read or modify game process memory, saves, or game files. This tool is intended solely for learning Python programming and researching and exchanging knowledge about image recognition technology. Check the game's rules on automation yourself. Do not use this tool to disrupt the game's ecosystem or for any commercial or profit-making purposes. The developer accepts no responsibility for any problems resulting from its use.
 
-無法續局、追蹤異常或其他問題，可在 [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues) 聯繫作者。
+## Reporting problems and Developer mode
 
-勾選「開發者模式」後再重現問題。它會儲存狀態截圖、魚獲卡片、追蹤資料及耗時；資料只存於本機，不會自動上傳。截圖包含遊戲畫面，啟用後會增加效能負擔。
+Report continuation failures, tracking issues, or other problems through [GitHub Issues](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues).
 
-點擊右側 `?` 可查看並開啟診斷資料夾：
+Enable Developer mode before reproducing the issue. It saves state screenshots, catch cards, tracking data, and timing information locally; nothing is automatically uploaded. Screenshots include the game view, and diagnostics add performance overhead.
 
-截圖以 JPEG 在背景保存，單張不超過 192 KiB，保留最近 64 張事件圖及最新畫面；追蹤 CSV 保留最近兩段各 4 MiB。診斷 ZIP 不包含選用的錄影。
+Click `?` beside Developer mode to view and open the diagnostic folder:
+
+JPEG screenshots are saved in the background, up to 192 KiB each. The latest 64 event images and latest view are retained, along with two recent 4 MiB trace segments. The diagnostic ZIP excludes optional video.
 
 ```text
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
 ```
 
-路徑由目前 Windows 帳戶決定；每次運行建立時間命名的資料夾。請提供軟件版本、遊戲語言／角色、解析度、Windows 顯示縮放、問題描述，以及停止後自動產生的 `diagnostics-YYYY-MM-DD_HH-MM-SS.zip`。分享前請先檢查截圖是否含有不想公開的內容。
+The path follows your Windows account. Each run creates a timestamp-named folder. Include the app version, game language / character, resolution, Windows display scaling, a description, and the automatically generated `diagnostics-YYYY-MM-DD_HH-MM-SS.zip` after stopping. Review screenshots for information you do not want to share before submitting them.
 
-## 原始碼與授權
+## Source and license
 
-原始碼啟動、單檔建置與離線測試見 [開發說明](docs/DEVELOPMENT.md)。授權為 [MIT](LICENSE)；魚角色與遊戲相關權利歸原權利人所有。
+See the [development guide](docs/DEVELOPMENT.md) for source setup, single-file builds, and offline tests. Code is [MIT licensed](LICENSE); rights to the fish character and game belong to their respective owners.

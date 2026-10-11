@@ -2,7 +2,7 @@
 
 [既知の問題と回避策](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
 
-[English](README.en.md) · [繁體中文](README.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md) · [简体中文](README.zh-CN.md)
+[English](README.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md) · [简体中文](README.zh-CN.md)
 
 Windows 版 **hololive Dreams** の自動さかな釣りアシスタントです。画面認識と通常のマウス入力で、食いつき、駆け引き、釣果の確認、次の釣りを操作します。
 

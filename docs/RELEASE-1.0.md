@@ -28,6 +28,6 @@
 
 下載附件 **`Hololive-Dreams-Fishing-Auto-v1.0.exe`** 即可使用，無需安裝 Python 或另外複製素材。適用於 Windows 10／11 x64；運行時讓遊戲保持前景，客戶區維持 16:9。附件 `SHA256SUMS.txt` 可核對下載檔案。
 
-使用說明：[繁體中文](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.md) · [简体中文](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.zh-CN.md) · [English](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.en.md) · [日本語](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.ja.md) · [한국어](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.ko.md) · [Indonesian](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.id.md)
+使用說明：[繁體中文](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.zh-TW.md) · [简体中文](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.zh-CN.md) · [English](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.en.md) · [日本語](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.ja.md) · [한국어](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.ko.md) · [Indonesian](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/README.id.md)
 
 114 項離線／模擬測試已通過，但不代表所有角色、場景或魚種均已實機驗證，不保證四／五星魚或任何難度的成功率。如遇異常，請啟用開發者模式重現問題，並向作者提供問題描述與對應診斷資料。

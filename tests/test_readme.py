@@ -6,7 +6,7 @@ from app_locale import GAME_LANGUAGES
 
 
 ROOT=Path(__file__).resolve().parents[1]
-GUIDES=('README.md','README.zh-CN.md','README.en.md','README.ja.md','README.ko.md','README.id.md')
+GUIDES=('README.md','README.zh-TW.md','README.ja.md','README.ko.md','README.id.md','README.zh-CN.md')
 
 
 class ReadmeTests(unittest.TestCase):
