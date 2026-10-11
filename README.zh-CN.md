@@ -2,7 +2,7 @@
 
 [已知问题与临时解决方案](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
 
-[繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
+[English](README.en.md) · [繁體中文](README.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md) · [简体中文](README.zh-CN.md)
 
 Windows 版《hololive Dreams》的自动钓鱼助手。通过游戏画面识别与普通鼠标输入，处理咬钩、拉扯、鱼获结算和继续钓鱼。
 

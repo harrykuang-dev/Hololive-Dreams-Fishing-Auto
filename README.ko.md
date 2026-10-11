@@ -2,7 +2,7 @@
 
 [알려진 문제 및 임시 해결 방법](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
 
-[繁體中文](README.md) · [简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md)
+[English](README.en.md) · [繁體中文](README.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Indonesian](README.id.md) · [简体中文](README.zh-CN.md)
 
 Windows용 **hololive Dreams** 자동 낚시 도우미입니다. 화면 인식과 일반 마우스 입력으로 입질, 물고기 끌어올리기, 결과 확인, 다음 낚시를 처리합니다.
 
