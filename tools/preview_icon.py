@@ -8,12 +8,10 @@ from PIL import Image, ImageDraw
 
 def preview():
     repo = Path(__file__).resolve().parents[1]
-    sheet = Image.new('RGB',(860,734),'#e5e5e5')
+    sheet = Image.new('RGB',(430,734),'#e5e5e5')
     draw = ImageDraw.Draw(sheet)
-    columns = [('OLD / light','fish-pixel.ico','#ffffff'),
-               ('NEW / light','fish-clear.ico','#ffffff'),
-               ('OLD / dark','fish-pixel.ico','#202020'),
-               ('NEW / dark','fish-clear.ico','#202020')]
+    columns = [('light','fishing-hook.ico','#ffffff'),
+               ('dark','fishing-hook.ico','#202020')]
     for col,(label,name,bg) in enumerate(columns):
         x = col*215
         draw.text((x+12,10),label,fill='#202020')
@@ -27,7 +25,7 @@ def preview():
                 sheet.paste(frame,(x+12,y+40),frame)
                 zoom = frame.resize((size*3,size*3),Image.Resampling.NEAREST)
                 sheet.paste(zoom,(x+64,y+24),zoom)
-    output = repo/'build'/'icon-comparison.png'
+    output = repo/'build'/'icon-preview.png'
     output.parent.mkdir(parents=True,exist_ok=True)
     sheet.save(output)
     print(output)

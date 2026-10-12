@@ -1,6 +1,6 @@
 """Cached Fluent surfaces with native ttk input and keyboard behavior."""
 from tkinter import ttk
-from PIL import Image, ImageDraw, ImageFont, ImageTk
+from PIL import Image, ImageDraw, ImageTk
 
 BG, SURFACE, TEXT, MUTED = '#F5F5F5', '#FFFFFF', '#242424', '#616161'
 ACCENT, HOVER, PRESSED, ACCENT_TEXT = '#72B6E8', '#62A9DC', '#529ACD', '#102C40'

@@ -49,11 +49,11 @@ proof of in-game success rates.
 
 ## Icon / 圖標
 
-The active asset is `assets/fish-clear.ico`; both the EXE and Tk windows must use it.
+The active asset is `assets/fishing-hook.ico`; both the EXE and Tk windows must use it.
 Artwork and generation provenance are documented in [ICON.md](../assets/ICON.md).
 
 ```powershell
-python tools/make_icon.py assets/fish-clear.png assets/fish-clear.ico --pixel
+python tools/make_icon.py assets/fishing-hook.png assets/fishing-hook.ico --crop
 python tools/preview_icon.py
 ```
 
