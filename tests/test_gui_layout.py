@@ -48,11 +48,23 @@ class LayoutTests(unittest.TestCase):
                     if dpi==96:
                         # Move to a higher-DPI monitor, including pixel spacing.
                         old_wrap = int(app.instructions.cget('wraplength'))
+                        from tkinter import font
+                        old_title_height = font.nametofont('FishingTitleFont').metrics('linespace')
+                        original_theme = app.theme
                         with patch('gui.window_dpi',return_value=144):
                             app._dpi_changed(SimpleNamespace(widget=root))
                             root.update()
                             self.assertEqual(int(app.instructions.cget('wraplength')),round(old_wrap*1.5))
                             self.assertEqual(app.start_button.winfo_height(),app.stop_button.winfo_height())
+                            self.assertGreater(font.nametofont('FishingTitleFont').metrics('linespace'),old_title_height)
+                        with patch('gui.window_dpi',return_value=96):
+                            app._dpi_changed(SimpleNamespace(widget=root))
+                            root.update()
+                            self.assertIs(app.theme,original_theme)
+                            image_count=len(app.theme.images)
+                            root.geometry('700x860')
+                            root.update()
+                            self.assertEqual(len(app.theme.images),image_count)
             finally:
                 app._closing=True
                 for callback in root.tk.splitlist(root.tk.call('after','info')):
@@ -100,6 +112,42 @@ class LayoutTests(unittest.TestCase):
             self.assertEqual(app.shortcut_display.get(),'F7')
             app._capture_shortcut(key)
             self.assertEqual(app.stop_key.get(),'F7')
+        finally:
+            app._closing=True
+            for callback in root.tk.splitlist(root.tk.call('after','info')):
+                root.after_cancel(callback)
+            root.destroy()
+
+    def test_unlimited_and_numeric_target_preserve_amount_and_reject_invalid_limits(self):
+        root=tk.Tk(); app=FishingApp(root)
+        try:
+            app.target_amount.set('7')
+            self.assertEqual(app.target.get(),'0')
+            self.assertTrue(app.target_entry.instate(['disabled']))
+            app.target_mode.set('count')
+            self.assertEqual(app.target.get(),'7')
+            self.assertFalse(app.target_entry.instate(['disabled']))
+            app.target_mode.set('unlimited')
+            self.assertEqual(app.target.get(),'0')
+            self.assertEqual(app.target_amount.get(),'7')
+            app.target_mode.set('count')
+            self.assertEqual(app.target.get(),'7')
+            for value in ('0','-2','abc',''):
+                app.target_amount.set(value)
+                with self.assertRaises(ValueError):
+                    app._launch(app._start_snapshot,'button')
+                self.assertIsNone(app.worker)
+            app.target_amount.set('12')
+            with patch('gui.threading.Thread') as worker:
+                worker.return_value.is_alive.return_value=False
+                app.start()
+                self.assertEqual(app.session_args.target_catches,12)
+                self.assertTrue(app.amount_choice.instate(['disabled']))
+                self.assertTrue(app.unlimited_choice.instate(['disabled']))
+            app._set_controls(False)
+            app.target_mode.set('unlimited')
+            self.assertFalse(app.amount_choice.instate(['disabled']))
+            self.assertTrue(app.target_entry.instate(['disabled']))
         finally:
             app._closing=True
             for callback in root.tk.splitlist(root.tk.call('after','info')):
@@ -208,9 +256,9 @@ class LayoutTests(unittest.TestCase):
                 self.assertEqual(app.session_args.target_catches,0)
             dialog=app.show_developer_help()
             root.update()
-            body=dialog.nametowidget('content.body')
-            link=dialog.nametowidget('content.project_link')
-            path_link=dialog.nametowidget('content.diagnostic_link')
+            body=dialog.nametowidget('panel.content.body')
+            link=dialog.nametowidget('panel.project.project_link')
+            path_link=dialog.nametowidget('panel.content.diagnostic_link')
             self.assertIn('診斷資料位於：',body.cget('text'))
             self.assertEqual(path_link.cget('text'),str(app.diagnostic_base()))
             self.assertEqual(str(path_link.cget('cursor')),'hand2')
@@ -219,7 +267,7 @@ class LayoutTests(unittest.TestCase):
                 mkdir.assert_called_once_with(parents=True,exist_ok=True)
                 explorer.assert_called_once_with(str(app.diagnostic_base().resolve()))
             self.assertNotIn('固定',body.cget('text'))
-            self.assertEqual(dialog.nametowidget('content.project_label').cget('text'),'項目地址：')
+            self.assertEqual(dialog.nametowidget('panel.project.project_label').cget('text'),'項目地址：')
             self.assertEqual(link.cget('text'),PROJECT_URL)
             self.assertEqual(str(link.cget('cursor')),'hand2')
             with patch('gui.webbrowser.open_new_tab') as browser:
@@ -232,7 +280,7 @@ class LayoutTests(unittest.TestCase):
                 app._apply_language()
                 dialog=app.show_developer_help()
                 root.update()
-                path_link=dialog.nametowidget('content.diagnostic_link')
+                path_link=dialog.nametowidget('panel.content.diagnostic_link')
                 self.assertTrue(path_link.bind('<Return>'))
                 self.assertTrue(path_link.bind('<space>'))
                 self.assertEqual(path_link.cget('text'),str(app.diagnostic_base()))

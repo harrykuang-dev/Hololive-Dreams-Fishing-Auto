@@ -296,6 +296,25 @@ for code, values in START_TEXT.items():
  TEXT[code].update(zip(('start_source','source_hotkey','source_button','hotkey_ready','hotkey_unavailable','startup_find','startup_activate','startup_prepare'),values))
 
 
+# Compact product labels shared by the six GUI languages.
+GUI_PRESENTATION = {
+    'zh-TW': ('自動釣魚','等待開始','先進入游戲釣魚畫面，再點擊「開始」','目標釣獲數','不限','開始',
+              '請選擇不限或輸入大於 0 的整數，並設定有效快捷鍵。'),
+    'zh-CN': ('自动钓鱼','等待开始','先进入游戏钓鱼画面，再点击「开始」','目标钓获数','不限','开始',
+              '请选择不限或输入大于 0 的整数，并设置有效快捷键。'),
+    'en': ('Auto Fishing','Waiting to start','Open the game fishing screen, then click “Start”.','Target catches','Unlimited','Start',
+           'Choose Unlimited or enter a positive integer, and set valid shortcuts.'),
+    'ja': ('自動釣り','開始待ち','ゲームの釣り画面を開いてから「開始」をクリックしてください。','目標釣果数','無制限','開始',
+           '無制限を選ぶか正の整数を入力し、有効なショートカットを設定してください。'),
+    'ko': ('자동 낚시','시작 대기','게임의 낚시 화면을 연 다음 “시작”을 클릭하세요.','목표 물고기 수','무제한','시작',
+           '무제한을 선택하거나 양의 정수를 입력하고 유효한 단축키를 설정하세요.'),
+    'id': ('Memancing Otomatis','Menunggu mulai','Buka layar memancing dalam game, lalu klik “Mulai”.','Target tangkapan','Tanpa batas','Mulai',
+           'Pilih Tanpa batas atau masukkan bilangan bulat positif, lalu atur pintasan yang valid.'),
+}
+for code,values in GUI_PRESENTATION.items():
+    TEXT[code].update(zip(('subtitle','idle','instructions','target_count','unlimited','start','invalid_settings'),values))
+
+
 def text(locale: str, key: str, **values) -> str:
     """Return fully localized text; CLI 'auto' keeps the previous TW default."""
     entry = TEXT["zh-TW" if locale == "auto" else locale][key]

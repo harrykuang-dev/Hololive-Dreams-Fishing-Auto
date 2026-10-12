@@ -38,7 +38,7 @@ def verify(exe,icon):
     finally:
         win32api.FreeLibrary(module)
     archive=CArchiveReader(str(exe.resolve()))
-    asset=next(name for name in archive.toc if name.replace('\\','/')=='assets/fish-clear.ico')
+    asset=next(name for name in archive.toc if name.replace('\\','/')==f'assets/{icon.name}')
     assert archive.extract(asset)==raw
     print(f'Verified {count} exact EXE icon frames: {sorted(found)}')
     print('Bundled window icon matches EXE icon; PerMonitorV2 manifest retained.')
@@ -47,6 +47,6 @@ def verify(exe,icon):
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('exe',type=Path)
-    parser.add_argument('--icon',type=Path,default=Path(__file__).resolve().parents[1]/'assets'/'fish-clear.ico')
+    parser.add_argument('--icon',type=Path,default=Path(__file__).resolve().parents[1]/'assets'/'fishing-hook.ico')
     args=parser.parse_args()
     verify(args.exe,args.icon)

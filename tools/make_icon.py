@@ -14,7 +14,12 @@ def make_icon(source_path,output_path,pixel=False,crop=False):
         raise ValueError('Source must already have transparent pixels')
     frames = []
     if pixel or crop:
-        source = source.crop(source.getchannel('A').getbbox())
+        alpha = source.getchannel('A')
+        # Fit the visible glyph, not nearly transparent extraction specks.
+        # Only the exported frames are cropped; the source artwork is preserved.
+        bounds = alpha.point(lambda value:255 if value>=128 else 0).getbbox() if crop else alpha.getbbox()
+        if bounds is None: raise ValueError('Source has no visible artwork')
+        source = source.crop(bounds)
     for size in SIZES:
         frame = Image.new('RGBA',(size,size))
         artwork = source.copy()

@@ -6,7 +6,7 @@ python -m PyInstaller `
     --onefile `
     --windowed `
     --name 'Hololive-Dreams-Fishing-Auto-v1.1.1' `
-    --icon '.\assets\fish-clear.ico' `
+    --icon '.\assets\fishing-hook.ico' `
     --manifest '.\assets\windows.manifest' `
     --add-data '.\assets;assets' `
     --version-file '.\version_info.txt' `
