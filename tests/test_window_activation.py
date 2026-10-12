@@ -37,7 +37,7 @@ class WindowActivationTests(unittest.TestCase):
 
     def test_minimized_game_uses_async_restore_and_activation_failure_is_reported(self):
         with (patch('auto_fishing.win32gui.GetForegroundWindow',return_value=999),
-              patch('auto_fishing.win32gui.IsIconic',return_value=True),
+              patch('auto_fishing.win32gui.IsIconic',side_effect=[True,False,True,False,True]),
               patch('auto_fishing.ctypes.windll.user32') as user32):
             user32.ShowWindowAsync.return_value=1
             user32.SetForegroundWindow.return_value=1
@@ -49,6 +49,19 @@ class WindowActivationTests(unittest.TestCase):
             user32.ShowWindowAsync.return_value=0
             with self.assertRaisesRegex(RuntimeError,'還原'):
                 self.window().activate()
+
+    def test_stop_during_minimized_restore_skips_foreground_activation(self):
+        from threading import Event
+        stop = Event()
+        with (patch('auto_fishing.win32gui.GetForegroundWindow',return_value=999),
+              patch('auto_fishing.win32gui.IsIconic',return_value=True),
+              patch('auto_fishing.ctypes.windll.user32') as user32):
+            def restore(*_):
+                stop.set()
+                return 1
+            user32.ShowWindowAsync.side_effect=restore
+            self.assertFalse(self.window().activate(stop_event=stop))
+            user32.SetForegroundWindow.assert_not_called()
 
     def test_failed_startup_closes_window_without_constructing_mouse(self):
         with (patch('auto_fishing.WindowCapture') as capture,

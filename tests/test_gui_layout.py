@@ -17,6 +17,52 @@ class LayoutTests(unittest.TestCase):
         self.trace_patch.start()
         self.addCleanup(self.trace_patch.stop)
 
+    def test_connection_message_failure_does_not_break_stop_and_restart(self):
+        import time
+        root=tk.Tk()
+        root.withdraw()
+        app=FishingApp(root)
+        append=app._append_log
+
+        def record(message):
+            if message=='transient startup update':
+                raise tk.TclError('interrupted UI update')
+            append(message)
+
+        def session(args,stop_event,status_callback,progress_callback):
+            status_callback('transient startup update')
+            status_callback(text(args.language,'connected_window',title=args.window_title,language=args.language))
+            stop_event.wait(2.)
+
+        def until(predicate):
+            deadline=time.monotonic()+2.
+            while not predicate():
+                root.update()
+                if time.monotonic()>=deadline:
+                    self.fail('UI did not complete the start/stop transition')
+                time.sleep(.01)
+
+        try:
+            with (patch('gui.run',side_effect=session),
+                  patch.object(app,'_append_log',side_effect=record),
+                  patch.object(root,'report_callback_exception') as report):
+                for _ in range(2):
+                    app.start()
+                    until(lambda:app.status.cget('text')==text('zh-TW','waiting'))
+                    self.assertEqual(str(app.status.cget('foreground')),app.CYAN)
+                    app.stop()
+                    until(lambda:not app._controls_running and not app.worker.is_alive())
+                    self.assertFalse(app.start_button.instate(['disabled']))
+                self.assertEqual(report.call_count,2)
+        finally:
+            app._closing=True
+            app.stop_event.set()
+            if app.worker: app.worker.join(1.)
+            app._hotkey.close()
+            for callback in root.tk.splitlist(root.tk.call('after','info')):
+                root.after_cancel(callback)
+            root.destroy()
+
     def test_buttons_match_and_controls_fit_at_multiple_dpis(self):
         for dpi in (96,120,144,192):
             root=tk.Tk()

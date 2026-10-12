@@ -71,11 +71,11 @@ class WindowCapture:
         self._size = None
         self._capture_rect = None
 
-    def activate(self) -> None:
+    def activate(self, stop_event=None) -> bool:
         # A global shortcut is normally pressed with the game already in
         # front. Do not restore its window or inject Alt in that case.
         if win32gui.GetForegroundWindow() == self.hwnd:
-            return
+            return True
         user32 = ctypes.windll.user32
         if win32gui.IsIconic(self.hwnd):
             show = user32.ShowWindowAsync
@@ -83,6 +83,18 @@ class WindowCapture:
             show.restype = wintypes.BOOL
             if not show(self.hwnd, win32con.SW_RESTORE):
                 raise RuntimeError("無法還原遊戲視窗，請手動切回遊戲後重新開始。")
+            deadline = time.monotonic()+3.
+            while win32gui.IsIconic(self.hwnd):
+                if stop_event is not None and stop_event.is_set():
+                    return False
+                if time.monotonic() >= deadline:
+                    raise RuntimeError("遊戲視窗未完成還原，請手動切回遊戲後重新開始。")
+                if stop_event is not None:
+                    stop_event.wait(.02)
+                else:
+                    time.sleep(.02)
+        if stop_event is not None and stop_event.is_set():
+            return False
         # ctypes releases the GIL while Windows processes activation, so
         # Tk's event loop and Stop remain responsive. Never synthesize Alt.
         foreground = user32.SetForegroundWindow
@@ -90,6 +102,7 @@ class WindowCapture:
         foreground.restype = wintypes.BOOL
         if not foreground(self.hwnd):
             raise RuntimeError("無法切換到遊戲，請手動切回遊戲後按開始快捷鍵。")
+        return True
 
     def client_rect(self) -> tuple[int, int, int, int]:
         left, top, right, bottom = win32gui.GetClientRect(self.hwnd)
@@ -297,11 +310,18 @@ def run(
     window = WindowCapture(args.window_title)
     startup('startup_activate')
     try:
-        window.activate()
+        if window.activate(stop_event=stop_event) is False:
+            window.close()
+            return 0
     except Exception:
         window.close()
         raise
-    time.sleep(0.20)
+    if stop_event is not None:
+        if stop_event.wait(.20):
+            window.close()
+            return 0
+    else:
+        time.sleep(.20)
     startup('startup_prepare')
     mouse = MouseController(window)
     running = True

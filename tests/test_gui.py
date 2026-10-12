@@ -153,13 +153,17 @@ class GuiConfigurationTests(unittest.TestCase):
         self, _capture, _mouse, _signal
     ):
         stop_event = Event()
-        stop_event.set()
         for language in GAME_LANGUAGES.values():
             with self.subTest(language=language):
+                stop_event.clear()
                 messages = []
+                connected=text(language,'connected_window',title='hololive-Dreams',language=language)
+                def receive(message):
+                    messages.append(message)
+                    if message==connected: stop_event.set()
                 with mock.patch.object(auto_fishing.sys, "stdout", None):
                     auto_fishing.run(FishingApp.bot_args(language),
-                                     stop_event=stop_event, status_callback=messages.append)
+                                     stop_event=stop_event, status_callback=receive)
                 self.assertEqual(messages[0], text(language, "connected_window",
                                                    title="hololive-Dreams", language=language))
                 self.assertIn(text(language, "final_stop", frames=0, seconds=0.0,

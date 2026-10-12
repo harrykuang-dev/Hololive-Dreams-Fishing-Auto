@@ -256,11 +256,9 @@ class FishingApp:
         activity = self.log_card = ttk.Frame(main,style='Card.TFrame',padding=self.px(16))
         activity.grid(row=7,column=0,sticky='nsew')
         activity.columnconfigure(0,weight=1)
-        activity.rowconfigure(1,weight=1)
-        self.log_title = ttk.Label(activity,style='CardMuted.TLabel')
-        self.log_title.grid(row=0,column=0,sticky='w',pady=(0,self.py(8)))
+        activity.rowconfigure(0,weight=1)
         log_frame = ttk.Frame(activity,style='Surface.TFrame')
-        log_frame.grid(row=1,column=0,sticky='nsew')
+        log_frame.grid(row=0,column=0,sticky='nsew')
         self.log = tk.Text(log_frame,wrap='word',state='disabled',font='TkFixedFont',height=1,width=1,bg=SURFACE,fg=self.TEXT,
                            relief='flat',bd=0,highlightthickness=0,padx=0,pady=self.py(2),spacing3=self.py(3))
         scroll = ttk.Scrollbar(log_frame,orient='vertical',command=self.log.yview)
@@ -422,7 +420,7 @@ class FishingApp:
         self.root.title(f'Hololive Dreams — {tr(lang,"subtitle")}')
         for widget,key in ((self.subtitle,'subtitle'),(self.instructions,'instructions'),(self.language_label,'game_language'),
                            (self.target_label,'target_count'),(self.unlimited_choice,'unlimited'),(self.shortcut_label,'stop_shortcut'),(self.start_shortcut_label,'start_shortcut'),
-                           (self.start_button,'start'),(self.stop_button,'stop'),(self.diagnostics_check,'developer_mode'),(self.log_title,'log')):
+                           (self.start_button,'start'),(self.stop_button,'stop'),(self.diagnostics_check,'developer_mode')):
             widget.configure(text=tr(lang,key))
         self.footer.configure(text=f'v{APP_VERSION}')
         self._refresh_count()
@@ -516,7 +514,8 @@ class FishingApp:
         self.log.see('end')
         self.log.configure(state='disabled')
 
-    def _set_status(self,text,color): self.status.configure(text=text,foreground=color)
+    def _set_status(self,text,color=None):
+        self.status.configure(text=text,foreground=self.CYAN)
 
     def start(self):
         self._snapshot_settings()
@@ -616,42 +615,56 @@ class FishingApp:
             self.stop_button.configure(state='disabled')
             self._set_status(tr(self.session_args.language,'stopping'),self.MUTED)
 
+    def _handle_message(self,item):
+        if len(item)==3:
+            run_id,kind,value = item
+            if run_id != self._run_id:
+                return
+        else:
+            kind,value = item
+        lang = self.session_args.language
+        if kind=='starting':
+            self._show_start(value)
+        elif kind=='hotkey_status':
+            key,registered,error = value
+            self._append_log(tr(self.language_code(),'hotkey_ready' if registered else 'hotkey_unavailable',hotkey=key,error=error))
+        elif kind=='settings_error':
+            messagebox.showerror(tr(lang,'error'),value,parent=self.root)
+        elif kind=='progress':
+            self.counter.update(value['catches'])
+            self._refresh_count()
+        elif kind=='log' and value:
+            self._append_log(value)
+            prefix = tr(lang,'state_prefix')
+            if value.startswith(prefix): self._set_status(value[len(prefix):])
+            elif value in (
+                    tr(lang,'connected_window',title=self.session_args.window_title,language=lang),
+                    tr(lang,'connected_hotkey',title=self.session_args.window_title,language=lang,hotkey=self.session_args.stop_hotkey)):
+                self._set_status(tr(lang,'waiting'))
+        elif kind=='error':
+            self.has_error = True
+            self._append_log(f'{tr(lang,"error")}: {value}')
+            self._set_status(tr(lang,'error'),self.RED)
+            if not self._closing: messagebox.showerror(tr(lang,'error_title'),value,parent=self.root)
+        elif kind=='done':
+            self._set_controls(False)
+            if not self.has_error: self._set_status(tr(lang,'stopped'),self.MUTED)
+
     def _poll(self):
-        self._poll_start_hotkey()
         try:
-            while True:
+            self._poll_start_hotkey()
+            for _ in range(100):
                 item = self.messages.get_nowait()
-                if len(item)==3:
-                    run_id,kind,value = item
-                    if run_id != self._run_id:
-                        continue
-                else:
-                    kind,value = item
-                lang = self.session_args.language
-                if kind=='starting':
-                    self._show_start(value)
-                elif kind=='hotkey_status':
-                    key,registered,error = value
-                    self._append_log(tr(self.language_code(),'hotkey_ready' if registered else 'hotkey_unavailable',hotkey=key,error=error))
-                elif kind=='settings_error':
-                    messagebox.showerror(tr(lang,'error'),value,parent=self.root)
-                elif kind=='progress':
-                    self.counter.update(value['catches'])
-                    self._refresh_count()
-                elif kind=='log' and value:
-                    self._append_log(value)
-                    prefix = tr(lang,'state_prefix')
-                    if value.startswith(prefix): self._set_status(value[len(prefix):],self.GREEN)
-                elif kind=='error':
-                    self.has_error = True
-                    self._append_log(f'{tr(lang,"error")}: {value}')
-                    self._set_status(tr(lang,'error'),self.RED)
-                    if not self._closing: messagebox.showerror(tr(lang,'error_title'),value,parent=self.root)
-                elif kind=='done':
-                    self._set_controls(False)
-                    if not self.has_error: self._set_status(tr(lang,'stopped'),self.MUTED)
-        except queue.Empty: pass
-        if not self._closing: self.root.after(100,self._poll)
+                try:
+                    self._handle_message(item)
+                except Exception as exc:
+                    startup_log(f'{APP_BUILD} UI message failed: {exc}', self.session_args.debug_dir)
+                    self.root.report_callback_exception(type(exc),exc,exc.__traceback__)
+        except queue.Empty:
+            pass
+        finally:
+            if not self._closing:
+                self.root.after(100,self._poll)
 
     def close(self):
         self._closing = True

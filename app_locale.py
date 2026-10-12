@@ -195,13 +195,13 @@ UI_KEYS = ('counter','target_count','target_hint','stop_shortcut','developer_mod
            'developer_help_title','developer_help','invalid_settings','target_done',
            'catch_target_reached','hotkey_stop','connected_hotkey','instructions')
 UI_TEXT = {
-    'zh-TW': ('已釣獲 {count} 條魚','目標釣魚數量','0 表示不限；達標後停止','停止快捷鍵','開發者模式',
+    'zh-TW': ('已釣獲：{count} 條魚','目標釣魚數量','0 表示不限；達標後停止','停止快捷鍵','開發者模式',
         '開發者模式說明','會儲存以日期時間為標題的狀態截圖、魚獲卡片及追蹤與耗時作為診斷資料，用於定位與排查異常。資料不會自動上傳。\n\n診斷資料位於：\n{path}\n\n每次運行會建立以時間命名的資料夾。如遇異常，可透過下方項目地址聯繫作者，並提供問題描述及診斷資料。開啟開發者模式會增加效能負擔。',
         '請輸入非負整數目標及有效快捷鍵，例如 F9、Esc、Ctrl+Alt+Q。',
         '已達到目標數量；調高目標或設為 0 後可繼續。','已確認釣獲 {target} 條魚，達標停止。',
         '{hotkey}：已停止。','已連接：{title}；語言：{language}（{hotkey} 停止）',
         '先進入遊戲釣魚畫面再開始。切換到其他視窗會停止。'),
-    'zh-CN': ('已钓获 {count} 条鱼','目标钓鱼数量','0 表示不限；达标后停止','停止快捷键','开发者模式',
+    'zh-CN': ('已钓获：{count} 条鱼','目标钓鱼数量','0 表示不限；达标后停止','停止快捷键','开发者模式',
         '开发者模式说明','会保存以日期时间为标题的状态截图、鱼获卡片及跟踪与耗时数据作为诊断资料，用于定位与排查异常。资料不会自动上传。\n\n诊断资料位于：\n{path}\n\n每次运行会建立以时间命名的文件夹。如遇异常，可通过下方项目地址联系作者，并提供问题描述及诊断资料。开启开发者模式会增加性能负担。',
         '请输入非负整数目标及有效快捷键，例如 F9、Esc、Ctrl+Alt+Q。',
         '已达到目标数量；提高目标或设为 0 后可继续。','已确认钓获 {target} 条鱼，达标停止。',
@@ -302,13 +302,13 @@ GUI_PRESENTATION = {
               '請選擇不限或輸入大於 0 的整數，並設定有效快捷鍵。'),
     'zh-CN': ('自动钓鱼','等待开始','先进入游戏钓鱼画面，再点击「开始」','目标钓获数','不限','开始',
               '请选择不限或输入大于 0 的整数，并设置有效快捷键。'),
-    'en': ('Auto Fishing','Waiting to start','Open the game fishing screen, then click “Start”.','Target catches','Unlimited','Start',
+    'en': ('Auto Fishing','Waiting to start','Open the game fishing screen, then click “Start”','Target catches','Unlimited','Start',
            'Choose Unlimited or enter a positive integer, and set valid shortcuts.'),
-    'ja': ('自動釣り','開始待ち','ゲームの釣り画面を開いてから「開始」をクリックしてください。','目標釣果数','無制限','開始',
+    'ja': ('自動釣り','開始待ち','ゲームの釣り画面を開いてから「開始」をクリックしてください','目標釣果数','無制限','開始',
            '無制限を選ぶか正の整数を入力し、有効なショートカットを設定してください。'),
-    'ko': ('자동 낚시','시작 대기','게임의 낚시 화면을 연 다음 “시작”을 클릭하세요.','목표 물고기 수','무제한','시작',
+    'ko': ('자동 낚시','시작 대기','게임의 낚시 화면을 연 다음 “시작”을 클릭하세요','목표 물고기 수','무제한','시작',
            '무제한을 선택하거나 양의 정수를 입력하고 유효한 단축키를 설정하세요.'),
-    'id': ('Memancing Otomatis','Menunggu mulai','Buka layar memancing dalam game, lalu klik “Mulai”.','Target tangkapan','Tanpa batas','Mulai',
+    'id': ('Memancing Otomatis','Menunggu mulai','Buka layar memancing dalam game, lalu klik “Mulai”','Target tangkapan','Tanpa batas','Mulai',
            'Pilih Tanpa batas atau masukkan bilangan bulat positif, lalu atur pintasan yang valid.'),
 }
 for code,values in GUI_PRESENTATION.items():
