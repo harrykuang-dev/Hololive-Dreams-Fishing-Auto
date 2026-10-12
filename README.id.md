@@ -26,7 +26,7 @@ Cukup jalankan satu file EXE ini.
 
 1. Buka game, siapkan umpan, dan masuk ke layar memancing.
 2. Jalankan EXE dan pilih bahasa pada “Bahasa / Language”.
-3. Atur target tangkapan; `0` berarti tanpa batas. Untuk mengubah pintasan berhenti, klik kolomnya lalu tekan kombinasi yang diinginkan.
+3. Atur target tangkapan. Untuk mengubah pintasan mulai atau berhenti, klik kolomnya lalu tekan kombinasi yang diinginkan.
 4. Klik Mulai atau tekan pintasan mulai. Asisten mencoba mengaktifkan game; pertahankan game di depan dengan seluruh tampilannya terlihat selama berjalan.
 5. Berhenti dengan pintasan berhenti, tombol Berhenti, atau berpindah jendela. Memulai lagi akan mengatur hitungan ke nol dan menghitung target tangkapan dari awal.
 
@@ -44,7 +44,7 @@ Aktifkan Mode pengembang sebelum mengulangi masalah. Mode ini menyimpan tangkapa
 
 Klik `?` di sebelah Mode pengembang untuk melihat dan membuka folder diagnostik:
 
-JPEG disimpan di latar belakang, maksimum 192 KiB per gambar. Sebanyak 64 gambar kejadian terakhir dan tampilan terbaru disimpan, beserta dua segmen pelacakan terakhir masing-masing 4 MiB. ZIP diagnostik tidak menyertakan video opsional.
+JPEG disimpan di latar belakang, maksimum 192 KiB per gambar. Sebanyak 64 gambar kejadian terakhir dan tampilan terbaru disimpan, beserta dua segmen pelacakan terakhir masing-masing 4 MiB.
 
 ```text
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\

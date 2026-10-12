@@ -26,7 +26,7 @@ Simply run this single EXE.
 
 1. Open the game, prepare bait, and enter the fishing screen.
 2. Run the EXE and select a language under “Language”.
-3. Set a catch target; `0` means unlimited. To change the stop shortcut, click its field and press the desired key combination.
+3. Set a catch target. To change the start or stop shortcut, click its field and press the desired key combination.
 4. Click Start or press the Start shortcut. The assistant attempts to activate the game; keep the game in the foreground and fully visible while it runs.
 5. Stop with the Stop shortcut, the Stop button, or by switching windows. Starting again resets the counter to zero and counts toward the catch target from the beginning.
 
@@ -44,7 +44,7 @@ Enable Developer mode before reproducing the issue. It saves state screenshots, 
 
 Click `?` beside Developer mode to view and open the diagnostic folder:
 
-JPEG screenshots are saved in the background, up to 192 KiB each. The latest 64 event images and latest view are retained, along with two recent 4 MiB trace segments. The diagnostic ZIP excludes optional video.
+JPEG screenshots are saved in the background, up to 192 KiB each. The latest 64 event images and latest view are retained, along with two recent 4 MiB trace segments.
 
 ```text
 %LOCALAPPDATA%\HololiveFishingAuto\sessions\
