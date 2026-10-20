@@ -2,9 +2,9 @@
 
 ## English
 
-This table describes the **1.1.1 stable release**, covering resolved issues from earlier versions and remaining limitations. See the [v1.1.1 Release](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/tag/v1.1.1) for the update notes.
+This table describes the **1.1.2 stable release**, covering resolved issues from earlier versions and remaining limitations. See the [v1.1.2 Release](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/tag/v1.1.2) for the update notes.
 
-| Issue | Symptoms | Status in 1.1.1 | What to do |
+| Issue | Symptoms | Status in 1.1.2 | What to do |
 | --- | --- | --- | --- |
 | Fishing preparation screen closed by mistake | Earlier versions could mistake the preparation screen's X for the encyclopedia close button and leave fishing, especially with pale character colors. | **Fixed**: preparation-screen protection and encyclopedia structure checks were added. | Update to 1.1.1. If it still closes the wrong screen, stop the assistant and provide diagnostics. |
 | Ina reward screen does not continue | With the dark-purple UI, the assistant could stay on the reward screen after receiving a material without clicking Continue. See [Issue #1](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues/1). | **Known case fixed**: dark reward-strip and button recognition was expanded and verified offline against the reported screenshot. | Update to 1.1.1. If it still stalls, click Continue manually and provide diagnostics. |
@@ -20,9 +20,9 @@ Report problems through [GitHub Issues](https://github.com/harrykuang-dev/Hololi
 Diagnostic ZIPs are created only with Developer mode enabled. Successful, verified packaging removes the packed originals and keeps the ZIP for reporting. ZIPs are not automatically deleted or uploaded; you may delete them after reporting. Normal mode does not create persistent startup logs. Review screenshots before sharing.
 
 ## 繁體中文
-以下以 **1.1.1 正式版**為準，統一列出已修正的舊版問題與仍需注意的情況。更新說明見 [v1.1.1 Release](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/tag/v1.1.1)。
+以下以 **1.1.2 正式版**為準，統一列出已修正的舊版問題與仍需注意的情況。更新說明見 [v1.1.2 Release](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/tag/v1.1.2)。
 
-| 問題 | 表現 | 1.1.1 狀態 | 處理方式 |
+| 問題 | 表現 | 1.1.2 狀態 | 處理方式 |
 | --- | --- | --- | --- |
 | 準備釣魚畫面被誤關 | 舊版可能把準備畫面的 X 當成圖鑑關閉 X，點擊後退出釣魚；淺色角色配色較容易觸發。 | **已修正**：加入準備畫面保護及圖鑑結構核對。 | 更新至 1.1.1。若仍誤關，停止助手並提供診斷。 |
 | Ina 獎勵畫面無法繼續 | 深紫色 UI 下，領取材料後可能停在獎勵畫面，沒有點擊「繼續」。見 [Issue #1](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/issues/1)。 | **已修正已知案例**：擴展深色獎勵橫幅與按鈕辨識，已通過原問題截圖的離線驗證。 | 更新至 1.1.1。若仍停住，可手動點擊「繼續」，並提供診斷。 |

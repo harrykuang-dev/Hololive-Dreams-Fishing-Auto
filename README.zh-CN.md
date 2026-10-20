@@ -8,7 +8,7 @@ Windows 版《hololive Dreams》的自动钓鱼助手。通过游戏画面识别
 
 ## 下载
 
-前往 [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)，下载附件中的 `Hololive-Dreams-Fishing-Auto-v1.1.1.exe`。
+前往 [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)，下载附件中的 `Hololive-Dreams-Fishing-Auto-v1.1.2.exe`。
 
 只需运行这一个 EXE。
 
@@ -18,7 +18,7 @@ Windows 版《hololive Dreams》的自动钓鱼助手。通过游戏画面识别
 - 识别结算画面的“继续／下一步”，关闭新图鉴及物品弹窗，接续钓鱼。
 - 支持六种语言：繁體中文、简体中文、English、日本語、한국어、Indonesian。选择语言会切换助手界面及消息。
 - 显示本次钓获数量，可设置目标数量，达到目标后停止。
-- 开始快捷键默认 F8，停止快捷键默认 F9；点击各自的设置框后按下新按键或组合键即可自定义。两者不能冲突。
+- 开始快捷键默认 F8，停止快捷键默认 F9；点击各自的设置框后按下新按键或组合键即可自定义。两者不能冲突。 自定义的开始与停止快捷键会自动保存，下次启动会先读取设置再注册。
 - 运行记录。
 - 可选的本机开发者诊断模式。
 

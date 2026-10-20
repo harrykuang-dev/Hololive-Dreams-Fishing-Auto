@@ -7,7 +7,7 @@
 Windows 版《hololive Dreams》的自動釣魚助手。透過遊戲畫面辨識與一般滑鼠輸入，處理咬鉤、拉扯、魚獲結算和續局
 ## 下載
 
-前往 [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)，下載附件中的 `Hololive-Dreams-Fishing-Auto-v1.1.1.exe`。
+前往 [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)，下載附件中的 `Hololive-Dreams-Fishing-Auto-v1.1.2.exe`。
 
 只需執行這一個 EXE。
 
@@ -17,7 +17,7 @@ Windows 版《hololive Dreams》的自動釣魚助手。透過遊戲畫面辨識
 - 辨識結算畫面的「繼續／下一步」，關閉新圖鑑及物品彈窗，接續釣魚。
 - 支援六種語言：繁體中文、简体中文、English、日本語、한국어、Indonesian。選擇語言會切換助手介面及訊息。
 - 顯示本次釣獲數量，可設定目標數量，達到目標後停止。
-- 開始快捷鍵預設 F8，停止快捷鍵預設 F9；點擊各自的設定框後按下新按鍵或組合鍵即可自訂。兩者不能衝突。
+- 開始快捷鍵預設 F8，停止快捷鍵預設 F9；點擊各自的設定框後按下新按鍵或組合鍵即可自訂。兩者不能衝突。 自訂的開始與停止快捷鍵會自動保存，下次啟動會先讀取設定再註冊。
 - 運行記錄
 - 可選的本機開發者診斷模式。
 

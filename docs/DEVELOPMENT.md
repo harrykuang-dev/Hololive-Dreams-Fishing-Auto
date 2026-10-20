@@ -19,7 +19,7 @@ python -m venv .venv
 .\build.ps1
 ```
 
-Output: `dist\Hololive-Dreams-Fishing-Auto-v1.1.1.exe`.
+Output: `dist\Hololive-Dreams-Fishing-Auto-v1.1.2.exe`.
 The EXE includes the runtime, artwork and high-DPI manifest.
 Close the previous build before overwriting it.
 
@@ -35,7 +35,7 @@ For the current command-line entry point and packaged icon:
 
 ```powershell
 python auto_fishing.py --help
-python tools/verify_icon.py dist/Hololive-Dreams-Fishing-Auto-v1.1.1.exe
+python tools/verify_icon.py dist/Hololive-Dreams-Fishing-Auto-v1.1.2.exe
 ```
 
 ## Artwork / 圖像素材

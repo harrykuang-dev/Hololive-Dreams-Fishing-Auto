@@ -8,7 +8,7 @@ Windows용 **hololive Dreams** 자동 낚시 도우미입니다. 화면 인식�
 
 ## 다운로드
 
-[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)의 첨부 파일에서 `Hololive-Dreams-Fishing-Auto-v1.1.1.exe`를 다운로드하세요.
+[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest)의 첨부 파일에서 `Hololive-Dreams-Fishing-Auto-v1.1.2.exe`를 다운로드하세요.
 
 이 EXE 파일 하나만 실행하면 됩니다.
 
@@ -18,7 +18,7 @@ Windows용 **hololive Dreams** 자동 낚시 도우미입니다. 화면 인식�
 - 결과 화면의 계속 / 다음 버튼을 누르고 새 도감 등록 및 아이템 팝업을 닫아 낚시를 이어갑니다.
 - 繁體中文, 简体中文, English, 日本語, 한국어, Indonesian의 6개 언어를 지원합니다. 언어를 선택하면 도우미의 인터페이스와 메시지가 바뀝니다.
 - 현재 실행에서 잡은 물고기 수를 표시합니다. 목표 수를 설정하면 목표에 도달한 뒤 중지합니다.
-- 시작 단축키는 F8, 정지 단축키는 F9가 기본값입니다. 각 설정 칸을 클릭하고 새 키 또는 키 조합을 누르면 변경할 수 있습니다. 두 단축키는 서로 충돌할 수 없습니다.
+- 시작 단축키는 F8, 정지 단축키는 F9가 기본값입니다. 각 설정 칸을 클릭하고 새 키 또는 키 조합을 누르면 변경할 수 있습니다. 두 단축키는 서로 충돌할 수 없습니다. 변경한 시작 및 중지 단축키는 자동 저장되며 다음 실행 시 등록 전에 불러옵니다.
 - 실행 기록.
 - 선택적인 로컬 개발자 진단 모드.
 

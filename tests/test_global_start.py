@@ -5,6 +5,8 @@ import threading
 import time
 import tkinter as tk
 import unittest
+import os
+import tempfile
 from unittest.mock import patch
 from global_hotkey import GlobalHotkey, WM_HOTKEY, windows_hotkey
 from gui import FishingApp
@@ -19,6 +21,13 @@ def post_hotkey(listener,value):
 
 
 class GlobalStartTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        preferences = patch.dict(os.environ, {'LOCALAPPDATA':temporary.name})
+        preferences.start()
+        self.addCleanup(preferences.stop)
+
     def test_windows_hotkey_modifiers_are_distinct_from_tk_lock_bits(self):
         self.assertEqual(windows_hotkey('F9'),(0,0x78))
         self.assertEqual(windows_hotkey('Ctrl+Alt+Shift+Q'),(7,ord('Q')))

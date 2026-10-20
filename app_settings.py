@@ -1,5 +1,53 @@
-"""In-memory UI counters and validated global shortcuts."""
+"""In-memory counters and validated, persistent shortcut preferences."""
+import json
+import os
+from pathlib import Path
 import re
+import tempfile
+
+DEFAULT_SHORTCUTS = {'start_key': 'F8', 'stop_key': 'F9'}
+
+
+def shortcuts_path():
+    return Path(os.environ.get('LOCALAPPDATA', Path.home()/'AppData'/'Local'))/'HololiveFishingAuto'/'shortcuts.json'
+
+
+def validated_shortcuts(values):
+    if not isinstance(values, dict):
+        raise ValueError('Shortcut preferences must be an object')
+    result = {key: values.get(key) for key in DEFAULT_SHORTCUTS}
+    if not all(isinstance(value, str) for value in result.values()):
+        raise ValueError('Start and stop shortcuts must be strings')
+    result = {key: value.strip() for key, value in result.items()}
+    if hotkeys_conflict(result['start_key'], result['stop_key']):
+        raise ValueError('Start and stop shortcuts must not overlap')
+    return result
+
+
+def load_shortcuts():
+    try:
+        return validated_shortcuts(json.loads(shortcuts_path().read_text(encoding='utf-8-sig')))
+    except (OSError, UnicodeError, ValueError, TypeError):
+        return DEFAULT_SHORTCUTS.copy()
+
+
+def save_shortcuts(values):
+    normalized = validated_shortcuts(values)
+    destination = shortcuts_path()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=destination.parent,
+                                         prefix='.shortcuts-', suffix='.tmp', delete=False) as stream:
+            temporary = Path(stream.name)
+            json.dump(normalized, stream, ensure_ascii=False, indent=2)
+            stream.write('\n')
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 NAMED_KEYS = {'ESC':0x1B,'ESCAPE':0x1B,'PAUSE':0x13,'SPACE':0x20,'TAB':0x09,
               'ENTER':0x0D,'BACKSPACE':0x08,'DELETE':0x2E,'INSERT':0x2D,

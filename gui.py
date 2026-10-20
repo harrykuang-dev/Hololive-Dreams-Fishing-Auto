@@ -15,11 +15,12 @@ from global_hotkey import GlobalHotkey
 from startup_trace import startup_log, remove_legacy_startup_logs
 from auto_fishing import enable_dpi_awareness, run
 from app_locale import GAME_LANGUAGES, text as tr
-from app_settings import FishingCounter, parse_stop_hotkey, captured_hotkey, hotkeys_conflict
+from app_settings import (FishingCounter, parse_stop_hotkey, captured_hotkey, hotkeys_conflict,
+                          load_shortcuts, save_shortcuts, validated_shortcuts)
 from fluent_theme import FluentTheme, BG, TEXT, MUTED, ACCENT, SURFACE
 
-APP_VERSION = '1.1.1'
-APP_BUILD = '1.1.1'
+APP_VERSION = '1.1.2'
+APP_BUILD = '1.1.2'
 PROJECT_URL = 'https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto'
 
 
@@ -48,8 +49,11 @@ class FishingApp:
     BG,TEXT,MUTED = BG,TEXT,MUTED
     CYAN,GREEN,RED = '#1B6798','#187b38','#b42318'
 
-    def __init__(self,root):
+    def __init__(self,root,*,shortcuts=None,persist_shortcuts=True):
         self.root = root
+        bindings = load_shortcuts() if shortcuts is None else validated_shortcuts(shortcuts)
+        self._persist_shortcuts = persist_shortcuts
+        self._saved_shortcuts = bindings.copy()
         root.configure(bg=self.BG)
         root.protocol('WM_DELETE_WINDOW',self.close)
         self.dpi = window_dpi(root)
@@ -69,16 +73,16 @@ class FishingApp:
         self.target_amount = tk.StringVar(value='1')
         self._target_syncing = False
         self._controls_running = False
-        self.start_key = tk.StringVar(value='F8')
-        self.start_shortcut_display = tk.StringVar(value='F8')
+        self.start_key = tk.StringVar(value=bindings['start_key'])
+        self.start_shortcut_display = tk.StringVar(value=bindings['start_key'])
         self._launch_lock = threading.Lock()
         self._run_id = 0
         self._display_run_id = 0
         self._start_snapshot = None
         self._hotkey_enabled = True
         self._capture_target = 'stop'
-        self.stop_key = tk.StringVar(value='F9')
-        self.shortcut_display = tk.StringVar(value='F9')
+        self.stop_key = tk.StringVar(value=bindings['stop_key'])
+        self.shortcut_display = tk.StringVar(value=bindings['stop_key'])
         self._shortcut_capturing = False
         self._developer_help_dialog = None
         self.diagnostics = tk.BooleanVar(value=False)
@@ -96,6 +100,8 @@ class FishingApp:
             variable.trace_add('write',self._target_controls_changed)
         for variable in (self.game_language,self.target,self.start_key,self.stop_key,self.diagnostics):
             variable.trace_add('write',self._snapshot_settings)
+        for variable in (self.start_key,self.stop_key):
+            variable.trace_add('write',self._save_shortcut_preferences)
         self._snapshot_settings()
         self._hotkey.start()
         root.bind('<Destroy>',self._destroy_listener,add='+')
@@ -391,6 +397,20 @@ class FishingApp:
                                 self.target.get(),self.start_key.get(),self.stop_key.get(),self.diagnostics.get())
         self._hotkey.configure(value=self.start_key.get())
 
+    def _save_shortcut_preferences(self,*_):
+        if not self._persist_shortcuts:
+            return
+        try:
+            values = validated_shortcuts(dict(start_key=self.start_key.get(),stop_key=self.stop_key.get()))
+        except ValueError:
+            return
+        if values != self._saved_shortcuts:
+            try:
+                save_shortcuts(values)
+                self._saved_shortcuts = values
+            except OSError as error:
+                self.messages.put(('settings_error',str(error)))
+
     def _hotkey_report(self,value,registered,error):
         startup_log(f'{APP_BUILD} hotkey {value} registered={registered} error={error}')
         self.messages.put(('hotkey_status',(value,registered,error)))
@@ -627,6 +647,8 @@ class FishingApp:
             self._show_start(value)
         elif kind=='hotkey_status':
             key,registered,error = value
+            if parse_stop_hotkey(key) != parse_stop_hotkey(self.start_key.get()):
+                return  # A queued registration report for a replaced binding.
             self._append_log(tr(self.language_code(),'hotkey_ready' if registered else 'hotkey_unavailable',hotkey=key,error=error))
         elif kind=='settings_error':
             messagebox.showerror(tr(lang,'error'),value,parent=self.root)

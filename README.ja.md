@@ -8,7 +8,7 @@ Windows 版 **hololive Dreams** の自動さかな釣りアシスタントです
 
 ## ダウンロード
 
-[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) の添付ファイルから `Hololive-Dreams-Fishing-Auto-v1.1.1.exe` をダウンロードしてください。
+[GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) の添付ファイルから `Hololive-Dreams-Fishing-Auto-v1.1.2.exe` をダウンロードしてください。
 
 この EXE 1 個を実行するだけで利用できます。
 
@@ -18,7 +18,7 @@ Windows 版 **hololive Dreams** の自動さかな釣りアシスタントです
 - 釣果画面の「つづける／次へ」を操作し、新しい図鑑登録やアイテムのポップアップを閉じて釣りを続行。
 - 繁體中文、简体中文、English、日本語、한국어、Indonesian の 6 言語に対応。言語を選択すると、アシスタントの画面とメッセージが切り替わります。
 - 今回の釣果数を表示。目標数を設定すると、達成後に停止します。
-- 開始キーは F8、停止キーは F9 が初期設定です。各設定欄をクリックして新しいキーや組み合わせを押すと変更できます。両方に競合するキーは設定できません。
+- 開始キーは F8、停止キーは F9 が初期設定です。各設定欄をクリックして新しいキーや組み合わせを押すと変更できます。両方に競合するキーは設定できません。 変更した開始・停止キーは自動保存され、次回起動時は登録前に読み込まれます。
 - 実行履歴。
 - 任意のローカル開発者診断モード。
 

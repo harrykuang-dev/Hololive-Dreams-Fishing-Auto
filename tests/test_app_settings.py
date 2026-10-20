@@ -1,7 +1,36 @@
 import unittest
+import os
+from pathlib import Path
+import tempfile
+from unittest.mock import patch
+from app_settings import DEFAULT_SHORTCUTS, load_shortcuts, save_shortcuts, shortcuts_path
 from app_settings import FishingCounter,parse_stop_hotkey,stop_hotkey_pressed,captured_hotkey,StartHotkey,hotkeys_conflict
 
 class SettingsTests(unittest.TestCase):
+    def test_shortcuts_are_saved_and_reloaded_without_touching_counters(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {'LOCALAPPDATA':directory}):
+            self.assertEqual(load_shortcuts(), DEFAULT_SHORTCUTS)
+            self.assertFalse(shortcuts_path().exists())
+            expected = {'start_key':'PageUp','stop_key':'PageDown'}
+            save_shortcuts(expected)
+            self.assertEqual(load_shortcuts(), expected)
+            self.assertEqual(shortcuts_path(),Path(directory)/'HololiveFishingAuto'/'shortcuts.json')
+            self.assertEqual(FishingCounter().total,0)
+            self.assertEqual(list(shortcuts_path().parent.iterdir()),[shortcuts_path()])
+
+    def test_invalid_shortcuts_never_replace_saved_preferences(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {'LOCALAPPDATA':directory}):
+            save_shortcuts({'start_key':'Ctrl+1','stop_key':'PageDown'})
+            original = shortcuts_path().read_bytes()
+            for invalid in ({'start_key':'F8','stop_key':'Ctrl+F8'},
+                            {'start_key':None,'stop_key':'F9'}, ['F8','F9']):
+                with self.subTest(values=invalid), self.assertRaises(ValueError):
+                    save_shortcuts(invalid)
+                self.assertEqual(shortcuts_path().read_bytes(), original)
+            shortcuts_path().write_text('{broken',encoding='utf-8')
+            self.assertEqual(load_shortcuts(),DEFAULT_SHORTCUTS)
+            self.assertEqual(shortcuts_path().read_text(encoding='utf-8'),'{broken')
+
     def test_every_begin_run_resets_count_and_duplicate_updates_do_not_add(self):
         counter = FishingCounter()
         counter.begin_run()

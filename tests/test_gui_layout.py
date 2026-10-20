@@ -1,14 +1,22 @@
 """Inspect Tk widget geometry only; never starts the game/input runtime."""
 import unittest
+import os
+import tempfile
 from unittest.mock import patch
 import tkinter as tk
 from types import SimpleNamespace
 from gui import FishingApp, PROJECT_URL
 from app_locale import GAME_LANGUAGES, text
+from app_settings import save_shortcuts, shortcuts_path
 from tkinter import ttk
 
 class LayoutTests(unittest.TestCase):
     def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        preferences = patch.dict(os.environ, {'LOCALAPPDATA':temporary.name})
+        preferences.start()
+        self.addCleanup(preferences.stop)
         # Geometry tests never register or consume real keyboard shortcuts.
         self.listener_patch=patch('gui.GlobalHotkey')
         self.listener=self.listener_patch.start()
@@ -16,6 +24,45 @@ class LayoutTests(unittest.TestCase):
         self.trace_patch=patch('gui.startup_log')
         self.trace_patch.start()
         self.addCleanup(self.trace_patch.stop)
+
+    def test_saved_shortcut_is_the_first_registered_and_stale_reports_are_hidden(self):
+        save_shortcuts({'start_key':'PageUp','stop_key':'PageDown'})
+        root=tk.Tk(); root.withdraw()
+        app=FishingApp(root)
+        try:
+            self.assertEqual(app.start_key.get(),'PageUp')
+            self.assertEqual(app.stop_key.get(),'PageDown')
+            configured=[call.kwargs.get('value') for call in self.listener.return_value.configure.call_args_list]
+            self.assertTrue(configured)
+            self.assertEqual(set(configured),{'PageUp'})
+            self.listener.return_value.start.assert_called_once()
+            with patch.object(app,'_append_log') as log:
+                app._handle_message(('hotkey_status',('F8',True,0)))
+                log.assert_not_called()
+                app._handle_message(('hotkey_status',('PAGEUP',True,0)))
+                self.assertIn('PAGEUP',log.call_args.args[0])
+            app.start_key.set('Ctrl+1')
+            from app_settings import load_shortcuts
+            self.assertEqual(load_shortcuts()['start_key'],'Ctrl+1')
+        finally:
+            for callback in root.tk.splitlist(root.tk.call('after','info')):
+                root.after_cancel(callback)
+            root.destroy()
+
+    def test_embedded_shortcuts_do_not_overwrite_standalone_preferences(self):
+        expected={'start_key':'PageUp','stop_key':'PageDown'}
+        save_shortcuts(expected)
+        before=shortcuts_path().read_bytes()
+        root=tk.Tk(); root.withdraw()
+        app=FishingApp(root,shortcuts={'start_key':'Ctrl+1','stop_key':'INSERT'},persist_shortcuts=False)
+        try:
+            self.assertEqual(app.start_key.get(),'Ctrl+1')
+            app.start_key.set('Ctrl+2')
+            self.assertEqual(shortcuts_path().read_bytes(),before)
+        finally:
+            for callback in root.tk.splitlist(root.tk.call('after','info')):
+                root.after_cancel(callback)
+            root.destroy()
 
     def test_connection_message_failure_does_not_break_stop_and_restart(self):
         import time

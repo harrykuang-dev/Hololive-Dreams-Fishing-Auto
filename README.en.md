@@ -8,7 +8,7 @@ An auto-fishing assistant for the Windows version of **hololive Dreams**. It use
 
 ## Download
 
-Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) and download `Hololive-Dreams-Fishing-Auto-v1.1.1.exe` from the release assets.
+Open [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) and download `Hololive-Dreams-Fishing-Auto-v1.1.2.exe` from the release assets.
 
 Simply run this single EXE.
 
@@ -18,7 +18,7 @@ Simply run this single EXE.
 - Handles Continue / Next buttons on result screens and closes new encyclopedia entries and item pop-ups to resume fishing.
 - Six languages: 繁體中文, 简体中文, English, 日本語, 한국어, and Indonesian. Selecting a language changes the assistant interface and messages.
 - Displays the catch count for the current run. Set a target count to stop when it is reached.
-- The Start shortcut defaults to F8 and Stop to F9. Click either setting field and press a new key or combination to customize it. The two shortcuts must not conflict.
+- The Start shortcut defaults to F8 and Stop to F9. Click either setting field and press a new key or combination to customize it. The two shortcuts must not conflict. Custom start and stop shortcuts are saved automatically and restored before registration at the next launch.
 - Activity log.
 - Optional local developer diagnostics.
 

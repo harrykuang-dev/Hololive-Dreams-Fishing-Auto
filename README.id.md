@@ -8,7 +8,7 @@ Asisten memancing otomatis untuk **hololive Dreams** versi Windows. Aplikasi mem
 
 ## Unduh
 
-Buka [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) dan unduh `Hololive-Dreams-Fishing-Auto-v1.1.1.exe` dari lampiran rilis.
+Buka [GitHub Releases](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/releases/latest) dan unduh `Hololive-Dreams-Fishing-Auto-v1.1.2.exe` dari lampiran rilis.
 
 Cukup jalankan satu file EXE ini.
 
@@ -18,7 +18,7 @@ Cukup jalankan satu file EXE ini.
 - Menangani tombol Lanjut / Berikutnya pada layar hasil serta menutup pop-up entri ensiklopedia baru dan item untuk melanjutkan memancing.
 - Enam bahasa: 繁體中文, 简体中文, English, 日本語, 한국어, dan Indonesian. Memilih bahasa akan mengubah antarmuka dan pesan asisten.
 - Menampilkan jumlah tangkapan pada sesi saat ini. Atur target tangkapan agar asisten berhenti setelah target tercapai.
-- Pintasan mulai bawaan adalah F8 dan berhenti F9. Klik masing-masing kolom pengaturan lalu tekan tombol atau kombinasi baru untuk mengubahnya. Kedua pintasan tidak boleh bertabrakan.
+- Pintasan mulai bawaan adalah F8 dan berhenti F9. Klik masing-masing kolom pengaturan lalu tekan tombol atau kombinasi baru untuk mengubahnya. Kedua pintasan tidak boleh bertabrakan. Pintasan mulai dan berhenti disimpan otomatis dan dimuat sebelum didaftarkan saat program dibuka kembali.
 - Riwayat aktivitas.
 - Diagnostik pengembang lokal opsional.
 
