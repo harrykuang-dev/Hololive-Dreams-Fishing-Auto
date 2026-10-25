@@ -61,7 +61,7 @@ class FishingApp:
         self.spacing = 1.
         root.tk.call('tk','scaling',self.dpi/72)
         self._configure_fonts()
-        self._set_window_size(self.px(450),self.px(800))
+        self._set_window_size(round(517*self.dpi/120),round(1055*self.dpi/120))
         self.messages = queue.Queue()
         self.stop_event = threading.Event()
         self.worker = None
@@ -93,6 +93,8 @@ class FishingApp:
         except tk.TclError: pass
         root.bind('<Configure>',self._dpi_changed,add='+')
         root.bind('<Configure>',self._fit_content,add='+')
+        root.bind('<MouseWheel>',self._scroll_window,add='+')
+        root.bind('<FocusIn>',self._reveal_focus,add='+')
         root.bind('<Button-1>',self._cancel_shortcut_on_click,add='+')
         self._hotkey = GlobalHotkey(self._hotkey_start, self._hotkey_report)
         self.target.trace_add('write',self._target_value_changed)
@@ -193,8 +195,16 @@ class FishingApp:
         self.theme = self._themes[self.dpi]
         self.style = self.theme.style
         self._logo_images = {}
-        main = self.main_frame = ttk.Frame(self.root,padding=(self.px(24),self.py(24)))
-        main.pack(fill='both',expand=True)
+        self.viewport = tk.Canvas(self.root,bg=self.BG,bd=0,highlightthickness=0)
+        self.viewport.pack(side='left',fill='both',expand=True)
+        self.window_scroll = ttk.Scrollbar(self.root,orient='vertical',command=self.viewport.yview)
+        self.viewport.configure(yscrollcommand=self.window_scroll.set)
+        self._layout_callback = None
+        main = self.main_frame = ttk.Frame(self.viewport,padding=(self.px(24),self.py(24)))
+        self._content_window = self.viewport.create_window(0,0,window=main,anchor='nw')
+        main.bind('<Configure>',self._queue_viewport_layout)
+        self.viewport.bind('<Configure>',self._queue_viewport_layout)
+        self.viewport.bind('<Configure>',self._fit_content,add='+')
         main.columnconfigure(0,weight=1)
         main.rowconfigure(7,weight=1)
         heading=ttk.Frame(main)
@@ -271,15 +281,55 @@ class FishingApp:
         self.log.configure(yscrollcommand=scroll.set)
         scroll.pack(side='right',fill='y',padx=(self.px(8),0))
         self.log.pack(fill='both',expand=True)
-        self.footer = ttk.Label(main,style='Muted.TLabel',wraplength=self.px(552))
+        self.footer = ttk.Label(main,style='Muted.TLabel',wraplength=self.px(552),cursor='hand2',takefocus=True)
         self.footer.grid(row=8,column=0,sticky='w',pady=(self.py(12),0))
+        for sequence in ('<Button-1>','<Return>','<space>'):
+            self.footer.bind(sequence,self.open_project)
         self._wrap_width = None
         self._activate_theme()
 
+    def _queue_viewport_layout(self,_event=None):
+        if self._layout_callback is None:
+            self._layout_callback = self.root.after_idle(self._layout_viewport)
+
+    def _layout_viewport(self):
+        self._layout_callback = None
+        width,height = self.viewport.winfo_width(),self.viewport.winfo_height()
+        if width<2 or height<2: return
+        content_height = max(height,self.main_frame.winfo_reqheight())
+        current = tuple(float(self.viewport.itemcget(self._content_window,key)) for key in ('width','height'))
+        if current != (width,content_height):
+            self.viewport.itemconfigure(self._content_window,width=width,height=content_height)
+        self.viewport.configure(scrollregion=(0,0,width,content_height))
+        if content_height>height:
+            if not self.window_scroll.winfo_manager(): self.window_scroll.pack(side='right',fill='y')
+        else:
+            self.window_scroll.pack_forget()
+            self.viewport.yview_moveto(0)
+
+    def _scroll_window(self,event):
+        # The log retains its own wheel behavior and scrollbar.
+        if event.widget is self.log or not self.window_scroll.winfo_manager() or not event.delta:
+            return
+        self.viewport.yview_scroll(-1 if event.delta>0 else 1,'units')
+        return 'break'
+
+    def _reveal_focus(self,event):
+        if not self.window_scroll.winfo_manager(): return
+        widget = event.widget
+        if not str(widget).startswith(str(self.main_frame)+'.'): return
+        y = widget.winfo_rooty()-self.viewport.winfo_rooty()
+        height = self.viewport.winfo_height()
+        bottom = y+widget.winfo_height()
+        adjustment = y if y<0 else bottom-height if bottom>height else 0
+        if adjustment:
+            content_height = float(self.viewport.itemcget(self._content_window,'height'))
+            self.viewport.yview_moveto((self.viewport.canvasy(0)+adjustment)/content_height)
+
     def _fit_content(self,event):
         """Only update spacing at a threshold and wrapping when width changes."""
-        if event.widget is not self.root: return
-        spacing = .5 if event.height/self.scale<680 else 1.
+        if event.widget not in (self.root,self.viewport): return
+        spacing = .5 if self.root.winfo_height()/self.scale<680 else 1.
         if spacing != self.spacing:
             ratio,self.spacing = spacing/self.spacing,spacing
             def scaled(value):
@@ -296,7 +346,7 @@ class FishingApp:
             self.main_frame.configure(padding=(self.px(24),self.py(24)))
             for name in ('Primary','Secondary'):
                 self.style.configure(name+'.TButton',padding=(self.px(12),self.py(10)))
-        width = max(self.px(200),event.width-self.px(48))
+        width = max(self.px(200),self.viewport.winfo_width()-self.px(48))
         key = (width,self.dpi)
         if key==self._wrap_width: return
         self._wrap_width = key

@@ -25,6 +25,71 @@ class LayoutTests(unittest.TestCase):
         self.trace_patch.start()
         self.addCleanup(self.trace_patch.stop)
 
+    def test_default_client_size_scales_and_short_screens_keep_log_scrolling(self):
+        import win32gui
+        from auto_fishing import enable_dpi_awareness
+        enable_dpi_awareness()
+        for dpi in (96,120,144,192):
+            root=tk.Tk()
+            root.maxsize(3840,2160)
+            try:
+                with patch('gui.window_dpi',return_value=dpi), patch('gui.window_work_area',return_value=(3840,2160)):
+                    app=FishingApp(root,persist_shortcuts=False)
+                    root.update()
+                    width,height=round(517*dpi/120),round(1055*dpi/120)
+                    self.assertEqual(win32gui.GetClientRect(root.winfo_id()),(0,0,width,height))
+                    self.assertEqual(root.resizable(),(1,1))
+                    root.geometry(f'{width+40}x{height+40}')
+                    root.update()
+                    self.assertEqual((root.winfo_width(),root.winfo_height()),(width+40,height+40))
+                    with patch('gui.window_work_area',return_value=(1280,720)):
+                        app._set_window_size(width,height)
+                        root.update()
+                        self.assertLessEqual(root.winfo_height(),720-app.px(40))
+                        app._append_log('\n'.join(f'Line {i}' for i in range(100)))
+                        app.log.yview_moveto(0)
+                        top=app.log.yview()
+                        app.log.yview_moveto(1)
+                        self.assertGreater(app.log.yview()[0],top[0])
+                        app.footer.focus_force()
+                        root.update()
+                        self.assertGreaterEqual(app.footer.winfo_rooty(),app.viewport.winfo_rooty())
+                        self.assertLessEqual(app.footer.winfo_rooty()+app.footer.winfo_height(),app.viewport.winfo_rooty()+app.viewport.winfo_height())
+            finally:
+                if hasattr(root,'tk'):
+                    for callback in root.tk.splitlist(root.tk.call('after','info')):
+                        root.after_cancel(callback)
+                    root.destroy()
+
+    def test_version_link_mouse_and_keyboard_work_in_all_six_languages(self):
+        root=tk.Tk()
+        app=FishingApp(root,persist_shortcuts=False)
+        try:
+            root.update()
+            root.focus_force()
+            with patch('gui.webbrowser.open_new_tab') as browser:
+                for language in GAME_LANGUAGES:
+                    app.game_language.set(language)
+                    app._apply_language()
+                    root.update()
+                    self.assertEqual(str(app.footer.cget('style')),'Muted.TLabel')
+                    self.assertEqual(str(app.footer.cget('cursor')),'hand2')
+                    self.assertEqual(str(app.footer.cget('takefocus')),'1')
+                    for sequence in ('<Button-1>','<Return>','<space>'):
+                        app.footer.focus_set()
+                        root.update()
+                        before=browser.call_count
+                        app.footer.event_generate(sequence)
+                        root.update()
+                        self.assertEqual(browser.call_count,before+1,(language,sequence))
+                        browser.assert_called_with(PROJECT_URL)
+                self.assertEqual(browser.call_count,18)
+        finally:
+            app._closing=True
+            for callback in root.tk.splitlist(root.tk.call('after','info')):
+                root.after_cancel(callback)
+            root.destroy()
+
     def test_saved_shortcut_is_the_first_registered_and_stale_reports_are_hidden(self):
         save_shortcuts({'start_key':'PageUp','stop_key':'PageDown'})
         root=tk.Tk(); root.withdraw()
@@ -283,7 +348,7 @@ class LayoutTests(unittest.TestCase):
                 root.after_cancel(callback)
             root.destroy()
 
-    def test_only_log_has_scrollbar(self):
+    def test_log_keeps_its_own_scrollbar(self):
         root=tk.Tk()
         app=FishingApp(root)
         try:
@@ -292,9 +357,7 @@ class LayoutTests(unittest.TestCase):
                     yield child
                     yield from descendants(child)
             bars=[w for w in descendants(root) if isinstance(w,ttk.Scrollbar)]
-            self.assertEqual(len(bars),1)
-            self.assertEqual(bars[0].master,app.log.master)
-            self.assertFalse(hasattr(app,'viewport'))
+            self.assertEqual(len([bar for bar in bars if bar.master is app.log.master]),1)
             self.assertNotIn('計數',app.instructions.cget('text'))
         finally:
             app._closing=True
