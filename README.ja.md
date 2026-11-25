@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> このプログラムは [Holodori-Auto](https://github.com/harrykuang-dev/Holodori-Auto) に統合されました。単独版のメンテナンスと更新は終了しました。
+
 # Hololive Dreams Auto Fishing
 
 [既知の問題と回避策](https://github.com/harrykuang-dev/Hololive-Dreams-Fishing-Auto/blob/main/docs/KNOWN_ISSUES.md)
